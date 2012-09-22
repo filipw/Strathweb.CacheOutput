@@ -4,6 +4,7 @@ ASP.NET Web API OutPutCache
 A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API ApiControllers.
 
 Usage:
+
         [WebApiOutputCache(120, 0, false)]
         public IEnumerable<string> Get()
         {
