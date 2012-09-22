@@ -28,31 +28,19 @@ namespace WebApi.OutputCache
         // cache repository
         private static readonly ObjectCache WebApiCache = MemoryCache.Default;
 
-        private bool _isCacheableOnClient(HttpActionContext ac)
+        Func<int, HttpActionContext, bool, bool> _isCachingTimeValid = (timespan, ac, anonymous) =>
         {
-            if (_clientTimeSpan > 0)
+            if (timespan > 0)
             {
-                if (_anonymousOnly)
+                if (anonymous)
                     if (Thread.CurrentPrincipal.Identity.IsAuthenticated)
                         return false;
+
                 if (ac.Request.Method == HttpMethod.Get) return true;
             }
 
             return false;
-        }
-
-        private bool _isCacheableOnServer(HttpActionContext ac)
-        {
-            if (_timespan > 0)
-            {
-                if (_anonymousOnly)
-                    if (Thread.CurrentPrincipal.Identity.IsAuthenticated)
-                        return false;
-                if (ac.Request.Method == HttpMethod.Get) return true;
-            }
-
-            return false;
-        }
+        };
 
         private CacheControlHeaderValue setClientCache()
         {
@@ -73,7 +61,7 @@ namespace WebApi.OutputCache
         {
             if (ac != null)
             {
-                if (_isCacheableOnServer(ac))
+                if (_isCachingTimeValid(_timespan, ac, _anonymousOnly))
                 {
                     _cachekey = string.Join(":", new string[] { ac.Request.RequestUri.PathAndQuery, ac.Request.Headers.Accept.FirstOrDefault().ToString() });
 
@@ -111,7 +99,7 @@ namespace WebApi.OutputCache
                 WebApiCache.Add(_cachekey + ":response-ct", actionExecutedContext.Response.Content.Headers.ContentType, DateTime.Now.AddSeconds(_timespan));
             }
 
-            if (_isCacheableOnClient(actionExecutedContext.ActionContext))
+            if (_isCachingTimeValid(_clientTimeSpan, actionExecutedContext.ActionContext, _anonymousOnly))
                 actionExecutedContext.ActionContext.Response.Headers.CacheControl = setClientCache();
         }
     }

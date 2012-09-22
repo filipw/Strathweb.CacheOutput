@@ -1,4 +1,4 @@
-ASP.NET Web API OutPutCache
+ASP.NET Web API OutputCache
 ========================
 
 A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API ApiControllers.
