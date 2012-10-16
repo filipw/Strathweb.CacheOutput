@@ -2,7 +2,7 @@ using System;
 
 namespace WebApi.OutputCache
 {
-    public class CacheOutputUntilCacheAttribute : OutputCacheAttribute
+    public class CacheOutputUntilAttribute : OutputCacheAttribute
     {
         /// <summary>
         /// Cache item until absolute expiration 2012/01/01 @ 17h45
@@ -15,7 +15,7 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilCacheAttribute(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
+        public CacheOutputUntilAttribute(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
             : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
         {
             AbsoluteExpiration = new DateTime(year,
@@ -39,7 +39,7 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilCacheAttribute(int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
+        public CacheOutputUntilAttribute(int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
             : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
         {
             AbsoluteExpiration = new DateTime(DateTime.Now.Year,
@@ -62,7 +62,7 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilCacheAttribute(int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
+        public CacheOutputUntilAttribute(int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
             : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
         {
             AbsoluteExpiration = new DateTime(DateTime.Now.Year,
@@ -84,7 +84,7 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilCacheAttribute(int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
+        public CacheOutputUntilAttribute(int hour = 23, int minute = 59, int second = 59, bool anonymousOnly = false, bool mustRevalidate = false)
             : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
         {
             AbsoluteExpiration = new DateTime(DateTime.Now.Year,
