@@ -26,37 +26,45 @@ Variation: CacheUntil is used to cache data until a specific moment in time.
 
 Usage:
 
+	// CacheOutput until TODAY @ 17:45:00 & don't pay attention to query strings
+	//[CacheOutputUntil(Hour, Minutes, Seconds, AnonymousOnly, excludeQueryStringFromCacheKey: true)]
+	[CacheOutputUntil(17, 45, 00, true, excludeQueryStringFromCacheKey: true)]
+    public IEnumerable<string> Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
+
 	// CacheOutput until TODAY @ 17:45:00
-        [CacheOutputUntil(17, 45)]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+    [CacheOutputUntil(17, 45)]
+    public IEnumerable<string> Get()
+    {
+        return new string[] { "value1", "value2" };
+    }
 
 	// CacheOutput until 2012/01/01 00:00:00
-        [CacheOutputUntil(2012,01,01)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+    [CacheOutputUntil(2012,01,01)]
+    public string Get(int id)
+    {
+        return "value";
+    }
 
 	// CacheOutput until (This year)/01/01 00:00:00
-        [CacheOutputUntil(01,01)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+    [CacheOutputUntil(01,01)]
+    public string Get(int id)
+    {
+        return "value";
+    }
 
 	// CacheOutput until (This year)/(this month)/01 00:00:00
-        [CacheOutputUntil(01)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+    [CacheOutputUntil(01)]
+    public string Get(int id)
+    {
+        return "value";
+    }
 
 	// CacheOutput until 2012/01/01 17:45:00
 	[CacheOutputUntil(2012,01,01,17,45)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+    public string Get(int id)
+    {
+        return "value";
+    }

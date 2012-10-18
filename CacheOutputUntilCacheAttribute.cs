@@ -1,8 +1,6 @@
-using System;
-
-namespace WebApi.OutputCache
+namespace WebAPI.OutputCache
 {
-    public class CacheOutputUntilAttribute : OutputCacheAttribute
+    public class CacheOutputUntilAttribute : CacheOutputAttribute
     {
         /// <summary>
         /// Cache item until absolute expiration 2012/01/01 @ 17h45
@@ -15,18 +13,19 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilAttribute(int year, int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
-            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
+        /// <param name="excludeQueryStringFromCacheKey">will exclude the query string from the cache key</param>
+        public CacheOutputUntilAttribute(int year,
+                                         int month,
+                                         int day,
+                                         int hour = 0,
+                                         int minute = 0,
+                                         int second = 0,
+                                         bool anonymousOnly = false,
+                                         bool mustRevalidate = false,
+                                         bool excludeQueryStringFromCacheKey = false)
+            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate, excludeQueryStringFromCacheKey: excludeQueryStringFromCacheKey)
         {
-            AbsoluteExpiration = new DateTime(year,
-                                              month,
-                                              day,
-                                              hour,
-                                              minute,
-                                              second);
-
-            Timespan = AbsoluteExpiration.Subtract(DateTime.Now);
-            ClientTimeSpan = Timespan;
+            CacheTimeQuery = new SpecificTime(year, month, day, hour, minute, second);
         }
 
         /// <summary>
@@ -39,18 +38,18 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilAttribute(int month, int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
-            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
+        /// <param name="excludeQueryStringFromCacheKey">will exclude the query string from the cache key</param>
+        public CacheOutputUntilAttribute(int month,
+                                         int day,
+                                         int hour = 0,
+                                         int minute = 0,
+                                         int second = 0,
+                                         bool anonymousOnly = false,
+                                         bool mustRevalidate = false,
+                                         bool excludeQueryStringFromCacheKey = false)
+            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate, excludeQueryStringFromCacheKey: excludeQueryStringFromCacheKey)
         {
-            AbsoluteExpiration = new DateTime(DateTime.Now.Year,
-                                              month,
-                                              day,
-                                              hour,
-                                              minute,
-                                              second);
-
-            Timespan = AbsoluteExpiration.Subtract(DateTime.Now);
-            ClientTimeSpan = Timespan;
+            CacheTimeQuery = new ThisYear(month, day, hour, minute, second);
         }
 
         /// <summary>
@@ -62,18 +61,17 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilAttribute(int day, int hour = 0, int minute = 0, int second = 0, bool anonymousOnly = false, bool mustRevalidate = false)
-            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
+        /// <param name="excludeQueryStringFromCacheKey">will exclude the query string from the cache key</param>
+        public CacheOutputUntilAttribute(int day,
+                                         int hour = 0,
+                                         int minute = 0,
+                                         int second = 0,
+                                         bool anonymousOnly = false,
+                                         bool mustRevalidate = false,
+                                         bool excludeQueryStringFromCacheKey = false)
+            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate, excludeQueryStringFromCacheKey: excludeQueryStringFromCacheKey)
         {
-            AbsoluteExpiration = new DateTime(DateTime.Now.Year,
-                                              DateTime.Now.Month,
-                                              day,
-                                              hour,
-                                              minute,
-                                              second);
-
-            Timespan = AbsoluteExpiration.Subtract(DateTime.Now);
-            ClientTimeSpan = Timespan;
+            CacheTimeQuery = new ThisMonth(day, hour, minute, second);
         }
 
         /// <summary>
@@ -84,18 +82,16 @@ namespace WebApi.OutputCache
         /// <param name="second">0</param>
         /// <param name="anonymousOnly">only cache requests from annonymous clients</param>
         /// <param name="mustRevalidate"> whether the origin server require revalidation of a cache entry on any subsequent use when the cache entry becomes stale.</param>
-        public CacheOutputUntilAttribute(int hour = 23, int minute = 59, int second = 59, bool anonymousOnly = false, bool mustRevalidate = false)
-            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate)
+        /// <param name="excludeQueryStringFromCacheKey">will exclude the query string from the cache key</param>
+        public CacheOutputUntilAttribute(int hour = 23,
+                                         int minute = 59,
+                                         int second = 59,
+                                         bool anonymousOnly = false,
+                                         bool mustRevalidate = false,
+                                         bool excludeQueryStringFromCacheKey = false)
+            : base(anonymousOnly: anonymousOnly, mustRevalidate: mustRevalidate, excludeQueryStringFromCacheKey: excludeQueryStringFromCacheKey)
         {
-            AbsoluteExpiration = new DateTime(DateTime.Now.Year,
-                                              DateTime.Now.Month,
-                                              DateTime.Now.Day,
-                                              hour,
-                                              minute,
-                                              second);
-
-            Timespan = AbsoluteExpiration.Subtract(DateTime.Now);
-            ClientTimeSpan = Timespan;
+            CacheTimeQuery = new ThisDay(hour, minute, second);
         }
     }
 }
