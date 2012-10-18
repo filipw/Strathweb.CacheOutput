@@ -1,7 +1,7 @@
 ASP.NET Web API CacheOutput
 ========================
 
-A simple filter bringing caching options, similar to MVC's "CacheOutputAttribute" to Web API ApiControllers.
+A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API ApiControllers.
 
 Usage:
 
