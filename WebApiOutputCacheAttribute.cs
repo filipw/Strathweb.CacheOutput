@@ -79,6 +79,7 @@ namespace WebApi.OutputCache
                             ac.Response.Content = new StringContent(val);
 
                             ac.Response.Content.Headers.ContentType = contenttype;
+                            ac.Response.Headers.CacheControl = this.setClientCache();
                             return;
                         }
                     }
