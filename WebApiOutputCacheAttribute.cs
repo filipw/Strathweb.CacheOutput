@@ -63,8 +63,13 @@ namespace WebApi.OutputCache
             {
                 if (_isCachingTimeValid(_timespan, ac, _anonymousOnly))
                 {
-                    _cachekey = string.Join(":", new string[] { ac.Request.RequestUri.PathAndQuery, ac.Request.Headers.Accept.FirstOrDefault().ToString() });
+                    MediaTypeWithQualityHeaderValue mediaTypeWithQualityHeaderValue = ac.Request.Headers.Accept.FirstOrDefault();
+                    string acceptHeader = (mediaTypeWithQualityHeaderValue == null)
+                                              ? "Default"
+                                              : mediaTypeWithQualityHeaderValue.ToString();
 
+                    _cachekey = string.Join(":", new string[] { ac.Request.RequestUri.PathAndQuery, acceptHeader });
+                    
                     if (WebApiCache.Contains(_cachekey))
                     {
                         var val = WebApiCache.Get(_cachekey) as string;
