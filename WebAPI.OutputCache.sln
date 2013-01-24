@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "WebAPI.OutputCache\WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Tests", "WebAPI.OutputCache.Tests\WebAPI.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,10 @@ Global
 		{4F32DC89-081B-4264-92F8-F3371A088EB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F32DC89-081B-4264-92F8-F3371A088EB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F32DC89-081B-4264-92F8-F3371A088EB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

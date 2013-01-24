@@ -1,71 +1,110 @@
 ASP.NET Web API CacheOutput
 ========================
 
-A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API ApiControllers.
+A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API actions.
+Caching by default can only be applied to GET actions.
 
-Usage:
+**CacheOutput** will take care of server side caching and set the appropriate client side (response) headers for you.
 
-        [CacheOutput(120, 0)]
+You can specify the following properties:
+ - *ClientTimeSpan* (corresponds to CacheControl MaxAge HTTP header)
+ - *MustRevalidate* (corresponds to MustRevalidate HTTP header - indicates whether the origin server requires revalidation of 
+a cache entry on any subsequent use when the cache entry becomes stale)
+ - *ExcludeQueryStringFromCacheKey* (do not vary cache by querystring values)
+ - *ServerTimeSpan* (time how long the response should be cached on the server side)
+ - *AnonymousOnly* (cache enabled only for requests when Thread.CurrentPrincipal is not set)
+ 
+Usage
+--------------------
+
+	//Cache for 100s on the server, inform the client that response is valid for 100s
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
-        [CacheOutput(0, 60, false, false)]
+	//Cache for 100s on the server, inform the client that response is valid for 100s. Cache for anonymous users only.
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, AnonymousOnly = true)]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+	//Inform the client that response is valid for 50s. Force client to revalidate.
+        [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
         public string Get(int id)
         {
             return "value";
         }
 
-Where the first parameter indicates caching on the server side in seconds, 
-the second indicates caching on the client side in seconds, 
-the third decides whether to cache for anonymous users only,
-the fourth decides whether the origin server require revalidation of 
-a cache entry on any subsequent use when the cache entry becomes stale.
+	//Cache for 50s on the server. Ignore querystring parameters when serving cached content.
+        [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = true)]
+        public string Get(int id)
+        {
+            return "value";
+        }
 
-Variation: CacheOutputUntil is used to cache data until a specific moment in time.
 
-Usage:
+Variations
+--------------------
+*CacheOutputUntil* is used to cache data until a specific moment in time. This applies to both client and server.
+	
+	//Cache until 01/25/2013 17:00
+        [CacheOutputUntil(2013,01,25,17,00)]
+        public string Get_until25012013_1700()
+        {
+            return "test";
+        }
 
-    // CacheOutput until TODAY @ 17:45:00 & don't pay attention to query strings
-    // [CacheOutputUntil(Hour, Minutes, Seconds, AnonymousOnly, excludeQueryStringFromCacheKey: true)]
-    [CacheOutputUntil(17, 45, 00, true, excludeQueryStringFromCacheKey: true)]
-    public IEnumerable<string> Get()
+
+*CacheOutputUntilToday* is used to cache data until a specific hour later on the same day. This applies to both client and server.
+
+	//Cache until 23:55:00 today
+        [CacheOutputUntilToday(23,55)]
+        public string Get_until2355_today()
+        {
+            return "value";
+        }
+
+*CacheOutputUntilThisMonth* is used to cache data until a specific point later this month. This applies to both client and server.
+
+	//Cache until the 31st day of the current month
+        [CacheOutputUntilThisMonth(31)]
+        public string Get_until31_thismonth()
+        {
+            return "value";
+        }
+
+*CacheOutputUntilThisYear* is used to cache data until a specific point later this year. This applies to both client and server.
+
+	//Cache until the 31st of July this year
+        [CacheOutputUntilThisYear(7,31)]
+        public string Get_until731_thisyear()
+        {
+            return "value";
+        }
+
+Each of these can obviously be combined with the 5 general properties mentioned in the beginning.
+
+Server side caching
+--------------------
+By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cache on the server side. However, you are free to swap this with anything else
+(static Dictionary, Memcached, Redis, whatever..) as long as you implement *IApiOutputCache* interface.
+
+    public interface IApiOutputCache
     {
-        return new string[] { "value1", "value2" };
+        T Get<T>(string key) where T : class;
+        object Get(string key);
+        void Remove(string key);
+        bool Contains(string key);
+        void Add(string key, object o, DateTimeOffset expiration);
     }
 
-    // CacheOutput until TODAY @ 17:45:00
-    [CacheOutputUntil(17, 45)]
-    public IEnumerable<string> Get()
-    {
-        return new string[] { "value1", "value2" };
-    }
+You then need to register your implementation in the Web API dependency resolver (regardless of which DI provider you are using). **CacheOutput** will try to pick up the implementation from there, and if no implementation is available, we will default to *System.Runtime.Caching.MemoryCache*.
 
-    // CacheOutput until 2012/01/01 00:00:00
-    [CacheOutputUntil(2012,01,01)]
-    public string Get(int id)
-    {
-        return "value";
-    }
 
-    // CacheOutput until (This year)/01/01 00:00:00
-    [CacheOutputUntil(01,01)]
-    public string Get(int id)
-    {
-        return "value";
-    }
+License
+--------------------
 
-    // CacheOutput until (This year)/(this month)/01 00:00:00
-    [CacheOutputUntil(01)]
-    public string Get(int id)
-    {
-        return "value";
-    }
-
-    // CacheOutput until 2012/01/01 17:45:00
-    [CacheOutputUntil(2012,01,01,17,45)]
-    public string Get(int id)
-    {
-        return "value";
-    }
+Licensed under MITv2. License included.
