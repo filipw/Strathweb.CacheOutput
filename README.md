@@ -14,6 +14,8 @@ a cache entry on any subsequent use when the cache entry becomes stale)
  - *ServerTimeSpan* (time how long the response should be cached on the server side)
  - *AnonymousOnly* (cache enabled only for requests when Thread.CurrentPrincipal is not set)
  
+Additionally, the library is setting ETags for you, and keeping them unchanged for the duration of the caching period.
+
 Usage
 --------------------
 
@@ -86,6 +88,12 @@ Variations
         }
 
 Each of these can obviously be combined with the 5 general properties mentioned in the beginning.
+
+Caching convention
+--------------------
+In order to determine the expected content type of the response, **CacheOutput** will run Web APIs internal *content negotiation process*, based on the incoming request & the return type of the action on which caching is applied. 
+
+Each individual content type response is cached separately (so out of the box, you can expect the action to be cached as JSON and XML, if you introduce more formatters, those will be cached as well).
 
 Server side caching
 --------------------
