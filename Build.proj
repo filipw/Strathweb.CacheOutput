@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectName>WebAPI.OutputCache</ProjectName>
+    <MsTestPath>C:\Program Files (x86)\Microsoft Visual Studio 11.0\Common7\IDE\mstest.exe</MsTestPath>
+  </PropertyGroup> 
+  <Target Name="DebugBuild">
+    <Message Text="Building $(ProjectName)" />
+    <MSBuild Projects="$(ProjectName).sln" Targets="Clean" Properties="Configuration=Debug" BuildInParallel="true"/>
+    <MSBuild Projects="$(ProjectName).sln" Targets="Build" Properties="Configuration=Debug" BuildInParallel="true"/>
+	<Message Text="$(ProjectName) Debug Build Complete!" />
+  </Target>
+  <Target Name="ReleaseBuild">
+    <Message Text="Building $(ProjectName) Release Build" />
+    <MSBuild Projects="$(ProjectName).sln" Targets="Clean" Properties="Configuration=Release" BuildInParallel="true"/>
+    <MSBuild Projects="$(ProjectName).sln" Targets="Build" Properties="Configuration=Release;" BuildInParallel="true"/>
+    <Message Text="$(ProjectName) Release Build Complete!" />
+  </Target>
+</Project>

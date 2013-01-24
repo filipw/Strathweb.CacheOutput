@@ -1,0 +1,1 @@
+build.bat ReleaseBuild & pause
