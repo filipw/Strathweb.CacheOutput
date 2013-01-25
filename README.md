@@ -1,8 +1,7 @@
 ASP.NET Web API CacheOutput
 ========================
 
-A simple filter bringing caching options, similar to MVC's "OutputCacheAttribute" to Web API actions.
-Caching by default can only be applied to GET actions.
+A small library bringing caching options, similar to MVC's "OutputCacheAttribute", to Web API actions.
 
 **CacheOutput** will take care of server side caching and set the appropriate client side (response) headers for you.
 
@@ -15,6 +14,7 @@ a cache entry on any subsequent use when the cache entry becomes stale)
  - *AnonymousOnly* (cache enabled only for requests when Thread.CurrentPrincipal is not set)
  
 Additionally, the library is setting ETags for you, and keeping them unchanged for the duration of the caching period.
+Caching by default can only be applied to GET actions.
 
 Usage
 --------------------
