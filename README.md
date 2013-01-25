@@ -16,6 +16,13 @@ a cache entry on any subsequent use when the cache entry becomes stale)
 Additionally, the library is setting ETags for you, and keeping them unchanged for the duration of the caching period.
 Caching by default can only be applied to GET actions.
 
+Installation
+--------------------
+You can build from the source here, or you can install the Nuget version (currently pre-release):
+    
+    PM> Install-Package Strathweb.CacheOutput -Pre
+
+
 Usage
 --------------------
 

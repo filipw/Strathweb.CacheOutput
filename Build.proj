@@ -13,7 +13,7 @@
   <Target Name="ReleaseBuild">
     <Message Text="Building $(ProjectName) Release Build" />
     <MSBuild Projects="$(ProjectName).sln" Targets="Clean" Properties="Configuration=Release" BuildInParallel="true"/>
-    <MSBuild Projects="$(ProjectName).sln" Targets="Build" Properties="Configuration=Release;" BuildInParallel="true"/>
+    <MSBuild Projects="$(ProjectName).sln" Targets="Build" Properties="Configuration=Release" BuildInParallel="true"/>
     <Message Text="$(ProjectName) Release Build Complete!" />
   </Target>
 </Project>

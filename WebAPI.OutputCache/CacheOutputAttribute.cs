@@ -69,7 +69,6 @@ namespace WebAPI.OutputCache
                 responseMediaType = negotiatedResult.MediaType;
             }
 
-            Debug.WriteLine(responseMediaType.MediaType);
             return responseMediaType;
         }
 
@@ -112,7 +111,8 @@ namespace WebAPI.OutputCache
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
                         ApplyCacheHeaders(quickResponse, time);
-                        throw new HttpResponseException(quickResponse);
+                        actionContext.Response = quickResponse;
+                        return;
                     }
                 }
             }

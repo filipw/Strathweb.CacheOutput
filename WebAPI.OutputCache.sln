@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{944DCB
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Demo", "WebAPI.OutputCache.Demo\WebAPI.OutputCache.Demo.csproj", "{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +28,10 @@ Global
 		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5DFB349-FA13-41A1-9F11-332E88664DF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
