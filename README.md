@@ -98,7 +98,7 @@ Each individual content type response is cached separately (so out of the box, y
 Server side caching
 --------------------
 By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cache on the server side. However, you are free to swap this with anything else
-(static Dictionary, Memcached, Redis, whatever..) as long as you implement *IApiOutputCache* interface.
+(static Dictionary, Memcached, Redis, whatever..) as long as you implement the following *IApiOutputCache* interface (part of the distributed assembly).
 
     public interface IApiOutputCache
     {
@@ -109,8 +109,58 @@ By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cach
         void Add(string key, object o, DateTimeOffset expiration);
     }
 
-You then need to register your implementation in the Web API dependency resolver (regardless of which DI provider you are using). **CacheOutput** will try to pick up the implementation from there, and if no implementation is available, we will default to *System.Runtime.Caching.MemoryCache*.
+Suppose you have a custom implementation:
 
+    public class MyCache : IApiOutputCache {
+      //omitted for brevity
+    }
+
+You can register your implementation using a handy *GlobalConfiguration* extension method:
+
+    //instance
+    configuration.RegisterCacheOutputProvider(() => new MyCache());
+
+    //singleton
+    var cache = new MyCache();
+    configuration.RegisterCacheOutputProvider(() => cache);	
+
+If you prefer **CacheOutput** to use resolve the cache implementation directly from your dependency injection provider, that's also possible. Simply register your *IApiOutputCache* implementation in your Web API DI and that's it. Whenever **CacheOutput** does not find an implementation in the *GlobalConiguration*, it will fall back to the DI resolver. Example (using Autofac for Web API):
+
+    cache = new MyCache();
+    var builder = new ContainerBuilder();
+    builder.RegisterInstance(cache);
+    config.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
+
+If no implementation is available in neither *GlobalConfiguration* or *DependencyReolver*, we will default to *System.Runtime.Caching.MemoryCache*.
+
+Etags
+--------------------
+For client side caching, in addition to *MaxAge*, we will issue Etags. You can use the Etag value to make a request with *If-None-Match* header. If the resource is still valid, server will then response with a 304 status code.
+
+For example:
+
+    GET /api/myresource
+    Accept: application/json
+
+    Status Code: 200
+    Cache-Control: max-age=100
+    Content-Length: 24
+    Content-Type: application/json; charset=utf-8
+    Date: Fri, 25 Jan 2013 03:37:11 GMT
+    ETag: "5c479911-97b9-4b78-ae3e-d09db420d5ba"
+    Server: Microsoft-HTTPAPI/2.0
+
+On the next request:
+
+    GET /api/myresource
+    Accept: application/json
+    If-None-Match: "5c479911-97b9-4b78-ae3e-d09db420d5ba"
+    
+    Status Code: 304
+    Cache-Control: max-age=100
+    Content-Length: 0
+    Date: Fri, 25 Jan 2013 03:37:13 GMT
+    Server: Microsoft-HTTPAPI/2.0
 
 License
 --------------------
