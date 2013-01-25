@@ -26,8 +26,6 @@ namespace WebAPI.OutputCache.Tests
         public void init()
         {
             _cache = new Mock<IApiOutputCache>();
-            // _cache.Setup(x => x.Contains(It.IsAny<string>())).Verifiable();
-            // _cache.Setup(x => x.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>())).Verifiable();
 
             var conf = new HttpConfiguration();
             var builder = new ContainerBuilder();

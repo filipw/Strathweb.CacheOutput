@@ -61,6 +61,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="Cache\IApiOutputCache.cs" />
     <Compile Include="Cache\MemoryCacheDefault.cs" />
+    <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="Time\CacheTime.cs" />
     <Compile Include="Time\ThisDay.cs" />
     <Compile Include="IModelQuery.cs" />

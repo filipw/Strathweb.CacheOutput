@@ -69,6 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnegTests.cs" />
+    <Compile Include="ConfigurationTests.cs" />
     <Compile Include="ServerSideTests.cs" />
     <Compile Include="SampleController.cs" />
     <Compile Include="ClientSideTests.cs" />

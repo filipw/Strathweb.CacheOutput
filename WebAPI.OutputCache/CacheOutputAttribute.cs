@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
@@ -39,9 +40,14 @@ namespace WebAPI.OutputCache
             return ac.Request.Method == HttpMethod.Get;
         };
 
-        protected virtual void EnsureCache(HttpRequestMessage req)
+        protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
         {
-            _webApiCache = req != null ? req.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault() : new MemoryCacheDefault();
+            object cache;
+            config.Properties.TryGetValue(typeof (IApiOutputCache), out cache);
+
+            var cacheFunc = cache as Func<IApiOutputCache>;
+
+            _webApiCache = cacheFunc != null ? cacheFunc() : req.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault();
         }
 
         protected virtual void EnsureCacheTimeQuery()
@@ -49,13 +55,12 @@ namespace WebAPI.OutputCache
             if (CacheTimeQuery == null) CacheTimeQuery = new ShortTime(ServerTimeSpan, ClientTimeSpan);
         }
 
-        protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpActionContext actionContext)
+        protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
         {
             var responseMediaType = actionContext.Request.Headers.Accept != null
                                         ? actionContext.Request.Headers.Accept.FirstOrDefault()
                                         : new MediaTypeHeaderValue("application/json");
             
-            var config = actionContext.Request.GetConfiguration();
             var negotiator = config.Services.GetService(typeof (IContentNegotiator)) as IContentNegotiator;
 
             if (negotiator != null)
@@ -83,16 +88,16 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
-            if (actionContext == null)
-            {
-                throw new ArgumentNullException("actionContext");
-            }
+            if (actionContext == null) throw new ArgumentNullException("actionContext");
+
             if (!_isCachingAllowed(actionContext, AnonymousOnly)) return;
 
-            EnsureCacheTimeQuery();
-            EnsureCache(actionContext.Request);
+            var config = actionContext.Request.GetConfiguration();
 
-            _responseMediaType = GetExpectedMediaType(actionContext);
+            EnsureCacheTimeQuery();
+            EnsureCache(config, actionContext.Request);
+
+            _responseMediaType = GetExpectedMediaType(config, actionContext);
             var cachekey = MakeCachekey(actionContext.Request, _responseMediaType);
 
             if (!_webApiCache.Contains(cachekey)) return;
