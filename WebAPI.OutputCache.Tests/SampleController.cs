@@ -68,5 +68,12 @@ namespace WebAPI.OutputCache.Tests
         {
             return "value";
         }
+
+        [HttpGet]
+        [CacheOutput(AnonymousOnly = true, ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public string etag_match_304()
+        {
+            return "value";
+        }
     }
 }

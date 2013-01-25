@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConnegTests.cs" />
     <Compile Include="ServerSideTests.cs" />
     <Compile Include="SampleController.cs" />
     <Compile Include="ClientSideTests.cs" />

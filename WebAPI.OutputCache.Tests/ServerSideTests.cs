@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Principal;
@@ -106,6 +107,40 @@ namespace WebAPI.OutputCache.Tests
 
             Assert.IsNull(result.Headers.CacheControl);
             _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>()), Times.Never());
+        }
+
+        [Test]
+        public void etag_match_304_if_none_match()
+        {
+            _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
+            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+                  .Returns((object)new EntityTagHeaderValue(@"""abc"""));
+
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "etag_match_304");
+            req.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(@"""abc"""));
+            var result = client.SendAsync(req).Result;
+
+            Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
+            Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
+            Assert.AreEqual(HttpStatusCode.NotModified, result.StatusCode);
+        }
+
+        [Test]
+        public void etag_not_match_304_if_none_match()
+        {
+            _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
+            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+                  .Returns((object)new EntityTagHeaderValue(@"""abcdef"""));
+
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "etag_match_304");
+            req.Headers.IfNoneMatch.Add(new EntityTagHeaderValue(@"""abc"""));
+            var result = client.SendAsync(req).Result;
+
+            Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
+            Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
+            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
 
         [TearDown]

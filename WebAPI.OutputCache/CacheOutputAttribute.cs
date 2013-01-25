@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
@@ -62,6 +63,8 @@ namespace WebAPI.OutputCache
                 var negotiatedResult = negotiator.Negotiate(actionContext.ActionDescriptor.ReturnType, actionContext.Request, config.Formatters);
                 responseMediaType = negotiatedResult.MediaType;
             }
+
+            Debug.WriteLine(responseMediaType.MediaType);
             return responseMediaType;
         }
 
@@ -94,6 +97,21 @@ namespace WebAPI.OutputCache
 
             if (!_webApiCache.Contains(cachekey)) return;
 
+            if (actionContext.Request.Headers.IfNoneMatch != null)
+            {
+                var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
+                if (etag != null)
+                {
+                    if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag.Tag))
+                    {
+                        var time = CacheTimeQuery.Execute(DateTime.Now);
+                        var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
+                        ApplyCacheHeaders(quickResponse, time);
+                        throw new HttpResponseException(quickResponse);
+                    }
+                }
+            }
+
             var val = _webApiCache.Get(cachekey) as string;
             if (val == null) return;
 
@@ -104,7 +122,8 @@ namespace WebAPI.OutputCache
             actionContext.Response.Content = new StringContent(val);
 
             actionContext.Response.Content.Headers.ContentType = contenttype;
-            actionContext.Response.Headers.ETag = (EntityTagHeaderValue)_webApiCache.Get(cachekey + Constants.EtagKey);
+            var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
+            if (responseEtag != null) SetEtag(actionContext.Response, responseEtag.Tag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
@@ -117,14 +136,14 @@ namespace WebAPI.OutputCache
 
             if (!(_webApiCache.Contains(cachekey)) && !string.IsNullOrWhiteSpace(cachekey))
             {
-                SetEtag(actionExecutedContext);
+                SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
                 actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
                     {
                         _webApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration);
                         
                         _webApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                        actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
+                                        actionExecutedContext.Response.Content.Headers.ContentType,
                                         cacheTime.AbsoluteExpiration);
 
                         _webApiCache.Add(cachekey + Constants.EtagKey,
@@ -148,10 +167,10 @@ namespace WebAPI.OutputCache
             response.Headers.CacheControl = cachecontrol;
         }
 
-        private static void SetEtag(HttpActionExecutedContext actionExecutedContext)
+        private static void SetEtag(HttpResponseMessage message, string etag)
         {
-            var eTag = new EntityTagHeaderValue(@"""" + Guid.NewGuid() + @"""");
-            actionExecutedContext.Response.Headers.ETag = eTag;
+            var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
+            message.Headers.ETag = eTag;
         }
     }
 }
