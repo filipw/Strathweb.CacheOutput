@@ -172,4 +172,4 @@ On the next request:
 License
 --------------------
 
-Licensed under MITv2. License included.
+Licensed under Apache v2. License included.
