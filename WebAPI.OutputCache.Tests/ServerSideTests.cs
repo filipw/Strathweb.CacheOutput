@@ -97,6 +97,46 @@ namespace WebAPI.OutputCache.Tests
         }
 
         [Test]
+        public void callback_at_the_end_is_excluded_querystring()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?id=1&callback=abc").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?id=1:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50))), Times.Once());
+        }
+
+        [Test]
+        public void callback_at_the_beginning_is_excluded_querystring()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc&id=1").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?id=1:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50))), Times.Once());
+        }
+
+        [Test]
+        public void callback_in_the_middle_is_excluded_querystring()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?de=xxx&callback=abc&id=1").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?de=xxx&id=1:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback?de=xxx&id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50))), Times.Once());
+        }
+
+        [Test]
+        public void callback_alone_is_excluded_querystring()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_s50_exclude_fakecallback:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50))), Times.Once());
+        }
+
+        [Test]
         public void no_caching_if_user_authenticated_and_flag_set_to_off()
         {
             SetCurrentThreadIdentity("Filip");

@@ -21,6 +21,12 @@ namespace WebAPI.OutputCache.Tests
             return "test";
         }
 
+        [CacheOutput(ServerTimeSpan = 50)]
+        public string Get_s50_exclude_fakecallback(int id = 0, string callback = null, string de = null)
+        {
+            return "test";
+        }
+
         [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = false)]
         public string Get_s50_exclude_false(int id)
         {
@@ -45,8 +51,8 @@ namespace WebAPI.OutputCache.Tests
             return "value";
         }
 
-        [CacheOutputUntilThisMonth(31)]
-        public string Get_until31_thismonth()
+        [CacheOutputUntilThisMonth(27)]
+        public string Get_until27_thismonth()
         {
             return "value";
         }

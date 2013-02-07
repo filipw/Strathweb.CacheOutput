@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Runtime.Caching;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -75,7 +73,18 @@ namespace WebAPI.OutputCache
         protected virtual string MakeCachekey(HttpRequestMessage request, MediaTypeHeaderValue mediaType)
         {
             var uri = request.RequestUri.PathAndQuery;
-            if (ExcludeQueryStringFromCacheKey) uri = request.RequestUri.AbsolutePath;
+            if (ExcludeQueryStringFromCacheKey)
+            {
+                uri = request.RequestUri.AbsolutePath;
+            }
+            else
+            {
+                var callback = "callback=" + GetJsonpCallback(request);
+                if (uri.Contains("&"+callback)) uri = uri.Replace("&" + callback, string.Empty);
+                if (uri.Contains(callback +"&")) uri = uri.Replace(callback + "&", string.Empty);
+                if (uri.Contains("?" + callback)) uri = uri.Replace("?" + callback, string.Empty);
+                if (uri.EndsWith("&")) uri = uri.TrimEnd('&');
+            }
 
             var cachekey = string.Join(":", new[]
             {
@@ -176,6 +185,22 @@ namespace WebAPI.OutputCache
         {
             var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
             message.Headers.ETag = eTag;
+        }
+
+        private string GetJsonpCallback(HttpRequestMessage request)
+        {
+            var callback = string.Empty;
+            if (request.Method == HttpMethod.Get)
+            {
+                var query = request.GetQueryNameValuePairs();
+
+                if (query != null)
+                {
+                    var queryVal = query.FirstOrDefault(x => x.Key.ToLower() == "callback");
+                    if (!queryVal.Equals(default(KeyValuePair<string,string>))) callback = queryVal.Value;
+                }
+            }
+            return callback;
         }
     }
 } 

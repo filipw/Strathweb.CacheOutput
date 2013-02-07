@@ -74,9 +74,9 @@ namespace WebAPI.OutputCache.Tests
         public void maxage_mustrevalidate_headers_correct_with_cacheuntil_this_month()
         {
             var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_until31_thismonth").Result;
+            var result = client.GetAsync(_url + "Get_until27_thismonth").Result;
 
-            Assert.IsTrue(Math.Round(new ThisMonth(31,0,0,0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
+            Assert.IsTrue(Math.Round(new ThisMonth(27,0,0,0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
         }
 
