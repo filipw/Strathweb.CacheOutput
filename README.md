@@ -140,6 +140,20 @@ If you prefer **CacheOutput** to use resolve the cache implementation directly f
 
 If no implementation is available in neither *GlobalConfiguration* or *DependencyReolver*, we will default to *System.Runtime.Caching.MemoryCache*.
 
+JSONP
+--------------------
+We automatically exclude *callback* parameter from cache key to allow for smooth JSONP support. 
+
+So:
+
+    /api/something?abc=1&callback=jQuery1213
+
+is cached as:
+
+    /api/something?abc=1
+
+Position of the *callback* parameter does not matter.
+
 Etags
 --------------------
 For client side caching, in addition to *MaxAge*, we will issue Etags. You can use the Etag value to make a request with *If-None-Match* header. If the resource is still valid, server will then response with a 304 status code.
