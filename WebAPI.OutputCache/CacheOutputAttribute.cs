@@ -79,11 +79,15 @@ namespace WebAPI.OutputCache
             }
             else
             {
-                var callback = "callback=" + GetJsonpCallback(request);
-                if (uri.Contains("&"+callback)) uri = uri.Replace("&" + callback, string.Empty);
-                if (uri.Contains(callback +"&")) uri = uri.Replace(callback + "&", string.Empty);
-                if (uri.Contains("?" + callback)) uri = uri.Replace("?" + callback, string.Empty);
-                if (uri.EndsWith("&")) uri = uri.TrimEnd('&');
+                var callbackValue = GetJsonpCallback(request);
+                if (!string.IsNullOrWhiteSpace(callbackValue))
+                {
+                    var callback = "callback=" + callbackValue;
+                    if (uri.Contains("&" + callback)) uri = uri.Replace("&" + callback, string.Empty);
+                    if (uri.Contains(callback + "&")) uri = uri.Replace(callback + "&", string.Empty);
+                    if (uri.Contains("?" + callback)) uri = uri.Replace("?" + callback, string.Empty);
+                    if (uri.EndsWith("&")) uri = uri.TrimEnd('&');
+                }
             }
 
             var cachekey = string.Join(":", new[]
