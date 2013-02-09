@@ -53,15 +53,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CacheOutputUntilThisMonthAttribute.cs" />
-    <Compile Include="CacheOutputUntilThisYearAttribute.cs" />
-    <Compile Include="CacheOutputUntilToday.cs" />
+    <Compile Include="AutoInvalidateCacheOutputAttribute.cs" />
+    <Compile Include="BaseCacheAttribute.cs" />
+    <Compile Include="CacheOutputConfiguration.cs" />
+    <Compile Include="TimeAttributes\CacheOutputUntilThisMonthAttribute.cs" />
+    <Compile Include="TimeAttributes\CacheOutputUntilThisYearAttribute.cs" />
+    <Compile Include="TimeAttributes\CacheOutputUntilToday.cs" />
     <Compile Include="Cache\CacheExtensions.cs" />
-    <Compile Include="CacheOutputUntilCacheAttribute.cs" />
+    <Compile Include="TimeAttributes\CacheOutputUntilCacheAttribute.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Cache\IApiOutputCache.cs" />
     <Compile Include="Cache\MemoryCacheDefault.cs" />
     <Compile Include="HttpConfigurationExtensions.cs" />
+    <Compile Include="InvalidateCacheOutputAttribute.cs" />
     <Compile Include="Time\CacheTime.cs" />
     <Compile Include="Time\ThisDay.cs" />
     <Compile Include="IModelQuery.cs" />

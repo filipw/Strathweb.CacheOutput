@@ -58,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Teams2Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Team.cs" />
     <Compile Include="TeamsController.cs" />

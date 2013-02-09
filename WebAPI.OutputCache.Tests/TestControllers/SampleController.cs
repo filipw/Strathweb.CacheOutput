@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Web.Http;
+﻿using System.Web.Http;
+using WebAPI.OutputCache.TimeAttributes;
 
-namespace WebAPI.OutputCache.Tests
+namespace WebAPI.OutputCache.Tests.TestControllers
 {
     public class SampleController : ApiController
     {
@@ -80,6 +76,19 @@ namespace WebAPI.OutputCache.Tests
         public string etag_match_304()
         {
             return "value";
+        }
+
+        [InvalidateCacheOutput("Get_c100_s100")]
+        public void Post()
+        {
+            //do nothing
+        }
+
+        [InvalidateCacheOutput("Get_c100_s100")]
+        [InvalidateCacheOutput("Get_s50_exclude_fakecallback")]
+        public void Post_2_invalidates()
+        {
+            //do nothing
         }
     }
 }

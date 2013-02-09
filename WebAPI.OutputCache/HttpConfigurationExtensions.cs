@@ -1,14 +1,12 @@
-﻿using System;
-using System.Web.Http;
-using WebAPI.OutputCache.Cache;
+﻿using System.Web.Http;
 
 namespace WebAPI.OutputCache
 {
     public static class HttpConfigurationExtensions
     {
-        public static void RegisterCacheOutputProvider(this HttpConfiguration config, Func<IApiOutputCache> provider)
+        public static CacheOutputConfiguration CacheOutputConfiguration(this HttpConfiguration config)
         {
-            config.Properties.GetOrAdd(typeof (IApiOutputCache), x => provider);
+            return new CacheOutputConfiguration(config);
         }
     }
 }

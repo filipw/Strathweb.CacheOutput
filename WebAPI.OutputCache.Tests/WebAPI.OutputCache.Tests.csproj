@@ -68,10 +68,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestControllers\AutoInvalidateController.cs" />
     <Compile Include="ConnegTests.cs" />
     <Compile Include="ConfigurationTests.cs" />
+    <Compile Include="TestControllers\AutoInvalidateWithTypeController.cs" />
+    <Compile Include="TestControllers\InlineInvalidateController.cs" />
+    <Compile Include="InlineInvalidateTests.cs" />
+    <Compile Include="InvalidateTests.cs" />
+    <Compile Include="MemoryCacheDefaultTests.cs" />
     <Compile Include="ServerSideTests.cs" />
-    <Compile Include="SampleController.cs" />
+    <Compile Include="TestControllers\SampleController.cs" />
     <Compile Include="ClientSideTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

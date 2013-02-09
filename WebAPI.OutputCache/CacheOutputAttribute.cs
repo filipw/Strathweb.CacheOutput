@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -9,13 +8,13 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using WebAPI.OutputCache.Cache;
+using System.Web.Http.Routing;
 using WebAPI.OutputCache.Time;
 
 namespace WebAPI.OutputCache
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class CacheOutputAttribute : ActionFilterAttribute
+    public class CacheOutputAttribute : BaseCacheAttribute
     {
         public bool AnonymousOnly { get; set; }
         public bool MustRevalidate { get; set; }
@@ -23,8 +22,6 @@ namespace WebAPI.OutputCache
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
 
-        // cache repository
-        private IApiOutputCache _webApiCache;
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -37,16 +34,6 @@ namespace WebAPI.OutputCache
 
             return ac.Request.Method == HttpMethod.Get;
         };
-
-        protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
-        {
-            object cache;
-            config.Properties.TryGetValue(typeof (IApiOutputCache), out cache);
-
-            var cacheFunc = cache as Func<IApiOutputCache>;
-
-            _webApiCache = cacheFunc != null ? cacheFunc() : req.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault();
-        }
 
         protected virtual void EnsureCacheTimeQuery()
         {
@@ -70,34 +57,6 @@ namespace WebAPI.OutputCache
             return responseMediaType;
         }
 
-        protected virtual string MakeCachekey(HttpRequestMessage request, MediaTypeHeaderValue mediaType)
-        {
-            var uri = request.RequestUri.PathAndQuery;
-            if (ExcludeQueryStringFromCacheKey)
-            {
-                uri = request.RequestUri.AbsolutePath;
-            }
-            else
-            {
-                var callbackValue = GetJsonpCallback(request);
-                if (!string.IsNullOrWhiteSpace(callbackValue))
-                {
-                    var callback = "callback=" + callbackValue;
-                    if (uri.Contains("&" + callback)) uri = uri.Replace("&" + callback, string.Empty);
-                    if (uri.Contains(callback + "&")) uri = uri.Replace(callback + "&", string.Empty);
-                    if (uri.Contains("?" + callback)) uri = uri.Replace("?" + callback, string.Empty);
-                    if (uri.EndsWith("&")) uri = uri.TrimEnd('&');
-                }
-            }
-
-            var cachekey = string.Join(":", new[]
-            {
-                uri,
-                mediaType.MediaType
-            });
-            return cachekey;
-        }
-
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
@@ -110,13 +69,13 @@ namespace WebAPI.OutputCache
             EnsureCache(config, actionContext.Request);
 
             _responseMediaType = GetExpectedMediaType(config, actionContext);
-            var cachekey = MakeCachekey(actionContext.Request, _responseMediaType);
+            var cachekey = MakeCachekey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
-            if (!_webApiCache.Contains(cachekey)) return;
+            if (!WebApiCache.Contains(cachekey)) return;
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
-                var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
+                var etag = WebApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
                 if (etag != null)
                 {
                     if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag.Tag))
@@ -130,17 +89,17 @@ namespace WebAPI.OutputCache
                 }
             }
 
-            var val = _webApiCache.Get(cachekey) as string;
+            var val = WebApiCache.Get(cachekey) as string;
             if (val == null) return;
 
-            var contenttype = (MediaTypeHeaderValue)_webApiCache.Get(cachekey + Constants.ContentTypeKey) ??
+            var contenttype = (MediaTypeHeaderValue)WebApiCache.Get(cachekey + Constants.ContentTypeKey) ??
                               new MediaTypeHeaderValue(cachekey.Split(':')[1]);
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new StringContent(val);
 
             actionContext.Response.Content.Headers.ContentType = contenttype;
-            var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
+            var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
             if (responseEtag != null) SetEtag(actionContext.Response, responseEtag.Tag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
@@ -149,28 +108,32 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            var cachekey = MakeCachekey(actionExecutedContext.Request, _responseMediaType);
+            if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
-            if (!(_webApiCache.Contains(cachekey)) && !string.IsNullOrWhiteSpace(cachekey))
+            var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
+            var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
+
+            if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
             {
                 SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
                 actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
                     {
-                        _webApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration);
+                        var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                        WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                        WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
                         
-                        _webApiCache.Add(cachekey + Constants.ContentTypeKey,
+                        WebApiCache.Add(cachekey + Constants.ContentTypeKey,
                                         actionExecutedContext.Response.Content.Headers.ContentType,
-                                        cacheTime.AbsoluteExpiration);
+                                        cacheTime.AbsoluteExpiration, baseKey);
 
-                        _webApiCache.Add(cachekey + Constants.EtagKey,
+                        WebApiCache.Add(cachekey + Constants.EtagKey,
                                       actionExecutedContext.Response.Headers.ETag,
-                                      cacheTime.AbsoluteExpiration); 
+                                      cacheTime.AbsoluteExpiration, baseKey); 
                     });
             }
 
-            if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
+            //if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
         }
 
@@ -189,22 +152,6 @@ namespace WebAPI.OutputCache
         {
             var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
             message.Headers.ETag = eTag;
-        }
-
-        private string GetJsonpCallback(HttpRequestMessage request)
-        {
-            var callback = string.Empty;
-            if (request.Method == HttpMethod.Get)
-            {
-                var query = request.GetQueryNameValuePairs();
-
-                if (query != null)
-                {
-                    var queryVal = query.FirstOrDefault(x => x.Key.ToLower() == "callback");
-                    if (!queryVal.Equals(default(KeyValuePair<string,string>))) callback = queryVal.Value;
-                }
-            }
-            return callback;
         }
     }
 } 

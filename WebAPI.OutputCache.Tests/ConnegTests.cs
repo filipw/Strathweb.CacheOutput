@@ -47,15 +47,15 @@ namespace WebAPI.OutputCache.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_c100_s100:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_c100_s100:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100))), Times.Once());
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
 
             var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_c100_s100");
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
 
             var result2 = client.SendAsync(req).Result;
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "/api/sample/Get_c100_s100:text/xml")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "/api/sample/Get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100))), Times.Once());
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:text/xml")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
 
         }
             

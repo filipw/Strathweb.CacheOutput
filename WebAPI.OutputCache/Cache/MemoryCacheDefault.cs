@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.ObjectModel;
 using System.Runtime.Caching;
 
 namespace WebAPI.OutputCache.Cache
@@ -6,6 +8,14 @@ namespace WebAPI.OutputCache.Cache
     public class MemoryCacheDefault : IApiOutputCache
     {
         private static readonly MemoryCache Cache = MemoryCache.Default;
+
+        public void RemoveStartsWith(string key)
+        {
+            lock (Cache)
+            {
+                Cache.Remove(key);
+            }
+        }
 
         public T Get<T>(string key) where T : class
         {
@@ -20,7 +30,10 @@ namespace WebAPI.OutputCache.Cache
 
         public void Remove(string key)
         {
-            Cache.Remove(key);
+            lock (Cache)
+            {
+                Cache.Remove(key);
+            }
         }
 
         public bool Contains(string key)
@@ -28,9 +41,24 @@ namespace WebAPI.OutputCache.Cache
             return Cache.Contains(key);
         }
 
-        public void Add(string key, object o, DateTimeOffset expiration)
+        public void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null)
         {
-            Cache.Add(key, o, expiration);
+            var cachePolicy = new CacheItemPolicy
+            {
+                AbsoluteExpiration = expiration
+            };
+
+            if (!string.IsNullOrWhiteSpace(dependsOnKey))
+            {
+               
+                cachePolicy.ChangeMonitors.Add(
+                    Cache.CreateCacheEntryChangeMonitor(new[] {dependsOnKey})
+                );
+            }
+            lock (Cache)
+            {
+                Cache.Add(key, o, cachePolicy);
+            }
         }
     }
 }

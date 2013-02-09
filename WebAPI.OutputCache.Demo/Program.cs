@@ -18,7 +18,7 @@ namespace WebAPI.OutputCache.Demo
             );
             var server = new HttpSelfHostServer(config);
 
-            config.RegisterCacheOutputProvider(() => new MemoryCacheDefault());
+            config.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MemoryCacheDefault());
 
             server.OpenAsync().Wait();
 

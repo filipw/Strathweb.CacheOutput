@@ -10,7 +10,8 @@ using WebAPI.OutputCache.TimeAttributes;
 
 namespace WebAPI.OutputCache.Demo
 {
-    public class TeamsController : ApiController
+    [AutoInvalidateCacheOutput]
+    public class Teams2Controller : ApiController
     {
         private static readonly List<Team> Teams = new List<Team>
             {
@@ -33,7 +34,6 @@ namespace WebAPI.OutputCache.Demo
             return team;
         }
 
-        [InvalidateCacheOutput("Get")]
         public void Post(Team value)
         {
             if (!ModelState.IsValid) throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
@@ -49,9 +49,6 @@ namespace WebAPI.OutputCache.Demo
 
             team.League = value.League;
             team.Name = value.Name;
-
-            var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.GetById(0)));
         }
 
         public void Delete(int id)

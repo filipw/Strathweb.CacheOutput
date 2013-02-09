@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web.Http;
+using System.Web.Http.Controllers;
+using System.Web.Http.Filters;
+using WebAPI.OutputCache.Cache;
+
+namespace WebAPI.OutputCache
+{
+    public abstract class BaseCacheAttribute : ActionFilterAttribute
+    {
+        // cache repository
+        protected IApiOutputCache WebApiCache;
+
+        //protected virtual string MakeBaseCachekey(string controller, string action)
+        //{
+        //    return string.Format("{0}-{1}", controller.ToLower(), action.ToLower());
+        //}
+
+        protected virtual string MakeCachekey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
+        {
+            var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
+            var action = context.ActionDescriptor.ActionName;
+            var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
+            var parameters = "-"+context.Request.RequestUri.Query.Replace("?",string.Empty);
+
+            //var uri = request.RequestUri.PathAndQuery;
+            if (excludeQueryString)
+            {
+                parameters = string.Empty;
+            }
+            else
+            {
+                var callbackValue = GetJsonpCallback(context.Request);
+                if (!string.IsNullOrWhiteSpace(callbackValue))
+                {
+                    var callback = "callback=" + callbackValue;
+                    if (parameters.Contains("&" + callback)) parameters = parameters.Replace("&" + callback, string.Empty);
+                    if (parameters.Contains(callback + "&")) parameters = parameters.Replace(callback + "&", string.Empty);
+                    if (parameters.Contains("-" + callback)) parameters = parameters.Replace("-" + callback, string.Empty);
+                    if (parameters.EndsWith("&")) parameters = parameters.TrimEnd('&');
+                }
+            }
+
+            if (parameters == "-") parameters = string.Empty;
+
+            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType.MediaType);
+
+            //var cachekey = string.Join(":", new[]
+            //{
+            //    key,
+            //    mediaType.MediaType
+            //});
+            return cachekey;
+        }
+
+        //protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
+        //{
+        //    object cache;
+        //    config.Properties.TryGetValue(typeof(IApiOutputCache), out cache);
+
+        //    var cacheFunc = cache as Func<IApiOutputCache>;
+
+        //    WebApiCache = cacheFunc != null ? cacheFunc() : req.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault();
+        //}
+
+        protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
+        {
+            WebApiCache = config.CacheOutputConfiguration().GetCacheOutputProvider(req);
+        }
+
+        private string GetJsonpCallback(HttpRequestMessage request)
+        {
+            var callback = string.Empty;
+            if (request.Method == HttpMethod.Get)
+            {
+                var query = request.GetQueryNameValuePairs();
+
+                if (query != null)
+                {
+                    var queryVal = query.FirstOrDefault(x => x.Key.ToLower() == "callback");
+                    if (!queryVal.Equals(default(KeyValuePair<string, string>))) callback = queryVal.Value;
+                }
+            }
+            return callback;
+        }
+    }
+}

@@ -1,7 +1,6 @@
-using System;
 using WebAPI.OutputCache.Time;
 
-namespace WebAPI.OutputCache
+namespace WebAPI.OutputCache.TimeAttributes
 {
     public class CacheOutputUntilAttribute : CacheOutputAttribute
     {

@@ -112,8 +112,9 @@ By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cach
         T Get<T>(string key) where T : class;
         object Get(string key);
         void Remove(string key);
+	void RemoveStartsWith(string key);
         bool Contains(string key);
-        void Add(string key, object o, DateTimeOffset expiration);
+        void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
     }
 
 Suppose you have a custom implementation:
@@ -125,11 +126,11 @@ Suppose you have a custom implementation:
 You can register your implementation using a handy *GlobalConfiguration* extension method:
 
     //instance
-    configuration.RegisterCacheOutputProvider(() => new MyCache());
+    configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MyCache());
 
     //singleton
     var cache = new MyCache();
-    configuration.RegisterCacheOutputProvider(() => cache);	
+    configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => cache);	
 
 If you prefer **CacheOutput** to use resolve the cache implementation directly from your dependency injection provider, that's also possible. Simply register your *IApiOutputCache* implementation in your Web API DI and that's it. Whenever **CacheOutput** does not find an implementation in the *GlobalConiguration*, it will fall back to the DI resolver. Example (using Autofac for Web API):
 
