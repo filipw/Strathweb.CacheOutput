@@ -18,7 +18,7 @@ namespace WebAPI.OutputCache.Tests.TestControllers
         }
 
         [CacheOutput(ServerTimeSpan = 50)]
-        public string Get_s50_exclude_fakecallback(int id = 0, string callback = null, string de = null)
+        public string Get_s50_exclude_fakecallback(int? id = null, string callback = null, string de = null)
         {
             return "test";
         }

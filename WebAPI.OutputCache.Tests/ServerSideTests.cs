@@ -129,9 +129,9 @@ namespace WebAPI.OutputCache.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?de=xxx&callback=abc&id=1").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-de=xxx&id=1:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1&de=xxx:application/json")), Times.Exactly(2));
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-de=xxx&id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1&de=xxx:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
         }
 
         [Test]

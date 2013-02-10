@@ -15,19 +15,14 @@ namespace WebAPI.OutputCache
         // cache repository
         protected IApiOutputCache WebApiCache;
 
-        //protected virtual string MakeBaseCachekey(string controller, string action)
-        //{
-        //    return string.Format("{0}-{1}", controller.ToLower(), action.ToLower());
-        //}
-
         protected virtual string MakeCachekey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
         {
             var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var parameters = "-"+context.Request.RequestUri.Query.Replace("?",string.Empty);
+            var parametersCollections = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + x.Value);
+            var parameters = "-"+string.Join("&", parametersCollections);
 
-            //var uri = request.RequestUri.PathAndQuery;
             if (excludeQueryString)
             {
                 parameters = string.Empty;
@@ -48,24 +43,8 @@ namespace WebAPI.OutputCache
             if (parameters == "-") parameters = string.Empty;
 
             var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType.MediaType);
-
-            //var cachekey = string.Join(":", new[]
-            //{
-            //    key,
-            //    mediaType.MediaType
-            //});
             return cachekey;
         }
-
-        //protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
-        //{
-        //    object cache;
-        //    config.Properties.TryGetValue(typeof(IApiOutputCache), out cache);
-
-        //    var cacheFunc = cache as Func<IApiOutputCache>;
-
-        //    WebApiCache = cacheFunc != null ? cacheFunc() : req.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault();
-        //}
 
         protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
         {
