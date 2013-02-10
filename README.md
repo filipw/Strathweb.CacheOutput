@@ -102,6 +102,24 @@ In order to determine the expected content type of the response, **CacheOutput**
 
 Each individual content type response is cached separately (so out of the box, you can expect the action to be cached as JSON and XML, if you introduce more formatters, those will be cached as well).
 
+**Important**: We use *action name* as part of the key. Therefore it is *necessary* that action names are unique inside the controller - that's the only way we can provide consistency. 
+
+So you either should use unique method names inside a single controller, or (if you really want to keep them the same names when overloading) you need to use *ActionName* attribute to provide uniqeness for caching. Example:
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Team> Get()
+        {
+            return Teams;
+        }
+
+        [ActionName("GetById")]
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Team> Get(int id)
+        {
+            return Teams;
+        }
+
+
 Server side caching
 --------------------
 By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cache on the server side. However, you are free to swap this with anything else
@@ -112,7 +130,7 @@ By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cach
         T Get<T>(string key) where T : class;
         object Get(string key);
         void Remove(string key);
-	void RemoveStartsWith(string key);
+        void RemoveStartsWith(string key);
         bool Contains(string key);
         void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
     }
@@ -139,7 +157,119 @@ If you prefer **CacheOutput** to use resolve the cache implementation directly f
     builder.RegisterInstance(cache);
     config.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
 
-If no implementation is available in neither *GlobalConfiguration* or *DependencyReolver*, we will default to *System.Runtime.Caching.MemoryCache*.
+If no implementation is available in neither *GlobalConfiguration* or *DependencyResolver*, we will default to *System.Runtime.Caching.MemoryCache*.
+
+Each method can be cached multiple times separately - based on the representation (JSON, XML and so on). Therefore, *CacheOutput* will pass *dependsOnKey* value (which happens to be a prefix of all variations of a given cached method) when adding items to cache - this gives us flexibility to easily remove all variations of the cached method when we want to clear the cache. When cache gets invalidated, we will call *RemoveStartsWith* and just pass that key.
+
+The default cache store, *System.Runtime.Caching.MemoryCache* supports dependencies between cache items, so it's enough to just remove the main one, and all sub-dependencies get flushed. However, if you change the defalt implementation, and your underlying store doesn't - it's not a problem. When we invalidate cache (and need to cascade through all dependencies), we call *RemoveStartsWith* - so your custom store will just have to iterate through the entire store in the implementation of this method and remove all items with the prefix passed.
+
+Cache invalidation
+--------------------
+
+There are three ways to invalidate cache:
+
+- [AutoInvalidateCacheOutput] - on the controller level (through an attribute)
+- [InvalidateCache("ActionName")] - on the action level (through an attribute)
+- Manually - inside the action body
+
+Example:
+
+    [AutoInvalidateCacheOutput]
+    public class Teams2Controller : ApiController
+    {
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Team> Get()
+        {
+            return Teams;
+        }
+
+        public void Post(Team value)
+        {
+            //do stuff
+        }
+    }
+
+Decorating the controller with [AutoInvalidateCacheOutput] will automatically flush all cached *GET* data from this controller after a successfull *POST*/*PUT*/*DELETE* request.
+
+You can also use the [AutoInvalidateCacheOutput(TryMatchType = true)] variation. This will only invalidate such *GET* requests that return the same *Type* or *IEnumerable of Type* as the action peformed takes as input parameter. 
+
+For example:
+
+    [AutoInvalidateCacheOutput(TryMatchType = true)]
+    public class TeamsController : ApiController
+    {
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Team> Get()
+        {
+            return Teams;
+        }
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Player> GetTeamPlayers(int id)
+        {
+            //return something
+        }
+
+        public void Post(Team value)
+        {
+            //this will only invalidate Get, not GetTeamPlayers since TryMatchType is enabled
+        }
+    }
+
+Invalidation on action level is similar - done through attributes. For example:
+
+    public class TeamsController : ApiController
+    {
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Team> Get()
+        {
+            return Teams;
+        }
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public IEnumerable<Player> GetTeamPlayers(int id)
+        {
+            //return something
+        }
+
+        [InvalidateCache("Get")]
+        public void Post(Team value)
+        {
+            //this invalidates Get action cache
+        }
+    }
+
+Obviously, multiple attributes are supported. You can also invalidate methods from separate controller:
+
+        [InvalidateCache("Get", typeof(OtherController))] //this will invalidate Get in a different controller
+        [InvalidateCache("Get")] //this will invalidate Get in this controller
+        public void Post(Team value)
+        {
+            //do stuff
+        }
+
+Finally, you can also invalidate manually. For example:
+
+        public void Put(int id, Team value)
+        {
+            //do stuff, update resource etc.
+
+            //now get cache instance
+            var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
+
+            //and invalidate cache for method "Get" of "TeamsController"
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.Get()));
+        }
+
+As you see, you can we use expression try to allow you to point to the method in a strongly typed way (we can't unfortunately do that in the attributes, since C# doesn't support lambdas/expression trees in attributes). 
+
+If your method takes in arguments, you can pass whatever - we only use the expression tree to get the name of the controller and the name of the action - and we invalidate all variations.
+
+You can also point to the method in a traditional way:
+            
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey("TeamsController","Get"));
+
+
 
 JSONP
 --------------------
