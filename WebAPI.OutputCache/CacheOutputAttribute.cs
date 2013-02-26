@@ -110,6 +110,10 @@ namespace WebAPI.OutputCache
         {
             if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
+            // NOTE: Should this only impact server side caching?
+            if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode)
+                return;
+
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 

@@ -53,6 +53,17 @@ namespace WebAPI.OutputCache.Tests
         }
 
         [Test]
+        public void not_cache_when_request_not_succes()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_not_succesful").Result;
+
+            Assert.IsNull(result.Headers.CacheControl);
+            _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
         public void set_cache_to_predefined_value_respect_formatter_through_accept_header()
         {
             var client = new HttpClient(_server);

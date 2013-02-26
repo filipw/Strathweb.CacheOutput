@@ -78,14 +78,20 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return "value";
         }
 
-        [InvalidateCacheOutput("Get_c100_s100")]
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public string Get_request_not_succesful()
+        {
+            throw new System.Exception("Fault");
+        }
+
+        [InvalidateCacheOutput("Get_c100_s100", null)]
         public void Post()
         {
             //do nothing
         }
 
-        [InvalidateCacheOutput("Get_c100_s100")]
-        [InvalidateCacheOutput("Get_s50_exclude_fakecallback")]
+        [InvalidateCacheOutput("Get_c100_s100", null)]
+        [InvalidateCacheOutput("Get_s50_exclude_fakecallback", null)]
         public void Post_2_invalidates()
         {
             //do nothing
