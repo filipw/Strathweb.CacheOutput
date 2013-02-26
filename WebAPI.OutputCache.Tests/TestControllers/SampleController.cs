@@ -11,6 +11,24 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return "test";
         }
 
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 0)]
+        public string Get_c100_s0()
+        {
+            return "test";
+        }
+
+        [CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100)]
+        public string Get_c0_s100()
+        {
+            return "test";
+        }
+
+        [CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100, MustRevalidate = true)]
+        public string Get_c0_s100_mustR()
+        {
+            return "test";
+        }
+
         [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
         public string Get_c50_mustR()
         {
@@ -35,8 +53,8 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return "test" + id;
         }
 
-        [CacheOutputUntil(2013,01,25,17,00)]
-        public string Get_until25012013_1700()
+        [CacheOutputUntil(2015,01,25,17,00)]
+        public string Get_until25012015_1700()
         {
             return "test";
         }

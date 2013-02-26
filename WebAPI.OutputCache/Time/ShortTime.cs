@@ -9,13 +9,13 @@ namespace WebAPI.OutputCache.Time
 
         public ShortTime(int serverTimeInSeconds, int clientTimeInSeconds)
         {
-            if (serverTimeInSeconds < 1)
-                serverTimeInSeconds = 1;
+            if (serverTimeInSeconds < 0)
+                serverTimeInSeconds = 0;
 
             this.serverTimeInSeconds = serverTimeInSeconds;
 
-            if (clientTimeInSeconds < 1)
-                clientTimeInSeconds = 1;
+            if (clientTimeInSeconds < 0)
+                clientTimeInSeconds = 0;
 
             this.clientTimeInSeconds = clientTimeInSeconds;
         }
@@ -24,8 +24,7 @@ namespace WebAPI.OutputCache.Time
         {
             var cacheTime = new CacheTime
                 {
-                    AbsoluteExpiration = model.AddSeconds(clientTimeInSeconds),
-                    ServerTimespan = TimeSpan.FromSeconds(serverTimeInSeconds),
+                    AbsoluteExpiration = model.AddSeconds(serverTimeInSeconds),
                     ClientTimeSpan = TimeSpan.FromSeconds(clientTimeInSeconds)
                 };
 

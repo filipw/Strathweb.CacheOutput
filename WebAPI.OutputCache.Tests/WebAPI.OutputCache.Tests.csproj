@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebAPI.OutputCache.Tests</RootNamespace>
     <AssemblyName>WebAPI.OutputCache.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
@@ -68,18 +68,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClientSideTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConfigurationTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ConnegTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="InlineInvalidateTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="InvalidateTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MemoryCacheDefaultTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ServerSideTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="TestControllers\AutoInvalidateController.cs" />
-    <Compile Include="ConnegTests.cs" />
-    <Compile Include="ConfigurationTests.cs" />
     <Compile Include="TestControllers\AutoInvalidateWithTypeController.cs" />
     <Compile Include="TestControllers\InlineInvalidateController.cs" />
-    <Compile Include="InlineInvalidateTests.cs" />
-    <Compile Include="InvalidateTests.cs" />
-    <Compile Include="MemoryCacheDefaultTests.cs" />
-    <Compile Include="ServerSideTests.cs" />
-    <Compile Include="TestControllers\SampleController.cs" />
-    <Compile Include="ClientSideTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestControllers\SampleController.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WebAPI.OutputCache\WebAPI.OutputCache.csproj">
