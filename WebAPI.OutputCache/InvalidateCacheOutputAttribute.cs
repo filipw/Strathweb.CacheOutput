@@ -11,6 +11,10 @@ namespace WebAPI.OutputCache
         private string _controller;
         private readonly string _methodName;
 
+        public InvalidateCacheOutputAttribute(string methodName) : this(methodName, null)
+        {
+        }
+
         public InvalidateCacheOutputAttribute(string methodName, Type type = null)
         {
             _controller = type != null ? type.Name.Replace("Controller", string.Empty) : null;

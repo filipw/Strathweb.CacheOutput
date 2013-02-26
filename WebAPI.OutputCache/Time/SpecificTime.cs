@@ -33,8 +33,7 @@ namespace WebAPI.OutputCache.Time
                                                       second),
                 };
 
-            cacheTime.ServerTimespan = cacheTime.AbsoluteExpiration.Subtract(model);
-            cacheTime.ClientTimeSpan = cacheTime.ServerTimespan;
+            cacheTime.ClientTimeSpan = cacheTime.AbsoluteExpiration.Subtract(model);
 
             return cacheTime;
         }
