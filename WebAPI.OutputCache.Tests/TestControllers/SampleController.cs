@@ -110,6 +110,12 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Conflict){ReasonPhrase = "Fault shouldn't cache"});
         }
 
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public HttpResponseMessage Get_request_noContent()
+        {
+            return Request.CreateResponse(HttpStatusCode.Accepted);
+        }
+
         [InvalidateCacheOutput("Get_c100_s100", null)]
         public void Post()
         {

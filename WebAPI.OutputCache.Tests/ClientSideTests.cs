@@ -66,6 +66,16 @@ namespace WebAPI.OutputCache.Tests
 
             Assert.IsNull(result.Headers.CacheControl);
         }
+        [Test]
+        public void maxage_cachecontrol_when_no_content()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_noContent").Result;
+
+            Assert.IsNotNull(result.Headers.CacheControl);
+            Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
+        }
+
 
         [Test]
         public void maxage_mustrevalidate_headers_correct_with_clienttimeout_zero_with_must_revalidate()

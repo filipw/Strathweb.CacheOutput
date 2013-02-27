@@ -120,20 +120,23 @@ namespace WebAPI.OutputCache
                 {
                     SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
-                    actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
-                        {
-                            var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                            WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                            WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
+                    if (actionExecutedContext.Response.Content != null)
+                    {
+                        actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
+                            {
+                                var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                                WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
-                            WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                            actionExecutedContext.Response.Content.Headers.ContentType,
-                                            cacheTime.AbsoluteExpiration, baseKey);
+                                WebApiCache.Add(cachekey + Constants.ContentTypeKey,
+                                                actionExecutedContext.Response.Content.Headers.ContentType,
+                                                cacheTime.AbsoluteExpiration, baseKey);
 
-                            WebApiCache.Add(cachekey + Constants.EtagKey,
-                                            actionExecutedContext.Response.Headers.ETag,
-                                            cacheTime.AbsoluteExpiration, baseKey);
-                        });
+                                WebApiCache.Add(cachekey + Constants.EtagKey,
+                                                actionExecutedContext.Response.Headers.ETag,
+                                                cacheTime.AbsoluteExpiration, baseKey);
+                            });
+                    }
                 }
             }
 
