@@ -33,7 +33,7 @@ namespace WebAPI.OutputCache.Demo
             return team;
         }
 
-        [InvalidateCacheOutput("Get", null)]
+        [InvalidateCacheOutput("Get")]
         public void Post(Team value)
         {
             if (!ModelState.IsValid) throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));

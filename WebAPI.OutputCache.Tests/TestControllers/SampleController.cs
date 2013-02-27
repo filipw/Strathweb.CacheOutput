@@ -116,14 +116,14 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return Request.CreateResponse(HttpStatusCode.Accepted);
         }
 
-        [InvalidateCacheOutput("Get_c100_s100", null)]
+        [InvalidateCacheOutput("Get_c100_s100")]
         public void Post()
         {
             //do nothing
         }
 
-        [InvalidateCacheOutput("Get_c100_s100", null)]
-        [InvalidateCacheOutput("Get_s50_exclude_fakecallback", null)]
+        [InvalidateCacheOutput("Get_c100_s100")]
+        [InvalidateCacheOutput("Get_s50_exclude_fakecallback")]
         public void Post_2_invalidates()
         {
             //do nothing
