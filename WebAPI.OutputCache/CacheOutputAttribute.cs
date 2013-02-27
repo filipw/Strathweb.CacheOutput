@@ -115,41 +115,46 @@ namespace WebAPI.OutputCache
                 return;
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
-
-            if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
+            if (cacheTime.AbsoluteExpiration > DateTime.Now)
             {
-                SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
+                var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
-                actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
-                    {
-                        var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                        WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                        WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
-                        
-                        WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                        actionExecutedContext.Response.Content.Headers.ContentType,
-                                        cacheTime.AbsoluteExpiration, baseKey);
+                if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
+                {
+                    SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
-                        WebApiCache.Add(cachekey + Constants.EtagKey,
-                                      actionExecutedContext.Response.Headers.ETag,
-                                      cacheTime.AbsoluteExpiration, baseKey); 
-                    });
+                    actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
+                        {
+                            var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                            WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                            WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
+
+                            WebApiCache.Add(cachekey + Constants.ContentTypeKey,
+                                            actionExecutedContext.Response.Content.Headers.ContentType,
+                                            cacheTime.AbsoluteExpiration, baseKey);
+
+                            WebApiCache.Add(cachekey + Constants.EtagKey,
+                                          actionExecutedContext.Response.Headers.ETag,
+                                          cacheTime.AbsoluteExpiration, baseKey);
+                        });
+                }
             }
-
             //if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
         }
 
         private void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
         {
-            var cachecontrol = new CacheControlHeaderValue
+            if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate)
             {
-                MaxAge = cacheTime.ClientTimeSpan,
-                MustRevalidate = MustRevalidate
-            };
+                var cachecontrol = new CacheControlHeaderValue
+                                       {
+                                           MaxAge = cacheTime.ClientTimeSpan,
+                                           MustRevalidate = MustRevalidate
+                                       };
 
-            response.Headers.CacheControl = cachecontrol;
+                response.Headers.CacheControl = cachecontrol;
+            }
         }
 
         private static void SetEtag(HttpResponseMessage message, string etag)

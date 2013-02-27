@@ -30,8 +30,7 @@ namespace WebAPI.OutputCache.Time
             if (cacheTime.AbsoluteExpiration <= model)
                 cacheTime.AbsoluteExpiration = cacheTime.AbsoluteExpiration.AddDays(1);
 
-            cacheTime.ServerTimespan = cacheTime.AbsoluteExpiration.Subtract(model);
-            cacheTime.ClientTimeSpan = cacheTime.ServerTimespan;
+            cacheTime.ClientTimeSpan = cacheTime.AbsoluteExpiration.Subtract(model);
 
             return cacheTime;
         }
