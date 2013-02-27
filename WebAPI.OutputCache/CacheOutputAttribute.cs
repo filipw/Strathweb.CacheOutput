@@ -21,7 +21,6 @@ namespace WebAPI.OutputCache
         public bool ExcludeQueryStringFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
-
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -108,11 +107,9 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
+            if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
 
-            // NOTE: Should this only impact server side caching?
-            if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode)
-                return;
+            if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             if (cacheTime.AbsoluteExpiration > DateTime.Now)
@@ -134,12 +131,12 @@ namespace WebAPI.OutputCache
                                             cacheTime.AbsoluteExpiration, baseKey);
 
                             WebApiCache.Add(cachekey + Constants.EtagKey,
-                                          actionExecutedContext.Response.Headers.ETag,
-                                          cacheTime.AbsoluteExpiration, baseKey);
+                                            actionExecutedContext.Response.Headers.ETag,
+                                            cacheTime.AbsoluteExpiration, baseKey);
                         });
                 }
             }
-            //if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
+
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
         }
 

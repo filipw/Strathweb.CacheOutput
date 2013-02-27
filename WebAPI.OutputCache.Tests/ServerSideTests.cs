@@ -69,9 +69,18 @@ namespace WebAPI.OutputCache.Tests
         public void not_cache_when_request_not_succes()
         {
             var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_request_not_succesful").Result;
+            var result = client.GetAsync(_url + "Get_request_httpResponseException_noCache").Result;
 
-            Assert.IsNull(result.Headers.CacheControl);
+            _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void not_cache_when_request_exception()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_exception_noCache").Result;
+
             _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
             _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
         }
