@@ -50,6 +50,34 @@ namespace WebAPI.OutputCache.Tests
         }
 
         [Test]
+        public void no_cachecontrol_when_request_not_succes()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_httpResponseException_noCache").Result;
+
+            Assert.IsNull(result.Headers.CacheControl);
+        }
+
+        [Test]
+        public void no_cachecontrol_when_request_exception()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_exception_noCache").Result;
+
+            Assert.IsNull(result.Headers.CacheControl);
+        }
+        [Test]
+        public void maxage_cachecontrol_when_no_content()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_noContent").Result;
+
+            Assert.IsNotNull(result.Headers.CacheControl);
+            Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
+        }
+
+
+        [Test]
         public void maxage_mustrevalidate_headers_correct_with_clienttimeout_zero_with_must_revalidate()
         {
             var client = new HttpClient(_server);

@@ -66,6 +66,36 @@ namespace WebAPI.OutputCache.Tests
         }
 
         [Test]
+        public void not_cache_when_request_not_succes()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_httpResponseException_noCache").Result;
+
+            _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void not_cache_when_request_exception()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_exception_noCache").Result;
+
+            _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
+        public void not_cache_add_when_no_content()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_request_noContent").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_request_nocontent:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
+
+        [Test]
         public void set_cache_to_predefined_value_respect_formatter_through_accept_header()
         {
             var client = new HttpClient(_server);

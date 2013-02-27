@@ -1,4 +1,6 @@
-﻿using System.Web.Http;
+﻿using System.Net;
+using System.Net.Http;
+using System.Web.Http;
 using WebAPI.OutputCache.TimeAttributes;
 
 namespace WebAPI.OutputCache.Tests.TestControllers
@@ -94,6 +96,24 @@ namespace WebAPI.OutputCache.Tests.TestControllers
         public string etag_match_304()
         {
             return "value";
+        }
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public string Get_request_exception_noCache()
+        {
+            throw new System.Exception("Fault shouldn't cache");
+        }
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public string Get_request_httpResponseException_noCache()
+        {
+            throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Conflict){ReasonPhrase = "Fault shouldn't cache"});
+        }
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public HttpResponseMessage Get_request_noContent()
+        {
+            return Request.CreateResponse(HttpStatusCode.Accepted);
         }
 
         [InvalidateCacheOutput("Get_c100_s100")]

@@ -21,7 +21,6 @@ namespace WebAPI.OutputCache
         public bool ExcludeQueryStringFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
-
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -108,6 +107,8 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
+            if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
+
             if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
@@ -119,23 +120,26 @@ namespace WebAPI.OutputCache
                 {
                     SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
-                    actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
-                        {
-                            var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                            WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                            WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
+                    if (actionExecutedContext.Response.Content != null)
+                    {
+                        actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
+                            {
+                                var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                                WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
-                            WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                            actionExecutedContext.Response.Content.Headers.ContentType,
-                                            cacheTime.AbsoluteExpiration, baseKey);
+                                WebApiCache.Add(cachekey + Constants.ContentTypeKey,
+                                                actionExecutedContext.Response.Content.Headers.ContentType,
+                                                cacheTime.AbsoluteExpiration, baseKey);
 
-                            WebApiCache.Add(cachekey + Constants.EtagKey,
-                                          actionExecutedContext.Response.Headers.ETag,
-                                          cacheTime.AbsoluteExpiration, baseKey);
-                        });
+                                WebApiCache.Add(cachekey + Constants.EtagKey,
+                                                actionExecutedContext.Response.Headers.ETag,
+                                                cacheTime.AbsoluteExpiration, baseKey);
+                            });
+                    }
                 }
             }
-            //if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
+
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
         }
 
