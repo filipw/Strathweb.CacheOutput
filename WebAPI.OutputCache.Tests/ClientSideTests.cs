@@ -41,6 +41,25 @@ namespace WebAPI.OutputCache.Tests
         }
 
         [Test]
+        public void no_cachecontrol_when_clienttimeout_is_zero()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c0_s100").Result;
+
+            Assert.IsNull(result.Headers.CacheControl);
+        }
+
+        [Test]
+        public void maxage_mustrevalidate_headers_correct_with_clienttimeout_zero_with_must_revalidate()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c0_s100_mustR").Result;
+
+            Assert.IsTrue(result.Headers.CacheControl.MustRevalidate);
+            Assert.AreEqual(TimeSpan.Zero, result.Headers.CacheControl.MaxAge);
+        }
+
+        [Test]
         public void maxage_mustrevalidate_true_headers_correct()
         {
             var client = new HttpClient(_server);
@@ -54,9 +73,10 @@ namespace WebAPI.OutputCache.Tests
         public void maxage_mustrevalidate_headers_correct_with_cacheuntil()
         {
             var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_until25012013_1700").Result;
-
-            Assert.IsTrue(Math.Round(new SpecificTime(2013, 01, 25, 17, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
+            var result = client.GetAsync(_url + "Get_until25012015_1700").Result;
+            var clientTimeSpanSeconds = new SpecificTime(2015, 01, 25, 17, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds;
+            var resultCacheControlSeconds = ((TimeSpan) result.Headers.CacheControl.MaxAge).TotalSeconds;
+            Assert.IsTrue(Math.Round(clientTimeSpanSeconds - resultCacheControlSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
         }
 

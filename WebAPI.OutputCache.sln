@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "WebAPI.OutputCache\WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Tests", "WebAPI.OutputCache.Tests\WebAPI.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"

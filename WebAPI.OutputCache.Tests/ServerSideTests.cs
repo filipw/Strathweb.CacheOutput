@@ -48,8 +48,21 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
+        }
+
+        [Test]
+        public void set_cache_to_predefined_value_c100_s0()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c100_s0").Result;
+            
+            // NOTE: Should we expect the _cache to not be called at all if the ServerTimeSpan is 0?
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s0:application/json")), Times.Once());
+            // NOTE: Server timespan is 0, so there should not have been any Add at all.
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s0"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Never());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s0:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(1)), It.Is<string>(x => x == "sample-get_c100_s0")), Times.Never());
         }
 
         [Test]
@@ -61,8 +74,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:text/xml")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
         }
 
         [Test]
@@ -75,8 +88,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:text/xml")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_c100_s100:text/xml"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
         }
 
         [Test]
@@ -86,8 +99,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_false?id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_false")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_false")), Times.Once());
         }
 
         [Test]
@@ -97,8 +110,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_true?id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_true:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_true")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_true")), Times.Once());
         }
 
         [Test]
@@ -108,8 +121,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?id=1&callback=abc").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
         }
 
         [Test]
@@ -119,8 +132,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc&id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
         }
 
         [Test]
@@ -130,8 +143,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?de=xxx&callback=abc&id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1&de=xxx:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1&de=xxx:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback-id=1&de=xxx:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
         }
 
         [Test]
@@ -141,8 +154,8 @@ namespace WebAPI.OutputCache.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback:application/json")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Once());
         }
 
         [Test]
