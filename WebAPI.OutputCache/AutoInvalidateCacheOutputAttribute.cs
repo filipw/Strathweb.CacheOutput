@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -38,9 +36,9 @@ namespace WebAPI.OutputCache
                     WebApiCache.RemoveStartsWith(key);
                 }
             }
-        }        
+        }
 
-        private IEnumerable<string> FindAllGetMethods(Type controllerType, IEnumerable<HttpParameterDescriptor> httpParameterDescriptors)
+        private static IEnumerable<string> FindAllGetMethods(Type controllerType, IEnumerable<HttpParameterDescriptor> httpParameterDescriptors)
         {
             var actions = controllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
             var filteredActions = actions.Where(x =>
@@ -67,10 +65,10 @@ namespace WebAPI.OutputCache
 
             var projectedActions = filteredActions.Select(x =>
                 {
-                    var overridenNames = x.GetCustomAttributes(typeof (ActionNameAttribute), false);
+                    var overridenNames = x.GetCustomAttributes(typeof(ActionNameAttribute), false);
                     if (overridenNames.Any())
                     {
-                        var first = (ActionNameAttribute) overridenNames.FirstOrDefault();
+                        var first = (ActionNameAttribute)overridenNames.FirstOrDefault();
                         if (first != null) return first.Name;
                     }
                     return x.Name;

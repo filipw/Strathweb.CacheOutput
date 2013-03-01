@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net.Http;
-using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
 namespace WebAPI.OutputCache
@@ -11,7 +10,8 @@ namespace WebAPI.OutputCache
         private string _controller;
         private readonly string _methodName;
 
-        public InvalidateCacheOutputAttribute(string methodName) : this(methodName, null)
+        public InvalidateCacheOutputAttribute(string methodName)
+            : this(methodName, null)
         {
         }
 
