@@ -23,7 +23,7 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            if (!actionExecutedContext.Response.IsSuccessStatusCode) return;
+            if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
             _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName;
 
             var config = actionExecutedContext.Request.GetConfiguration();
