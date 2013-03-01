@@ -19,7 +19,7 @@ namespace WebAPI.OutputCache
 
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
-            if (!actionExecutedContext.Response.IsSuccessStatusCode) return;
+            if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
             if (actionExecutedContext.ActionContext.Request.Method != HttpMethod.Post &&
                 actionExecutedContext.ActionContext.Request.Method != HttpMethod.Put &&
                 actionExecutedContext.ActionContext.Request.Method != HttpMethod.Delete) return;
