@@ -88,14 +88,14 @@ namespace WebAPI.OutputCache
                 }
             }
 
-            var val = WebApiCache.Get(cachekey) as string;
+            var val = WebApiCache.Get(cachekey) as byte[];
             if (val == null) return;
 
             var contenttype = (MediaTypeHeaderValue)WebApiCache.Get(cachekey + Constants.ContentTypeKey) ??
                               new MediaTypeHeaderValue(cachekey.Split(':')[1]);
 
             actionContext.Response = actionContext.Request.CreateResponse();
-            actionContext.Response.Content = new StringContent(val);
+            actionContext.Response.Content = new ByteArrayContent(val);
 
             actionContext.Response.Content.Headers.ContentType = contenttype;
             var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
@@ -122,7 +122,7 @@ namespace WebAPI.OutputCache
 
                     if (actionExecutedContext.Response.Content != null)
                     {
-                        actionExecutedContext.Response.Content.ReadAsStringAsync().ContinueWith(t =>
+                        actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
                                 var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
                                 WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
