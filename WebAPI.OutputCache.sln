@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "WebAPI.OutputCache\WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "src\WebAPI.OutputCache\WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Tests", "WebAPI.OutputCache.Tests\WebAPI.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Tests", "test\WebAPI.OutputCache.Tests\WebAPI.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{944DCBA5-777A-4BE8-A1A3-1EA0924D8B70}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{944DCB
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Demo", "WebAPI.OutputCache.Demo\WebAPI.OutputCache.Demo.csproj", "{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Demo", "sample\WebAPI.OutputCache.Demo\WebAPI.OutputCache.Demo.csproj", "{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
