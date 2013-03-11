@@ -125,6 +125,8 @@ namespace WebAPI.OutputCache
                         actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
                                 var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                WebApiCache.RemoveStartsWith(baseKey);
+                                
                                 WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                                 WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
