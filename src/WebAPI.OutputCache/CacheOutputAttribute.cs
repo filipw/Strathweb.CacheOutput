@@ -8,7 +8,6 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.Routing;
 using WebAPI.OutputCache.Time;
 
 namespace WebAPI.OutputCache
@@ -36,7 +35,12 @@ namespace WebAPI.OutputCache
 
         protected virtual void EnsureCacheTimeQuery()
         {
-            if (CacheTimeQuery == null) CacheTimeQuery = new ShortTime(ServerTimeSpan, ClientTimeSpan);
+            if (CacheTimeQuery == null) ResetCacheTimeQuery();
+        }
+
+        protected void ResetCacheTimeQuery()
+        {
+            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan );
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
