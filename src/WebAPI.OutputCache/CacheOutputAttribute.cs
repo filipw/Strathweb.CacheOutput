@@ -20,6 +20,7 @@ namespace WebAPI.OutputCache
         public bool ExcludeQueryStringFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
+		public bool NoCache { get; set; }
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -159,7 +160,12 @@ namespace WebAPI.OutputCache
                                        };
 
                 response.Headers.CacheControl = cachecontrol;
-            }
+			}
+			else if (NoCache)
+			{
+				response.Headers.CacheControl = new CacheControlHeaderValue {NoCache = true};
+				response.Headers.Add("Pragma", "no-cache");
+			}
         }
 
         private static void SetEtag(HttpResponseMessage message, string etag)
