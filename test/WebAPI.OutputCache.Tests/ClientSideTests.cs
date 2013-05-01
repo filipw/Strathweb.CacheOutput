@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
 using Autofac;
@@ -87,7 +88,22 @@ namespace WebAPI.OutputCache.Tests
             Assert.AreEqual(TimeSpan.Zero, result.Headers.CacheControl.MaxAge);
         }
 
-        [Test]
+
+	    [Test]
+	    public void nocache_headers_correct()
+	    {
+			var client = new HttpClient(_server);
+			var result = client.GetAsync(_url + "Get_nocache").Result;
+
+			Assert.IsTrue(result.Headers.CacheControl.NoCache,
+				"NoCache in result headers was expected to be true when CacheOutput.NoCache=true.");
+		    Assert.IsTrue(result.Headers.Contains("Pragma"),
+				"result headers does not contain expected Pragma.");
+			Assert.IsTrue(result.Headers.GetValues("Pragma").Contains("no-cache"),
+				"expected no-cache Pragma was not found");
+	    }
+
+	    [Test]
         public void maxage_mustrevalidate_true_headers_correct()
         {
             var client = new HttpClient(_server);
