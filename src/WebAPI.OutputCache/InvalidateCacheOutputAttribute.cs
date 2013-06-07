@@ -5,7 +5,7 @@ using System.Web.Http.Filters;
 namespace WebAPI.OutputCache
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public class InvalidateCacheOutputAttribute : BaseCacheAttribute
+    public sealed class InvalidateCacheOutputAttribute : BaseCacheAttribute
     {
         private string _controller;
         private readonly string _methodName;

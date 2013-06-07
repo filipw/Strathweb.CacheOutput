@@ -11,7 +11,7 @@ using System.Web.Http.Filters;
 namespace WebAPI.OutputCache
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public class AutoInvalidateCacheOutputAttribute : BaseCacheAttribute
+    public sealed class AutoInvalidateCacheOutputAttribute : BaseCacheAttribute
     {
         public bool TryMatchType { get; set; }
 
