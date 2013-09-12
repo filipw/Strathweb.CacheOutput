@@ -2,7 +2,7 @@ using WebAPI.OutputCache.Time;
 
 namespace WebAPI.OutputCache.TimeAttributes
 {
-    public class CacheOutputUntilThisYearAttribute : CacheOutputAttribute
+    public sealed class CacheOutputUntilThisYearAttribute : CacheOutputAttribute
     {
         /// <summary>
         ///     Cache item until absolute expiration THIS YEAR / 01 / 01 @ 17h45

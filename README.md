@@ -18,9 +18,9 @@ Caching by default can only be applied to GET actions.
 
 Installation
 --------------------
-You can build from the source here, or you can install the Nuget version (currently pre-release):
+You can build from the source here, or you can install the Nuget version:
     
-    PM> Install-Package Strathweb.CacheOutput -Pre
+    PM> Install-Package Strathweb.CacheOutput
 
 
 Usage

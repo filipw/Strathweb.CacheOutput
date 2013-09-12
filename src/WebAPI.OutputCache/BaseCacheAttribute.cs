@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -20,7 +21,7 @@ namespace WebAPI.OutputCache
             var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var parametersCollections = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + x.Value);
+            var parametersCollections = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
             var parameters = "-"+string.Join("&", parametersCollections);
 
             if (excludeQueryString)
@@ -44,6 +45,17 @@ namespace WebAPI.OutputCache
 
             var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType.MediaType);
             return cachekey;
+        }
+
+        private string GetValue(object val)
+        {
+            if (val is IEnumerable)
+            {
+                var concatValue = string.Empty;
+                var paramArray = val as IEnumerable;
+                return paramArray.Cast<object>().Aggregate(concatValue, (current, paramValue) => current + (paramValue + ";"));
+            }
+            return val.ToString();
         }
 
         protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)

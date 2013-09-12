@@ -25,11 +25,17 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return "test";
         }
 
-        [CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100, MustRevalidate = true)]
-        public string Get_c0_s100_mustR()
+        [CacheOutput(NoCache=true)]
+        public string Get_nocache()
         {
             return "test";
         }
+
+		[CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100, MustRevalidate = true)]
+		public string Get_c0_s100_mustR()
+		{
+			return "test";
+		}
 
         [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
         public string Get_c50_mustR()

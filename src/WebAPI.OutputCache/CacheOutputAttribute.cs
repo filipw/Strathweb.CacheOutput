@@ -8,7 +8,6 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using System.Web.Http.Routing;
 using WebAPI.OutputCache.Time;
 
 namespace WebAPI.OutputCache
@@ -21,6 +20,7 @@ namespace WebAPI.OutputCache
         public bool ExcludeQueryStringFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
+		public bool NoCache { get; set; }
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -36,7 +36,12 @@ namespace WebAPI.OutputCache
 
         protected virtual void EnsureCacheTimeQuery()
         {
-            if (CacheTimeQuery == null) CacheTimeQuery = new ShortTime(ServerTimeSpan, ClientTimeSpan);
+            if (CacheTimeQuery == null) ResetCacheTimeQuery();
+        }
+
+        protected void ResetCacheTimeQuery()
+        {
+            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan );
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
@@ -124,6 +129,7 @@ namespace WebAPI.OutputCache
                         actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
                                 var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                
                                 WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                                 WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
@@ -153,7 +159,12 @@ namespace WebAPI.OutputCache
                                        };
 
                 response.Headers.CacheControl = cachecontrol;
-            }
+			}
+			else if (NoCache)
+			{
+				response.Headers.CacheControl = new CacheControlHeaderValue {NoCache = true};
+				response.Headers.Add("Pragma", "no-cache");
+			}
         }
 
         private static void SetEtag(HttpResponseMessage message, string etag)
