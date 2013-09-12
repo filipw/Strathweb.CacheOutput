@@ -91,15 +91,14 @@ namespace WebAPI.OutputCache
             var val = WebApiCache.Get(cachekey) as byte[];
             if (val == null) return;
 
-            var contenttype = (MediaTypeHeaderValue)WebApiCache.Get(cachekey + Constants.ContentTypeKey) ??
-                              new MediaTypeHeaderValue(cachekey.Split(':')[1]);
+            var contenttype = WebApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
 
-            actionContext.Response.Content.Headers.ContentType = contenttype;
-            var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
-            if (responseEtag != null) SetEtag(actionContext.Response, responseEtag.Tag);
+            actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
+            var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
+            if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
@@ -129,11 +128,11 @@ namespace WebAPI.OutputCache
                                 WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
                                 WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                                actionExecutedContext.Response.Content.Headers.ContentType,
+                                                actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
                                                 cacheTime.AbsoluteExpiration, baseKey);
 
                                 WebApiCache.Add(cachekey + Constants.EtagKey,
-                                                actionExecutedContext.Response.Headers.ETag,
+                                                actionExecutedContext.Response.Headers.ETag.Tag,
                                                 cacheTime.AbsoluteExpiration, baseKey);
                             });
                     }
@@ -159,8 +158,11 @@ namespace WebAPI.OutputCache
 
         private static void SetEtag(HttpResponseMessage message, string etag)
         {
-            var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
-            message.Headers.ETag = eTag;
+            if (etag != null)
+            {
+                var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
+                message.Headers.ETag = eTag;
+            }
         }
     }
 } 
