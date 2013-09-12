@@ -205,7 +205,7 @@ namespace WebAPI.OutputCache.Tests
         {
             _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
             _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
-                  .Returns((object)new EntityTagHeaderValue(@"""abc"""));
+                  .Returns(@"""abc""");
 
             var client = new HttpClient(_server);
             var req = new HttpRequestMessage(HttpMethod.Get, _url + "etag_match_304");

@@ -49,7 +49,7 @@ namespace WebAPI.OutputCache
 
         private string GetValue(object val)
         {
-            if (val is IEnumerable)
+            if (val is IEnumerable && !(val is string))
             {
                 var concatValue = string.Empty;
                 var paramArray = val as IEnumerable;

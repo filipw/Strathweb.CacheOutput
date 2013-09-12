@@ -79,10 +79,10 @@ namespace WebAPI.OutputCache
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
-                var etag = WebApiCache.Get(cachekey + Constants.EtagKey) as EntityTagHeaderValue;
+                var etag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
                 if (etag != null)
                 {
-                    if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag.Tag))
+                    if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag))
                     {
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
