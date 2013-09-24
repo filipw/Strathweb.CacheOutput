@@ -21,7 +21,9 @@ namespace WebAPI.OutputCache
             var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var parametersCollections = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+            var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+            var queryStringParameters = context.Request.GetQueryNameValuePairs().Select(x => x.Key + "=" + x.Value);
+            var parametersCollections = actionParameters.Union(queryStringParameters);
             var parameters = "-"+string.Join("&", parametersCollections);
 
             if (excludeQueryString)
