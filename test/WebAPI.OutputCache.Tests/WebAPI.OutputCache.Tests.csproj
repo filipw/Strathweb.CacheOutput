@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheKeyGeneratorTests.cs" />
     <Compile Include="ClientSideTests.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -91,6 +92,7 @@
     </Compile>
     <Compile Include="TestControllers\AutoInvalidateController.cs" />
     <Compile Include="TestControllers\AutoInvalidateWithTypeController.cs" />
+    <Compile Include="TestControllers\CacheKeyController.cs" />
     <Compile Include="TestControllers\InlineInvalidateController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestControllers\SampleController.cs">

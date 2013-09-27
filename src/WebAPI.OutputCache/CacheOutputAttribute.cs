@@ -21,6 +21,7 @@ namespace WebAPI.OutputCache
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
 		public bool NoCache { get; set; }
+        public Type CacheKeyGenerator { get; set; }
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -61,6 +62,12 @@ namespace WebAPI.OutputCache
             return responseMediaType;
         }
 
+        private ICacheKeyGenerator GetCacheKeyGenerator(HttpRequestMessage request)
+        {
+            var generator = request.GetDependencyScope().GetService(CacheKeyGenerator ?? typeof(ICacheKeyGenerator)) as ICacheKeyGenerator;
+            return generator ?? new DefaultCacheKeyGenerator();
+        }
+
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
@@ -72,8 +79,10 @@ namespace WebAPI.OutputCache
             EnsureCacheTimeQuery();
             EnsureCache(config, actionContext.Request);
 
+            var cacheKeyGenerator = GetCacheKeyGenerator(actionContext.Request);
+
             _responseMediaType = GetExpectedMediaType(config, actionContext);
-            var cachekey = MakeCachekey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
+            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
             if (!WebApiCache.Contains(cachekey)) return;
 
@@ -118,7 +127,9 @@ namespace WebAPI.OutputCache
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             if (cacheTime.AbsoluteExpiration > DateTime.Now)
             {
-                var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
+                var cacheKeyGenerator = GetCacheKeyGenerator(actionExecutedContext.Request);
+
+                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
                 {
