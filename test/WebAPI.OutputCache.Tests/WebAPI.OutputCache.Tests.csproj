@@ -68,6 +68,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheKeyGeneratorRegistrationTests.cs" />
     <Compile Include="CacheKeyGeneratorTests.cs" />
     <Compile Include="ClientSideTests.cs">
       <SubType>Code</SubType>

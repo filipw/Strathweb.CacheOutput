@@ -62,6 +62,7 @@ namespace WebAPI.OutputCache.Tests
             _keyGeneratorA.Setup(k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<bool>()))
                 .Returns("keykeykey")
                 .Verifiable("Key generator was never called");
+            // use the samplecontroller to show that no changes are required to existing code
             var result = client.GetAsync(_url + "sample/Get_c100_s100").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "keykeykey")), Times.Exactly(2));
