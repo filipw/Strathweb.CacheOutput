@@ -21,6 +21,7 @@ namespace WebAPI.OutputCache
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
 		public bool NoCache { get; set; }
+        public Type CacheKeyGenerator { get; set; }
         private MediaTypeHeaderValue _responseMediaType;
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
@@ -72,8 +73,10 @@ namespace WebAPI.OutputCache
             EnsureCacheTimeQuery();
             EnsureCache(config, actionContext.Request);
 
+            var cacheKeyGenerator = config.CacheOutputConfiguration().GetCacheKeyGenerator(actionContext.Request, CacheKeyGenerator);
+
             _responseMediaType = GetExpectedMediaType(config, actionContext);
-            var cachekey = MakeCachekey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
+            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
             if (!WebApiCache.Contains(cachekey)) return;
 
@@ -118,7 +121,10 @@ namespace WebAPI.OutputCache
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             if (cacheTime.AbsoluteExpiration > DateTime.Now)
             {
-                var cachekey = MakeCachekey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
+                var config = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration();
+                var cacheKeyGenerator = config.GetCacheKeyGenerator(actionExecutedContext.Request, CacheKeyGenerator);
+
+                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
                 {
@@ -128,7 +134,7 @@ namespace WebAPI.OutputCache
                     {
                         actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
-                                var baseKey = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
                                 
                                 WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                                 WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);

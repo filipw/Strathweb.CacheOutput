@@ -269,6 +269,36 @@ You can also point to the method in a traditional way:
             
             cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey("TeamsController","Get"));
 
+Customizing the cache keys
+--------------------------
+
+You can provide your own cache key generator. To do this, you need to implement the `ICacheKeyGenerator` interface. The default implementation should suffice in most situations.
+
+When implementing, it is easiest to inherit your custom generator from the `DefaultCacheKeyGenerator` class.
+
+To set your custom implementation as the default, you can do one of these things:
+
+    // Method A: register directly
+    Configuration.CacheOutputConfiguration().RegisterDefaultCacheKeyGeneratorProvider(() => new CustomCacheKeyGenerator());
+    
+    // Method B: register for DI (AutoFac example, the key is to register it as the default ICacheKeyGenerator)
+    builder.RegisterInstance(new CustomCacheKeyGenerator()).As<ICacheKeyGenerator>(); // this will be default
+    builder.RegisterType<SuperNiceCacheKeyGenerator>(); // this will be available, and constructed using dependency injection
+
+You can set a specific cache key generator for an action, using the `CacheKeyGenerator` property:
+
+    [CacheOutput(CacheKeyGenerator=typeof(SuperNiceCacheKeyGenerator))]
+
+PS! If you need dependency injection in your custom cache key generator, register it with your DI *as itself*.
+
+This works for unregistered generators if they have a parameterless constructor, or with dependency injection if they are registered with your DI.
+
+Finding a matching cache key generator is done in this order:
+
+1. Internal registration using `RegisterCacheKeyGeneratorProvider` or `RegisterDefaultCacheKeyGeneratorProvider`.
+2. Dependency injection.
+3. Parameterless constructor of unregistered classes.
+4. `DefaultCacheKeyGenerator`
 
 
 JSONP
