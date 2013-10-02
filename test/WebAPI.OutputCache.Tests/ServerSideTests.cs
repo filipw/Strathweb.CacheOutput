@@ -126,7 +126,18 @@ namespace WebAPI.OutputCache.Tests
         public void set_cache_dont_exclude_querystring()
         {
             var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_s50_exclude_false?id=1").Result;
+            var result = client.GetAsync(_url + "Get_s50_exclude_false/1?xxx=2").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1&xxx=2:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1&xxx=2:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_false")), Times.Once());
+        }
+
+        [Test]
+        public void set_cache_dont_exclude_querystring_duplicate_action_arg_in_querystring_is_still_excluded()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_false/1?id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_false-id=1:application/json")), Times.Exactly(2));
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
@@ -137,11 +148,32 @@ namespace WebAPI.OutputCache.Tests
         public void set_cache_do_exclude_querystring()
         {
             var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_s50_exclude_true/1?xxx=1").Result;
+
+            //check
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_true-id=1:application/json")), Times.Exactly(2));
+
+            //base
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+
+            //actual
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_true")), Times.Once());
+        }
+
+        [Test]
+        public void set_cache_do_exclude_querystring_do_not_exclude_action_arg_even_if_passed_as_querystring()
+        {
+            var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_s50_exclude_true?id=1").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_true:application/json")), Times.Exactly(2));
+            //check
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_true-id=1:application/json")), Times.Exactly(2));
+
+            //base
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_true")), Times.Once());
+
+            //actual
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_s50_exclude_true-id=1:application/json"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "sample-get_s50_exclude_true")), Times.Once());
         }
 
         [Test]
@@ -233,6 +265,18 @@ namespace WebAPI.OutputCache.Tests
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
+
+
+        //[Test]
+        //public void must_add_querystring_to_cache_params()
+        //{
+        //    var client = new HttpClient(_server);
+        //    var result = client.GetAsync(_url + "cachekey/get_custom_key").Result;
+
+        //    _cache.Verify(s => s.Contains(It.Is<string>(x => x == "custom_key")), Times.Exactly(2));
+        //    _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
+        //    _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
+        //}
 
         [TearDown]
         public void fixture_dispose()
