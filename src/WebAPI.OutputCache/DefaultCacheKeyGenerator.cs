@@ -14,15 +14,19 @@ namespace WebAPI.OutputCache
             var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var parametersCollections = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
-            var parameters = "-" + string.Join("&", parametersCollections);
+            var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
 
-            if (excludeQueryString)
+            string parameters;
+
+            if (!excludeQueryString)
             {
-                parameters = string.Empty;
-            }
-            else
-            {
+                var queryStringParameters =
+                    context.Request.GetQueryNameValuePairs()
+                           .Where(x => x.Key.ToLower() != "callback")
+                           .Select(x => x.Key + "=" + x.Value);
+                var parametersCollections = actionParameters.Union(queryStringParameters);
+                parameters = "-" + string.Join("&", parametersCollections);
+
                 var callbackValue = GetJsonpCallback(context.Request);
                 if (!string.IsNullOrWhiteSpace(callbackValue))
                 {
@@ -32,6 +36,10 @@ namespace WebAPI.OutputCache
                     if (parameters.Contains("-" + callback)) parameters = parameters.Replace("-" + callback, string.Empty);
                     if (parameters.EndsWith("&")) parameters = parameters.TrimEnd('&');
                 }
+            }
+            else
+            {
+                parameters = "-" + string.Join("&", actionParameters);
             }
 
             if (parameters == "-") parameters = string.Empty;
