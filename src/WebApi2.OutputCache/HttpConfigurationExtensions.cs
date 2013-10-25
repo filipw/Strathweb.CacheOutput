@@ -1,6 +1,6 @@
 ﻿using System.Web.Http;
 
-namespace WebAPI.OutputCache
+namespace WebApi2.OutputCache
 {
     public static class HttpConfigurationExtensions
     {

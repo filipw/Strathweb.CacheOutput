@@ -1,4 +1,4 @@
-﻿namespace WebAPI.OutputCache.Demo
+﻿namespace WebApi2.OutputCache.Demo
 {
     public class Team
     {

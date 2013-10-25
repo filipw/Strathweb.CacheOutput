@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebAPI.OutputCache.Time
+namespace WebApi.OutputCache.Core.Time
 {
-    internal class ThisDay : IModelQuery<DateTime, CacheTime>
+    public class ThisDay : IModelQuery<DateTime, CacheTime>
     {
         private readonly int hour;
         private readonly int minute;

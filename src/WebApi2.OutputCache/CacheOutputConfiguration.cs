@@ -4,9 +4,9 @@ using System.Linq.Expressions;
 using System.Net.Http;
 using System.Reflection;
 using System.Web.Http;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core.Cache;
 
-namespace WebAPI.OutputCache
+namespace WebApi2.OutputCache
 {
     public class CacheOutputConfiguration
     {

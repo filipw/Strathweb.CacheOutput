@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using Autofac;
-using Autofac.Integration.WebApi;
-using Moq;
 using NUnit.Framework;
-using WebAPI.OutputCache.Cache;
 using WebAPI.OutputCache.Time;
 
-namespace WebAPI.OutputCache.Tests
+namespace WebApi2.OutputCache.Tests
 {
     [TestFixture]
     public class ClientSideTests

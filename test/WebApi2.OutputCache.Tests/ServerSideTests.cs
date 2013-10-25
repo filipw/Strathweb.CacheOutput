@@ -11,7 +11,7 @@ using Moq;
 using NUnit.Framework;
 using WebAPI.OutputCache.Cache;
 
-namespace WebAPI.OutputCache.Tests
+namespace WebApi2.OutputCache.Tests
 {
     [TestFixture]
     public class ServerSideTests

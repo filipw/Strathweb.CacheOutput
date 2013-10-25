@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Linq;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Filters;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebAPI.OutputCache
 {

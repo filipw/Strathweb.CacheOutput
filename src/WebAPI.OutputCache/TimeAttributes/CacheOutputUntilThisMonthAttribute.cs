@@ -1,6 +1,7 @@
-using WebAPI.OutputCache.Time;
+using WebAPI.OutputCache;
+using WebApi.OutputCache.Core.Time;
 
-namespace WebAPI.OutputCache.TimeAttributes
+namespace WebApi.OutputCache.Core.TimeAttributes
 {
     public sealed class CacheOutputUntilThisMonthAttribute : CacheOutputAttribute
     {

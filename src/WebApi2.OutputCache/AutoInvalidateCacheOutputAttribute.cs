@@ -8,7 +8,7 @@ using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 
-namespace WebAPI.OutputCache
+namespace WebApi2.OutputCache
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public sealed class AutoInvalidateCacheOutputAttribute : BaseCacheAttribute

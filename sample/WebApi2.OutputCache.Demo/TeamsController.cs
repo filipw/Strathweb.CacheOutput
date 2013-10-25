@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http;
-using WebAPI.OutputCache.TimeAttributes;
+using WebApi2.OutputCache.TimeAttributes;
 
-namespace WebAPI.OutputCache.Demo
+namespace WebApi2.OutputCache.Demo
 {
     public class TeamsController : ApiController
     {

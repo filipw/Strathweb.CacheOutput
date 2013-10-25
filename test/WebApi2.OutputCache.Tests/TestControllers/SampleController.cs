@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using WebAPI.OutputCache.TimeAttributes;
+using WebApi2.OutputCache.TimeAttributes;
 
-namespace WebAPI.OutputCache.Tests.TestControllers
+namespace WebApi2.OutputCache.Tests.TestControllers
 {
     public class SampleController : ApiController
     {

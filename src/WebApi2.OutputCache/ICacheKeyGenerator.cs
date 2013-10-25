@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Web.Http.Controllers;
 
-namespace WebAPI.OutputCache
+namespace WebApi2.OutputCache
 {
     public interface ICacheKeyGenerator
     {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http.Controllers;
+using WebApi.OutputCache.Core;
 
 namespace WebAPI.OutputCache
 {

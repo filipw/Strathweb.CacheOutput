@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace WebAPI.OutputCache.Time
+namespace WebApi.OutputCache.Core.Time
 {
-    internal class ShortTime : IModelQuery<DateTime, CacheTime>
+    public class ShortTime : IModelQuery<DateTime, CacheTime>
     {
         private readonly int serverTimeInSeconds;
         private readonly int clientTimeInSeconds;

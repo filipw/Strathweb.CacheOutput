@@ -2,7 +2,7 @@
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
-namespace WebAPI.OutputCache.Tests.TestControllers
+namespace WebApi2.OutputCache.Tests.TestControllers
 {
     public class CacheKeyController : ApiController
     {

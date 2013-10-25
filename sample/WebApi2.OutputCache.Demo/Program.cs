@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
 using WebAPI.OutputCache.Cache;
 
-namespace WebAPI.OutputCache.Demo
+namespace WebApi2.OutputCache.Demo
 {
     class Program
     {

@@ -1,4 +1,4 @@
-using WebAPI.OutputCache.Time;
+using WebApi.OutputCache.Core.Time;
 
 namespace WebAPI.OutputCache.TimeAttributes
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebAPI.OutputCache.Time
+namespace WebApi.OutputCache.Core.Time
 {
     public class CacheTime
     {

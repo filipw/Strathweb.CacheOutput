@@ -1,9 +1,5 @@
-﻿using System;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http;
 using Autofac;
@@ -12,7 +8,7 @@ using Moq;
 using NUnit.Framework;
 using WebAPI.OutputCache.Cache;
 
-namespace WebAPI.OutputCache.Tests
+namespace WebApi2.OutputCache.Tests
 {
     [TestFixture]
     public class InvalidateTests

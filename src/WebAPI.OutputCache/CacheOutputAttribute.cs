@@ -8,7 +8,8 @@ using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
-using WebAPI.OutputCache.Time;
+using WebApi.OutputCache.Core;
+using WebApi.OutputCache.Core.Time;
 
 namespace WebAPI.OutputCache
 {

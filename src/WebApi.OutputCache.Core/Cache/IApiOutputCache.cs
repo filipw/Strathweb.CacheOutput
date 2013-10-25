@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections;
 
-namespace WebAPI.OutputCache.Cache
+namespace WebApi.OutputCache.Core.Cache
 {
     public interface IApiOutputCache
     {
