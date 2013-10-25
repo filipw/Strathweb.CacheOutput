@@ -5,25 +5,36 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using WebApi.OutputCache.Core;
+using WebApi.OutputCache.Core.Cache;
 using WebApi.OutputCache.Core.Time;
 
 namespace WebApi.OutputCache.V2
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class CacheOutputAttribute : BaseCacheAttribute
+    public class CacheOutputAttribute : FilterAttribute, IActionFilter
     {
         public bool AnonymousOnly { get; set; }
         public bool MustRevalidate { get; set; }
         public bool ExcludeQueryStringFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
-		public bool NoCache { get; set; }
+        public bool NoCache { get; set; }
         public Type CacheKeyGenerator { get; set; }
+        
         private MediaTypeHeaderValue _responseMediaType;
+        
+        // cache repository
+        private IApiOutputCache _webApiCache;
+
+        protected virtual void EnsureCache(HttpConfiguration config, HttpRequestMessage req)
+        {
+            _webApiCache = config.CacheOutputConfiguration().GetCacheOutputProvider(req);
+        }
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
 
@@ -63,7 +74,7 @@ namespace WebApi.OutputCache.V2
             return responseMediaType;
         }
 
-        public override void OnActionExecuting(HttpActionContext actionContext)
+        private void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
@@ -79,11 +90,11 @@ namespace WebApi.OutputCache.V2
             _responseMediaType = GetExpectedMediaType(config, actionContext);
             var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
-            if (!WebApiCache.Contains(cachekey)) return;
+            if (!_webApiCache.Contains(cachekey)) return;
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
-                var etag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
+                var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
                 if (etag != null)
                 {
                     if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag))
@@ -97,23 +108,23 @@ namespace WebApi.OutputCache.V2
                 }
             }
 
-            var val = WebApiCache.Get(cachekey) as byte[];
+            var val = _webApiCache.Get(cachekey) as byte[];
             if (val == null) return;
 
-            var contenttype = WebApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
+            var contenttype = _webApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
 
             actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
-            var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
+            var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
         }
 
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        private async Task OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
 
@@ -127,27 +138,25 @@ namespace WebApi.OutputCache.V2
 
                 var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
-                if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
+                if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
                     SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
                     if (actionExecutedContext.Response.Content != null)
                     {
-                        actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
-                            {
-                                var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                                
-                                WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                                WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
+                        var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync();
+                        var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
 
-                                WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                                actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
-                                                cacheTime.AbsoluteExpiration, baseKey);
+                        _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                        _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
 
-                                WebApiCache.Add(cachekey + Constants.EtagKey,
-                                                actionExecutedContext.Response.Headers.ETag.Tag,
-                                                cacheTime.AbsoluteExpiration, baseKey);
-                            });
+                        _webApiCache.Add(cachekey + Constants.ContentTypeKey,
+                                        actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
+                                        cacheTime.AbsoluteExpiration, baseKey);
+
+                        _webApiCache.Add(cachekey + Constants.EtagKey,
+                                        actionExecutedContext.Response.Headers.ETag.Tag,
+                                        cacheTime.AbsoluteExpiration, baseKey);
                     }
                 }
             }
@@ -166,12 +175,12 @@ namespace WebApi.OutputCache.V2
                                        };
 
                 response.Headers.CacheControl = cachecontrol;
-			}
-			else if (NoCache)
-			{
-				response.Headers.CacheControl = new CacheControlHeaderValue {NoCache = true};
-				response.Headers.Add("Pragma", "no-cache");
-			}
+            }
+            else if (NoCache)
+            {
+                response.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
+                response.Headers.Add("Pragma", "no-cache");
+            }
         }
 
         private static void SetEtag(HttpResponseMessage message, string etag)
@@ -182,5 +191,67 @@ namespace WebApi.OutputCache.V2
                 message.Headers.ETag = eTag;
             }
         }
+
+        Task<HttpResponseMessage> IActionFilter.ExecuteActionFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        {
+            if (actionContext == null)
+            {
+                throw new ArgumentNullException("actionContext");
+            }
+
+            if (continuation == null)
+            {
+                throw new ArgumentNullException("continuation");
+            }
+
+            OnActionExecuting(actionContext);
+
+            if (actionContext.Response != null)
+            {
+                return Task.FromResult(actionContext.Response);
+            }
+
+            return CallOnActionExecutedAsync(actionContext, cancellationToken, continuation);
+        }
+
+        private async Task<HttpResponseMessage> CallOnActionExecutedAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            HttpResponseMessage response = null;
+            Exception exception = null;
+            try
+            {
+                response = await continuation();
+            }
+            catch (Exception e)
+            {
+                exception = e;
+            }
+
+            try
+            {
+                var executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
+                await OnActionExecuted(executedContext);
+
+                if (executedContext.Response != null)
+                {
+                    return executedContext.Response;
+                }
+
+                if (executedContext.Exception != null)
+                {
+                    throw executedContext.Exception;
+                }
+            }
+            catch
+            {
+                actionContext.Response = null;
+                throw;
+            }
+
+            throw new InvalidOperationException(GetType().Name);
+        }
+
     }
 } 
