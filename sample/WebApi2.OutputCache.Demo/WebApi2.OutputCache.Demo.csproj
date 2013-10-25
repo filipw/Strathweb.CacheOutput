@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}</ProjectGuid>
+    <ProjectGuid>{FC585541-1F28-4D49-BCD9-1A08A90B2C66}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebAPI.OutputCache.Demo</RootNamespace>
@@ -68,9 +68,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebApi.OutputCache\WebApi.OutputCache.csproj">
+    <ProjectReference Include="..\..\src\WebAPI.OutputCache\WebAPI.OutputCache.csproj">
       <Project>{4f32dc89-081b-4264-92f8-f3371a088eb4}</Project>
-      <Name>WebApi.OutputCache</Name>
+      <Name>WebAPI.OutputCache</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

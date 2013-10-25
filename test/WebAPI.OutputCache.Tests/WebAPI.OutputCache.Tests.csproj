@@ -101,13 +101,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\WebAPI.OutputCache\WebAPI.OutputCache.csproj">
+    <ProjectReference Include="..\..\src\WebApi.OutputCache\WebApi.OutputCache.csproj">
       <Project>{4f32dc89-081b-4264-92f8-f3371a088eb4}</Project>
-      <Name>WebAPI.OutputCache</Name>
+      <Name>WebApi.OutputCache</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

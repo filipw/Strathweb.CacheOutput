@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache", "src\WebAPI.OutputCache\WebAPI.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache", "src\WebApi.OutputCache\WebApi.OutputCache.csproj", "{4F32DC89-081B-4264-92F8-F3371A088EB4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Tests", "test\WebAPI.OutputCache.Tests\WebAPI.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Tests", "test\WebApi.OutputCache.Tests\WebApi.OutputCache.Tests.csproj", "{C5DFB349-FA13-41A1-9F11-332E88664DF7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{944DCBA5-777A-4BE8-A1A3-1EA0924D8B70}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,7 +12,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{944DCB
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebAPI.OutputCache.Demo", "sample\WebAPI.OutputCache.Demo\WebAPI.OutputCache.Demo.csproj", "{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Demo", "sample\WebApi.OutputCache.Demo\WebApi.OutputCache.Demo.csproj", "{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{CEA1F6A7-ACA0-4B5B-BEE0-23AEB7E30A7D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{70946FFB-B575-4B2F-A174-3BDD93100097}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{1644F771-3A1F-40A4-80AA-CDB22B334F1F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache.Tests", "test\WebApi2.OutputCache.Tests\WebApi2.OutputCache.Tests.csproj", "{1267460B-C100-48AD-B2E2-9DDE2E40F052}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache", "src\WebApi2.OutputCache\WebApi2.OutputCache.csproj", "{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache.Demo", "sample\WebApi2.OutputCache.Demo\WebApi2.OutputCache.Demo.csproj", "{FC585541-1F28-4D49-BCD9-1A08A90B2C66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,8 +44,28 @@ Global
 		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1267460B-C100-48AD-B2E2-9DDE2E40F052}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1267460B-C100-48AD-B2E2-9DDE2E40F052}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1267460B-C100-48AD-B2E2-9DDE2E40F052}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1267460B-C100-48AD-B2E2-9DDE2E40F052}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC585541-1F28-4D49-BCD9-1A08A90B2C66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC585541-1F28-4D49-BCD9-1A08A90B2C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC585541-1F28-4D49-BCD9-1A08A90B2C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC585541-1F28-4D49-BCD9-1A08A90B2C66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4F32DC89-081B-4264-92F8-F3371A088EB4} = {CEA1F6A7-ACA0-4B5B-BEE0-23AEB7E30A7D}
+		{7A6F57F6-38E1-4287-812E-AD7D1025BA5E} = {CEA1F6A7-ACA0-4B5B-BEE0-23AEB7E30A7D}
+		{C5DFB349-FA13-41A1-9F11-332E88664DF7} = {70946FFB-B575-4B2F-A174-3BDD93100097}
+		{1267460B-C100-48AD-B2E2-9DDE2E40F052} = {70946FFB-B575-4B2F-A174-3BDD93100097}
+		{E8DC6A3C-A6BD-44BE-8777-ABD5F05EBD05} = {1644F771-3A1F-40A4-80AA-CDB22B334F1F}
+		{FC585541-1F28-4D49-BCD9-1A08A90B2C66} = {1644F771-3A1F-40A4-80AA-CDB22B334F1F}
 	EndGlobalSection
 EndGlobal
