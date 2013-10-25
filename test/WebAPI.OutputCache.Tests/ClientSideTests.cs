@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using Autofac;
-using Autofac.Integration.WebApi;
-using Moq;
 using NUnit.Framework;
-using WebAPI.OutputCache.Cache;
-using WebAPI.OutputCache.Time;
+using WebApi.OutputCache.Core.Time;
 
 namespace WebAPI.OutputCache.Tests
 {

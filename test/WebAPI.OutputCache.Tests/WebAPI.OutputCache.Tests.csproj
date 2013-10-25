@@ -101,6 +101,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\WebApi.OutputCache.Core\WebApi.OutputCache.Core.csproj">
+      <Project>{3e45fa0b-c465-4de9-9bc3-40a606b73e84}</Project>
+      <Name>WebApi.OutputCache.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\WebApi.OutputCache\WebApi.OutputCache.csproj">
       <Project>{4f32dc89-081b-4264-92f8-f3371a088eb4}</Project>
       <Name>WebApi.OutputCache</Name>

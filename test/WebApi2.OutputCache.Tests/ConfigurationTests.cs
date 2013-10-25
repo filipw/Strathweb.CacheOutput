@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Web.Http;
 using Moq;
 using NUnit.Framework;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi2.OutputCache.Tests
 {

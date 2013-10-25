@@ -9,7 +9,8 @@ using Autofac;
 using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi2.OutputCache.Tests
 {

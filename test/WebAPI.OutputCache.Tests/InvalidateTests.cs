@@ -1,16 +1,12 @@
-﻿using System;
-using System.Net;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
-using System.Security.Principal;
 using System.Threading;
 using System.Web.Http;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebAPI.OutputCache.Tests
 {

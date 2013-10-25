@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web.Http;
 using System.Web.Http.SelfHost;
-using WebAPI.OutputCache.Cache;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi2.OutputCache.Demo
 {
