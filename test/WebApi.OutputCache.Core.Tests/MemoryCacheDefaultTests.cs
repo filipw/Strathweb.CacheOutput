@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
 
-namespace WebApi2.OutputCache.Tests
+namespace WebApi.OutputCache.Core.Tests
 {
     [TestFixture]
     public class MemoryCacheDefaultTests

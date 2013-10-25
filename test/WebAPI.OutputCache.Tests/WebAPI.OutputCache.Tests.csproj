@@ -85,9 +85,6 @@
     <Compile Include="InvalidateTests.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MemoryCacheDefaultTests.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="ServerSideTests.cs">
       <SubType>Code</SubType>
     </Compile>
