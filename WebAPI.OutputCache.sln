@@ -20,11 +20,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{70946FFB-B
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{1644F771-3A1F-40A4-80AA-CDB22B334F1F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache.Tests", "test\WebApi2.OutputCache.Tests\WebApi2.OutputCache.Tests.csproj", "{1267460B-C100-48AD-B2E2-9DDE2E40F052}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.V2.Tests", "test\WebApi.OutputCache.V2.Tests\WebApi.OutputCache.V2.Tests.csproj", "{1267460B-C100-48AD-B2E2-9DDE2E40F052}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache", "src\WebApi2.OutputCache\WebApi2.OutputCache.csproj", "{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.V2", "src\WebApi.OutputCache.V2\WebApi.OutputCache.V2.csproj", "{7A6F57F6-38E1-4287-812E-AD7D1025BA5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi2.OutputCache.Demo", "sample\WebApi2.OutputCache.Demo\WebApi2.OutputCache.Demo.csproj", "{FC585541-1F28-4D49-BCD9-1A08A90B2C66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.V2.Demo", "sample\WebApi.OutputCache.V2.Demo\WebApi.OutputCache.V2.Demo.csproj", "{FC585541-1F28-4D49-BCD9-1A08A90B2C66}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Core", "src\WebApi.OutputCache.Core\WebApi.OutputCache.Core.csproj", "{3E45FA0B-C465-4DE9-9BC3-40A606B73E84}"
 EndProject
