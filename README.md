@@ -19,6 +19,12 @@ Caching by default can only be applied to GET actions.
 Installation
 --------------------
 You can build from the source here, or you can install the Nuget version:
+
+For Web API 2 (.NET 4.5)
+    
+    PM> Install-Package Strathweb.CacheOutput.WebApi2
+
+For Web API 1 (.NET 4.0)
     
     PM> Install-Package Strathweb.CacheOutput
 
