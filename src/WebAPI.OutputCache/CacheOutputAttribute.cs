@@ -16,6 +16,7 @@ namespace WebAPI.OutputCache
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class CacheOutputAttribute : BaseCacheAttribute
     {
+        protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json");
         public bool AnonymousOnly { get; set; }
         public bool MustRevalidate { get; set; }
         public bool ExcludeQueryStringFromCacheKey { get; set; }
@@ -48,16 +49,27 @@ namespace WebAPI.OutputCache
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
         {
-            var responseMediaType = actionContext.Request.Headers.Accept != null
-                                        ? actionContext.Request.Headers.Accept.FirstOrDefault()
-                                        : new MediaTypeHeaderValue("application/json");
-            
-            var negotiator = config.Services.GetService(typeof (IContentNegotiator)) as IContentNegotiator;
+            MediaTypeHeaderValue responseMediaType = null;
 
-            if (negotiator != null)
+            var negotiator = config.Services.GetService(typeof(IContentNegotiator)) as IContentNegotiator;
+            var returnType = actionContext.ActionDescriptor.ReturnType;
+
+            if (negotiator != null && returnType != typeof(HttpResponseMessage))
             {
-                var negotiatedResult = negotiator.Negotiate(actionContext.ActionDescriptor.ReturnType, actionContext.Request, config.Formatters);
+                var negotiatedResult = negotiator.Negotiate(returnType, actionContext.Request, config.Formatters);
                 responseMediaType = negotiatedResult.MediaType;
+            }
+            else
+            {
+                if (actionContext.Request.Headers.Accept != null)
+                {
+                    responseMediaType = actionContext.Request.Headers.Accept.FirstOrDefault();
+                    if (responseMediaType == null ||
+                        !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
+                    {
+                        return DefaultMediaType;
+                    }
+                }
             }
 
             return responseMediaType;
