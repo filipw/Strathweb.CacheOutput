@@ -238,7 +238,7 @@ Invalidation on action level is similar - done through attributes. For example:
             //return something
         }
 
-        [InvalidateCache("Get")]
+        [InvalidateCacheOutput("Get")]
         public void Post(Team value)
         {
             //this invalidates Get action cache
@@ -247,8 +247,8 @@ Invalidation on action level is similar - done through attributes. For example:
 
 Obviously, multiple attributes are supported. You can also invalidate methods from separate controller:
 
-        [InvalidateCache("Get", typeof(OtherController))] //this will invalidate Get in a different controller
-        [InvalidateCache("Get")] //this will invalidate Get in this controller
+        [InvalidateCacheOutput("Get", typeof(OtherController))] //this will invalidate Get in a different controller
+        [InvalidateCacheOutput("Get")] //this will invalidate Get in this controller
         public void Post(Team value)
         {
             //do stuff
