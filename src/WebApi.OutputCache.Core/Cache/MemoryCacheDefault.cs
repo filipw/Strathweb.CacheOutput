@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Caching;
 
 namespace WebApi.OutputCache.Core.Cache
@@ -48,14 +50,21 @@ namespace WebApi.OutputCache.Core.Cache
 
             if (!string.IsNullOrWhiteSpace(dependsOnKey))
             {
-               
                 cachePolicy.ChangeMonitors.Add(
-                    Cache.CreateCacheEntryChangeMonitor(new[] {dependsOnKey})
+                    Cache.CreateCacheEntryChangeMonitor(new[] { dependsOnKey })
                 );
             }
             lock (Cache)
             {
                 Cache.Add(key, o, cachePolicy);
+            }
+        }
+
+        public IEnumerable<string> AllKeys
+        {
+            get
+            {
+                return Cache.Select(x => x.Key);
             }
         }
     }

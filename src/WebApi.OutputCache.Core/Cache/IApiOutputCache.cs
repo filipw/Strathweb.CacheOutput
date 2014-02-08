@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WebApi.OutputCache.Core.Cache
 {
@@ -10,5 +11,6 @@ namespace WebApi.OutputCache.Core.Cache
         void Remove(string key);
         bool Contains(string key);
         void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
+        IEnumerable<string> AllKeys { get; }
     }
 }
