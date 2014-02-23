@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -253,13 +254,13 @@ namespace WebApi.OutputCache.V2
 
                 if (executedContext.Exception != null)
                 {
-                    throw executedContext.Exception;
+                    ExceptionDispatchInfo.Capture(executedContext.Exception).Throw();
                 }
             }
-            catch
+            catch (Exception e)
             {
                 actionContext.Response = null;
-                throw;
+                ExceptionDispatchInfo.Capture(e).Throw();
             }
 
             throw new InvalidOperationException(GetType().Name);
