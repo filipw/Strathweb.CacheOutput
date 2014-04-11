@@ -21,7 +21,8 @@ namespace WebAPI.OutputCache
             if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
             if (actionExecutedContext.ActionContext.Request.Method != HttpMethod.Post &&
                 actionExecutedContext.ActionContext.Request.Method != HttpMethod.Put &&
-                actionExecutedContext.ActionContext.Request.Method != HttpMethod.Delete) return;
+                actionExecutedContext.ActionContext.Request.Method != HttpMethod.Delete &&
+                actionExecutedContext.ActionContext.Request.Method.Method.ToLower() != "patch") return;
 
             var controller = actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor;
             var actions = FindAllGetMethods(controller.ControllerType, TryMatchType ? actionExecutedContext.ActionContext.ActionDescriptor.GetParameters() : null);
