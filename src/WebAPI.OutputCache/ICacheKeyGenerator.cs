@@ -5,6 +5,6 @@ namespace WebAPI.OutputCache
 {
     public interface ICacheKeyGenerator
     {
-        string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false);
+        string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false, bool excludeAuthHeader = false);
     }
 }

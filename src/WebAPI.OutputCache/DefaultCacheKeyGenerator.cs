@@ -10,14 +10,20 @@ namespace WebAPI.OutputCache
 {
     public class DefaultCacheKeyGenerator : ICacheKeyGenerator
     {
-        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
+        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false, bool excludeAuthHeader = false)
         {
             var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
             var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
 
-            string parameters;
+            string parameters = "";
+
+            if(!excludeAuthHeader && context.Request.Headers.Authorization != null)
+            {
+                var auth = context.Request.Headers.Authorization.Parameter.Trim() + context.Request.Headers.Authorization.Scheme.Trim();
+                parameters += "-" + auth.Trim();
+            }
 
             if (!excludeQueryString)
             {
@@ -26,7 +32,7 @@ namespace WebAPI.OutputCache
                            .Where(x => x.Key.ToLower() != "callback")
                            .Select(x => x.Key + "=" + x.Value);
                 var parametersCollections = actionParameters.Union(queryStringParameters);
-                parameters = "-" + string.Join("&", parametersCollections);
+                parameters += "-" + string.Join("&", parametersCollections);
 
                 var callbackValue = GetJsonpCallback(context.Request);
                 if (!string.IsNullOrWhiteSpace(callbackValue))
@@ -43,7 +49,10 @@ namespace WebAPI.OutputCache
                 parameters = "-" + string.Join("&", actionParameters);
             }
 
-            if (parameters == "-") parameters = string.Empty;
+            if (System.Text.RegularExpressions.Regex.IsMatch(parameters, @"^[\-]+$"))
+            {
+                parameters = string.Empty;
+            }
 
             var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType.MediaType);
             return cachekey;
