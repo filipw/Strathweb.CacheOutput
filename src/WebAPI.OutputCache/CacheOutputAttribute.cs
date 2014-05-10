@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
@@ -58,6 +59,7 @@ namespace WebAPI.OutputCache
             {
                 var negotiatedResult = negotiator.Negotiate(returnType, actionContext.Request, config.Formatters);
                 responseMediaType = negotiatedResult.MediaType;
+                responseMediaType.CharSet = Encoding.UTF8.HeaderName;
             }
             else
             {
@@ -67,6 +69,7 @@ namespace WebAPI.OutputCache
                     if (responseMediaType == null ||
                         !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
                     {
+                        DefaultMediaType.CharSet = Encoding.UTF8.HeaderName;
                         return DefaultMediaType;
                     }
                 }
