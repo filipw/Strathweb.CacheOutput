@@ -43,6 +43,18 @@ namespace WebAPI.OutputCache.Tests.TestControllers
             return "test";
         }
 
+        [CacheOutput(ClientTimeSpan = 50, Private = true)]
+        public string Get_c50_private()
+        {
+            return "test";
+        }
+
+        [CacheOutput(Private = true)]
+        public string Get_private()
+        {
+            return "test";
+        }
+
         [CacheOutput(ServerTimeSpan = 50)]
         public string Get_s50_exclude_fakecallback(int? id = null, string callback = null, string de = null)
         {

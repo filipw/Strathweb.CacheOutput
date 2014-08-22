@@ -21,12 +21,45 @@ namespace WebApi.OutputCache.V2
     public class CacheOutputAttribute : FilterAttribute, IActionFilter
     {
         protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json");
+
+        /// <summary>
+        /// Cache enabled only for requests when Thread.CurrentPrincipal is not set
+        /// </summary>
         public bool AnonymousOnly { get; set; }
+
+        /// <summary>
+        /// Corresponds to MustRevalidate HTTP header - indicates whether the origin server requires revalidation of a cache entry on any subsequent use when the cache entry becomes stale
+        /// </summary>
         public bool MustRevalidate { get; set; }
+
+        /// <summary>
+        /// Do not vary cache by querystring values
+        /// </summary>
         public bool ExcludeQueryStringFromCacheKey { get; set; }
+
+        /// <summary>
+        /// How long response should be cached on the server side (in seconds)
+        /// </summary>
         public int ServerTimeSpan { get; set; }
+
+        /// <summary>
+        /// Corresponds to CacheControl MaxAge HTTP header (in seconds)
+        /// </summary>
         public int ClientTimeSpan { get; set; }
+
+        /// <summary>
+        /// Corresponds to CacheControl NoCache HTTP header
+        /// </summary>
         public bool NoCache { get; set; }
+
+        /// <summary>
+        /// Corresponds to CacheControl Private HTTP header. Response can be cached by browser but not by intermediary cache
+        /// </summary>
+        public bool Private { get; set; }
+
+        /// <summary>
+        /// Class used to generate caching keys
+        /// </summary>
         public Type CacheKeyGenerator { get; set; }
         
         private MediaTypeHeaderValue _responseMediaType;
@@ -182,12 +215,13 @@ namespace WebApi.OutputCache.V2
 
         private void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
         {
-            if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate)
+            if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate || Private)
             {
                 var cachecontrol = new CacheControlHeaderValue
                                        {
                                            MaxAge = cacheTime.ClientTimeSpan,
-                                           MustRevalidate = MustRevalidate
+                                           MustRevalidate = MustRevalidate,
+                                           Private = Private
                                        };
 
                 response.Headers.CacheControl = cachecontrol;
