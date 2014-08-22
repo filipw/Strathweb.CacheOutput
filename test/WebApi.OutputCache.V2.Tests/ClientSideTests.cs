@@ -109,6 +109,16 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
         [Test]
+        public void maxage_private_true_headers_correct()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c50_private").Result;
+
+            Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
+            Assert.IsTrue(result.Headers.CacheControl.Private);
+        }
+
+        [Test]
         public void maxage_mustrevalidate_headers_correct_with_cacheuntil()
         {
             var client = new HttpClient(_server);
@@ -157,6 +167,15 @@ namespace WebApi.OutputCache.V2.Tests
 
             Assert.IsTrue(Math.Round(new ThisYear(7, 31, 0, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
             Assert.IsTrue(result.Headers.CacheControl.MustRevalidate);
+        }
+
+        [Test]
+        public void private_true_headers_correct()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_private").Result;
+
+            Assert.IsTrue(result.Headers.CacheControl.Private);
         }
 
         [TestFixtureTearDown]
