@@ -5,6 +5,7 @@ using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Http;
+using System.Web.Http.Controllers;
 using Autofac;
 using Autofac.Integration.WebApi;
 using Moq;
@@ -58,7 +59,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s0").Result;
-            
+
             // NOTE: Should we expect the _cache to not be called at all if the ServerTimeSpan is 0?
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s0:application/json")), Times.Once());
             // NOTE: Server timespan is 0, so there should not have been any Add at all.
@@ -278,6 +279,47 @@ namespace WebApi.OutputCache.V2.Tests
         //    _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
         //    _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
         //}
+
+        [Test]
+        public void no_caching_if_onerror_is_set()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_onerror_c100_s100/?hasError=false").Result;
+
+            Assert.True(result.IsSuccessStatusCode);
+            Assert.IsNull(result.Headers.CacheControl);
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Exactly(4));
+        }
+
+        [Test]
+        public void caching_last_result_on_error()
+        {
+            var cache = new MemoryCacheDefault();
+            _cache.Setup(
+                c => c.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()))
+                .Callback((string key, object o, DateTimeOffset expiration, string dependsOnKey) => cache.Add(key, o, expiration, dependsOnKey));
+
+            _cache.Setup(c => c.Get(It.IsAny<string>())).Returns((string key) => cache.Get(key));
+
+            var keyGenerator = new Mock<ICacheKeyGenerator>();
+            keyGenerator.Setup(
+                k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<bool>()))
+                .Returns("key");
+            _server.Configuration.CacheOutputConfiguration().RegisterDefaultCacheKeyGeneratorProvider(() => keyGenerator.Object);
+
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_onerror_c100_s100/?hasError=false").Result;
+
+            Assert.True(result.IsSuccessStatusCode);
+            Assert.IsNull(result.Headers.CacheControl);
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Exactly(4));
+
+            result = client.GetAsync(_url + "Get_onerror_c100_s100/?hasError=true").Result;
+            
+            Assert.True(result.IsSuccessStatusCode);
+            Assert.IsNotNull(result.Headers.CacheControl);
+            _cache.Verify(s => s.Get(It.IsAny<string>()), Times.Exactly(4));
+        }
 
         [TearDown]
         public void fixture_dispose()

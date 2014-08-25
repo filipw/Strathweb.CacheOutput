@@ -61,6 +61,11 @@ namespace WebApi.OutputCache.V2
         /// Class used to generate caching keys
         /// </summary>
         public Type CacheKeyGenerator { get; set; }
+
+        /// <summary>
+        /// Will return the cached result if the request has exception. This flag disable cache
+        /// </summary>
+        public bool OnError { get; set; }
         
         private MediaTypeHeaderValue _responseMediaType;
         
@@ -127,50 +132,22 @@ namespace WebApi.OutputCache.V2
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
+
             if (!_isCachingAllowed(actionContext, AnonymousOnly)) return;
 
             var config = actionContext.Request.GetConfiguration();
 
             EnsureCacheTimeQuery();
             EnsureCache(config, actionContext.Request);
-
+            
             var cacheKeyGenerator = config.CacheOutputConfiguration().GetCacheKeyGenerator(actionContext.Request, CacheKeyGenerator);
 
             _responseMediaType = GetExpectedMediaType(config, actionContext);
             var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
-            if (!_webApiCache.Contains(cachekey)) return;
+            if (!_webApiCache.Contains(cachekey) || OnError) return;
 
-            if (actionContext.Request.Headers.IfNoneMatch != null)
-            {
-                var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
-                if (etag != null)
-                {
-                    if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag))
-                    {
-                        var time = CacheTimeQuery.Execute(DateTime.Now);
-                        var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
-                        ApplyCacheHeaders(quickResponse, time);
-                        actionContext.Response = quickResponse;
-                        return;
-                    }
-                }
-            }
-
-            var val = _webApiCache.Get(cachekey) as byte[];
-            if (val == null) return;
-
-            var contenttype = _webApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
-
-            actionContext.Response = actionContext.Request.CreateResponse();
-            actionContext.Response.Content = new ByteArrayContent(val);
-
-            actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
-            var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
-            if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
-
-            var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            ApplyCacheHeaders(actionContext.Response, cacheTime);
+            ReturnCache(actionContext, cachekey);
         }
 
         private async Task OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
@@ -210,7 +187,41 @@ namespace WebApi.OutputCache.V2
                 }
             }
 
-            ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
+            if(!OnError) ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
+        }
+        
+        private void ReturnCache(HttpActionContext actionContext, string cachekey)
+        {
+            if (actionContext.Request.Headers.IfNoneMatch != null)
+            {
+                var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
+                if (etag != null)
+                {
+                    if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag == etag))
+                    {
+                        var time = CacheTimeQuery.Execute(DateTime.Now);
+                        var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
+                        ApplyCacheHeaders(quickResponse, time);
+                        actionContext.Response = quickResponse;
+                        return;
+                    }
+                }
+            }
+
+            var val = _webApiCache.Get(cachekey) as byte[];
+            if (val == null) return;
+
+            var contenttype = _webApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
+
+            actionContext.Response = actionContext.Request.CreateResponse();
+            actionContext.Response.Content = new ByteArrayContent(val);
+
+            actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
+            var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
+            if (responseEtag != null) SetEtag(actionContext.Response, responseEtag);
+
+            var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
+            ApplyCacheHeaders(actionContext.Response, cacheTime);
         }
 
         private void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
@@ -291,6 +302,18 @@ namespace WebApi.OutputCache.V2
 
                 if (executedContext.Exception != null)
                 {
+                    if (OnError)
+                    {
+                        var config = executedContext.Request.GetConfiguration().CacheOutputConfiguration();
+                        var cacheKeyGenerator = config.GetCacheKeyGenerator(executedContext.Request, CacheKeyGenerator);
+
+                        var cachekey = cacheKeyGenerator.MakeCacheKey(executedContext.ActionContext, _responseMediaType,
+                            ExcludeQueryStringFromCacheKey);
+
+                        ReturnCache(executedContext.ActionContext, cachekey);
+                        return executedContext.Response;
+                    }
+                    
                     ExceptionDispatchInfo.Capture(executedContext.Exception).Throw();
                 }
             }

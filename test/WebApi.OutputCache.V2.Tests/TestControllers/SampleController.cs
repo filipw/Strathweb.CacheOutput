@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using NUnit.Framework;
 using WebApi.OutputCache.V2.TimeAttributes;
 
 namespace WebApi.OutputCache.V2.Tests.TestControllers
@@ -145,6 +147,15 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Post_2_invalidates()
         {
             //do nothing
+        }
+
+        [CacheOutput(OnError = true, ClientTimeSpan = 100, ServerTimeSpan = 100)]
+        public string Get_onerror_c100_s100(bool hasError)
+        {
+            if(hasError)
+                throw new Exception();
+
+            return "value";
         }
     }
 }

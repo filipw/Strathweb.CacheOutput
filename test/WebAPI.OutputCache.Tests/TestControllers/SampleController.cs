@@ -146,5 +146,11 @@ namespace WebAPI.OutputCache.Tests.TestControllers
         {
             //do nothing
         }
+
+        //[CacheOutput(OnError = true)]
+        //public string Get_s50_c50_anonymousonly()
+        //{
+        //    return "value";
+        //}
     }
 }
