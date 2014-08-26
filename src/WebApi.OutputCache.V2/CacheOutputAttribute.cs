@@ -193,18 +193,24 @@ namespace WebApi.OutputCache.V2
 
                     if (actionExecutedContext.Response.Content != null)
                     {
-                        var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync();
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                        string mediaType = actionExecutedContext.Response.Content.Headers.ContentType.MediaType;
+                        string etag = actionExecutedContext.Response.Headers.ETag.Tag;
+                        //ConfigureAwait false to avoid deadlocks
+                        var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                        
 
                         _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                         _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
 
+                       
                         _webApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                        actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
+                                        mediaType,
                                         cacheTime.AbsoluteExpiration, baseKey);
 
+                       
                         _webApiCache.Add(cachekey + Constants.EtagKey,
-                                        actionExecutedContext.Response.Headers.ETag.Tag,
+                                        etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
                     }
                 }
