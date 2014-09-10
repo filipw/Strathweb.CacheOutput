@@ -20,7 +20,7 @@ namespace WebApi.OutputCache.V2
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class CacheOutputAttribute : FilterAttribute, IActionFilter
     {
-        protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json");
+        protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json") {CharSet = Encoding.UTF8.HeaderName};
 
         /// <summary>
         /// Cache enabled only for requests when Thread.CurrentPrincipal is not set
@@ -104,7 +104,10 @@ namespace WebApi.OutputCache.V2
             {
                 var negotiatedResult = negotiator.Negotiate(returnType, actionContext.Request, config.Formatters);
                 responseMediaType = negotiatedResult.MediaType;
-                responseMediaType.CharSet = Encoding.UTF8.HeaderName;
+                if (string.IsNullOrWhiteSpace(responseMediaType.CharSet))
+                {
+                    responseMediaType.CharSet = Encoding.UTF8.HeaderName;
+                }
             }
             else
             {
@@ -114,7 +117,6 @@ namespace WebApi.OutputCache.V2
                     if (responseMediaType == null ||
                         !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
                     {
-                        DefaultMediaType.CharSet = Encoding.UTF8.HeaderName;
                         return DefaultMediaType;
                     }
                 }
@@ -160,12 +162,12 @@ namespace WebApi.OutputCache.V2
             var val = _webApiCache.Get(cachekey) as byte[];
             if (val == null) return;
 
-            var contenttype = _webApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
+            var contenttype = _webApiCache.Get(cachekey + Constants.ContentTypeKey) as MediaTypeHeaderValue ?? new MediaTypeHeaderValue(cachekey.Split(new[] {':'},2)[1]);
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
 
-            actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
+            actionContext.Response.Content.Headers.ContentType = contenttype;
             var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
@@ -194,7 +196,7 @@ namespace WebApi.OutputCache.V2
                     if (actionExecutedContext.Response.Content != null)
                     {
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                        string mediaType = actionExecutedContext.Response.Content.Headers.ContentType.MediaType;
+                        var contentType = actionExecutedContext.Response.Content.Headers.ContentType;
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
                         //ConfigureAwait false to avoid deadlocks
                         var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
@@ -205,7 +207,7 @@ namespace WebApi.OutputCache.V2
 
                        
                         _webApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                        mediaType,
+                                        contentType,
                                         cacheTime.AbsoluteExpiration, baseKey);
 
                        

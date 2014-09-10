@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2
@@ -44,7 +46,7 @@ namespace WebApi.OutputCache.V2
 
             if (parameters == "-") parameters = string.Empty;
 
-            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType.MediaType);
+            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType);
             return cachekey;
         }
 
