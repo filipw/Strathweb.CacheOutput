@@ -8,7 +8,7 @@ namespace WebAPI.OutputCache.Tests.TestControllers
     {
         private class UnregisteredCacheKeyGenerator : ICacheKeyGenerator
         {
-            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false, bool excludeAuthHeader = false)
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 return "unregistered";
             }

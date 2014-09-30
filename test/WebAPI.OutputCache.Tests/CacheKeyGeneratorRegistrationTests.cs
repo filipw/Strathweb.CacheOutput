@@ -104,7 +104,7 @@ namespace WebAPI.OutputCache.Tests
         #region Helper classes
         private class FailCacheKeyGenerator : ICacheKeyGenerator
         {
-            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false, bool excludeAuthHeader = false)
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 Assert.Fail("This cache key generator should never be invoked");
                 return "fail";
@@ -120,7 +120,7 @@ namespace WebAPI.OutputCache.Tests
                 _key = key;
             }
 
-            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false, bool excludeAuthHeader = false)
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 return _key;
             }

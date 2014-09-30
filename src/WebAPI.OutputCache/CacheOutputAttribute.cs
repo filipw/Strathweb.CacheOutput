@@ -10,7 +10,6 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using WebApi.OutputCache.Core;
 using WebApi.OutputCache.Core.Time;
-using System.Threading.Tasks;
 
 namespace WebAPI.OutputCache
 {
@@ -21,7 +20,6 @@ namespace WebAPI.OutputCache
         public bool AnonymousOnly { get; set; }
         public bool MustRevalidate { get; set; }
         public bool ExcludeQueryStringFromCacheKey { get; set; }
-        public bool ExcludeAuthHeaderFromCacheKey { get; set; }
         public int ServerTimeSpan { get; set; }
         public int ClientTimeSpan { get; set; }
 		public bool NoCache { get; set; }
@@ -91,7 +89,7 @@ namespace WebAPI.OutputCache
             var cacheKeyGenerator = config.CacheOutputConfiguration().GetCacheKeyGenerator(actionContext.Request, CacheKeyGenerator);
 
             _responseMediaType = GetExpectedMediaType(config, actionContext);
-            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey, ExcludeAuthHeaderFromCacheKey);
+            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
             if (!WebApiCache.Contains(cachekey)) return;
 
@@ -139,7 +137,7 @@ namespace WebAPI.OutputCache
                 var config = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration();
                 var cacheKeyGenerator = config.GetCacheKeyGenerator(actionExecutedContext.Request, CacheKeyGenerator);
 
-                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey, ExcludeAuthHeaderFromCacheKey);
+                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, _responseMediaType, ExcludeQueryStringFromCacheKey);
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
                 {
@@ -147,10 +145,7 @@ namespace WebAPI.OutputCache
 
                     if (actionExecutedContext.Response.Content != null)
                     {
-                        HttpResponseMessage httpResponseMessage = actionExecutedContext.Response;
-                        HttpContent httpContent = httpResponseMessage.Content;
-                        Task<byte[]> task = httpContent.ReadAsByteArrayAsync();
-                        task.ContinueWith(t =>
+                        actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
                                 var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
                                 
@@ -164,7 +159,7 @@ namespace WebAPI.OutputCache
                                 WebApiCache.Add(cachekey + Constants.EtagKey,
                                                 actionExecutedContext.Response.Headers.ETag.Tag,
                                                 cacheTime.AbsoluteExpiration, baseKey);
-                            }, TaskContinuationOptions.OnlyOnRanToCompletion);
+                            });
                     }
                 }
             }
