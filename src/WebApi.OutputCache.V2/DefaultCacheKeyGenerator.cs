@@ -13,7 +13,7 @@ namespace WebApi.OutputCache.V2
     {
         public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
         {
-            var controller = context.ControllerContext.ControllerDescriptor.ControllerName;
+            var controller = context.ControllerContext.ControllerDescriptor.ControllerType.FullName;
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
             var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
