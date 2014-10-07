@@ -92,8 +92,14 @@ namespace WebAPI.OutputCache
             if (negotiator != null && returnType != typeof(HttpResponseMessage))
             {
                 var negotiatedResult = negotiator.Negotiate(returnType, actionContext.Request, config.Formatters);
-                responseMediaType = negotiatedResult.MediaType;
-                responseMediaType.CharSet = Encoding.UTF8.HeaderName;
+
+                if (negotiatedResult != null)
+                {
+                    responseMediaType = negotiatedResult.MediaType;
+                    responseMediaType.CharSet = Encoding.UTF8.HeaderName;
+                }
+                else
+                    return DefaultMediaType;
             }
             else
             {
