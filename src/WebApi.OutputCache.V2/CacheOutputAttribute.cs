@@ -221,7 +221,7 @@ namespace WebApi.OutputCache.V2
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
         }
 
-        private void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
+        protected virtual void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
         {
             if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate || Private)
             {
