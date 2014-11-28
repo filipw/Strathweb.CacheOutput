@@ -171,6 +171,13 @@ namespace WebApi.OutputCache.V2
             var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
+            var responseContentRange = _webApiCache.Get(cachekey + Constants.ContentRangeKey) as ContentRangeHeaderValue;
+            if (responseContentRange != null)
+            {
+                actionContext.Response.Content.Headers.ContentRange = responseContentRange;
+                actionContext.Response.StatusCode = HttpStatusCode.PartialContent;
+            }
+
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
         }
@@ -198,6 +205,7 @@ namespace WebApi.OutputCache.V2
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
                         var contentType = actionExecutedContext.Response.Content.Headers.ContentType;
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
+                        ContentRangeHeaderValue range = actionExecutedContext.Response.Content.Headers.ContentRange;
                         //ConfigureAwait false to avoid deadlocks
                         var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                         
@@ -214,6 +222,10 @@ namespace WebApi.OutputCache.V2
                         _webApiCache.Add(cachekey + Constants.EtagKey,
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
+
+                        _webApiCache.Add(cachekey + Constants.ContentRangeKey,
+                                       range,
+                                       cacheTime.AbsoluteExpiration, baseKey);
                     }
                 }
             }

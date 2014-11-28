@@ -158,6 +158,13 @@ namespace WebAPI.OutputCache
             var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
+            var responseContentRange = WebApiCache.Get(cachekey + Constants.ContentRangeKey) as ContentRangeHeaderValue;
+            if (responseContentRange != null)
+            {
+                actionContext.Response.Content.Headers.ContentRange = responseContentRange;
+                actionContext.Response.StatusCode = HttpStatusCode.PartialContent;
+            }
+
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
         }
@@ -196,6 +203,11 @@ namespace WebAPI.OutputCache
                                 WebApiCache.Add(cachekey + Constants.EtagKey,
                                                 actionExecutedContext.Response.Headers.ETag.Tag,
                                                 cacheTime.AbsoluteExpiration, baseKey);
+
+                                WebApiCache.Add(cachekey + Constants.ContentRangeKey,
+                                              actionExecutedContext.Response.Content.Headers.ContentRange,
+                                              cacheTime.AbsoluteExpiration, baseKey);
+
                             });
                     }
                 }
