@@ -132,7 +132,7 @@ namespace WebAPI.OutputCache
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
-                var etag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
+                var etag = WebApiCache.Get<string>(cachekey + Constants.EtagKey);
                 if (etag != null)
                 {
                     if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag))
@@ -146,16 +146,16 @@ namespace WebAPI.OutputCache
                 }
             }
 
-            var val = WebApiCache.Get(cachekey) as byte[];
+			var val = WebApiCache.Get<byte[]>(cachekey);
             if (val == null) return;
 
-            var contenttype = WebApiCache.Get(cachekey + Constants.ContentTypeKey) as string ?? cachekey.Split(':')[1];
+			var contenttype = WebApiCache.Get<string>(cachekey + Constants.ContentTypeKey) ?? cachekey.Split(':')[1];
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
 
             actionContext.Response.Content.Headers.ContentType = new MediaTypeHeaderValue(contenttype);
-            var responseEtag = WebApiCache.Get(cachekey + Constants.EtagKey) as string;
+			var responseEtag = WebApiCache.Get<string>(cachekey + Constants.EtagKey);
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
