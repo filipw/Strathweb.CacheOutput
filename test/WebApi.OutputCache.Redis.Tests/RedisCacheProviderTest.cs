@@ -13,17 +13,21 @@ namespace WebApi.OutputCache.Redis.Tests
 		[SetUp]
 		public void fixture_init()
 		{
-			_redisClient = new RedisClient("bmwremarketingqa.redis.cache.windows.net", 6379, "Ecdg3Rc+8bESAIqq4DmxGRBb7NjjRLLekaG7nuPMQ/8=");
+			_redisClient = new RedisClient("myredisinstance", 6379, "myredispassword");
 			_testClass = new RedisCacheProvider(_redisClient);
 		}
 
 		[TearDown]
 		public void fixture_dispose()
 		{
-			var keys = _redisClient.GetAllKeys();
-			_redisClient.RemoveAll(keys);
+			if (_redisClient != null)
+			{
+				var keys = _redisClient.GetAllKeys();
+				_redisClient.RemoveAll(keys);
 
-			_redisClient.Dispose();
+				_redisClient.Dispose();
+			}
+			
 			_testClass = null;
 		}
 

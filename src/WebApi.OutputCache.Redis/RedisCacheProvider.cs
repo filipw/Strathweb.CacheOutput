@@ -9,16 +9,6 @@ namespace WebApi.OutputCache.Redis
 	{
 		private readonly IRedisClient _redisClient;
 
-		public RedisCacheProvider(string host)
-		{
-			_redisClient = new RedisClient(host);
-		}
-
-		public RedisCacheProvider(string host, int port, string password = null, long db = 0L)
-		{
-			_redisClient = new RedisClient(host, port, password, db);
-		}
-
 		public RedisCacheProvider(IRedisClient redisClient)
 		{
 			_redisClient = redisClient;
@@ -28,13 +18,6 @@ namespace WebApi.OutputCache.Redis
 		{
 			var keys = _redisClient.SearchKeys(string.Format("{0}*", key));
 			_redisClient.RemoveAll(keys);
-
-			//var items = _redisClient.GetAllItemsFromList(key);
-			//foreach (var item in items)
-			//{
-			//	Remove(item);
-			//}
-			//Remove(key);
 		}
 
 		public T Get<T>(string key) where T : class
