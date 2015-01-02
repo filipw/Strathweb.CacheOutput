@@ -36,6 +36,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Redis", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Redis.Tests", "test\WebApi.OutputCache.Redis.Tests\WebApi.OutputCache.Redis.Tests.csproj", "{53BED8A1-365D-4B69-A3D2-0C1770FA0D41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Stackexchange.Redis", "src\WebApi.OutputCache.Stackexchange.Redis\WebApi.OutputCache.Stackexchange.Redis.csproj", "{B9FDD25A-9F95-4E0F-8958-84A7027A220D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi.OutputCache.Stackexchange.Redis.Tests", "test\WebApi.OutputCache.Stackexchange.Redis.Tests\WebApi.OutputCache.Stackexchange.Redis.Tests.csproj", "{94CA4818-2A1B-4458-BBF9-83058E7FB254}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,6 +86,14 @@ Global
 		{53BED8A1-365D-4B69-A3D2-0C1770FA0D41}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53BED8A1-365D-4B69-A3D2-0C1770FA0D41}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53BED8A1-365D-4B69-A3D2-0C1770FA0D41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9FDD25A-9F95-4E0F-8958-84A7027A220D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9FDD25A-9F95-4E0F-8958-84A7027A220D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9FDD25A-9F95-4E0F-8958-84A7027A220D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9FDD25A-9F95-4E0F-8958-84A7027A220D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94CA4818-2A1B-4458-BBF9-83058E7FB254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94CA4818-2A1B-4458-BBF9-83058E7FB254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94CA4818-2A1B-4458-BBF9-83058E7FB254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94CA4818-2A1B-4458-BBF9-83058E7FB254}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +109,7 @@ Global
 		{44F519D6-E825-442C-A112-B5C4404EAA44} = {70946FFB-B575-4B2F-A174-3BDD93100097}
 		{3D5130D4-E800-4C2A-A257-20DABA700610} = {CEA1F6A7-ACA0-4B5B-BEE0-23AEB7E30A7D}
 		{53BED8A1-365D-4B69-A3D2-0C1770FA0D41} = {70946FFB-B575-4B2F-A174-3BDD93100097}
+		{B9FDD25A-9F95-4E0F-8958-84A7027A220D} = {CEA1F6A7-ACA0-4B5B-BEE0-23AEB7E30A7D}
+		{94CA4818-2A1B-4458-BBF9-83058E7FB254} = {70946FFB-B575-4B2F-A174-3BDD93100097}
 	EndGlobalSection
 EndGlobal
