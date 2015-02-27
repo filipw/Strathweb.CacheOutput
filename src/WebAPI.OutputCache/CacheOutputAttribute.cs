@@ -101,7 +101,7 @@ namespace WebAPI.OutputCache
                 {
                     responseMediaType = actionContext.Request.Headers.Accept.FirstOrDefault();
                     if (responseMediaType == null ||
-                        !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
+                        !config.Formatters.Any(x => x.SupportedMediaTypes.Any(value => value.MediaType == responseMediaType.MediaType)))
                     {
                         DefaultMediaType.CharSet = Encoding.UTF8.HeaderName;
                         return DefaultMediaType;
