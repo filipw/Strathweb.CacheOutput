@@ -32,28 +32,28 @@ For Web API 1 (.NET 4.0)
 Usage
 --------------------
 
-	//Cache for 100s on the server, inform the client that response is valid for 100s
+	//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds
         [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
-	//Cache for 100s on the server, inform the client that response is valid for 100s. Cache for anonymous users only.
+	//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds. Cache for anonymous users only.
         [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, AnonymousOnly = true)]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
         }
 
-	//Inform the client that response is valid for 50s. Force client to revalidate.
+	//Inform the client that response is valid for 50 seconds. Force client to revalidate.
         [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
         public string Get(int id)
         {
             return "value";
         }
 
-	//Cache for 50s on the server. Ignore querystring parameters when serving cached content.
+	//Cache for 50 seconds on the server. Ignore querystring parameters when serving cached content.
         [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = true)]
         public string Get(int id)
         {
