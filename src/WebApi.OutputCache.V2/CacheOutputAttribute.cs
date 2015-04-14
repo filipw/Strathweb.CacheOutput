@@ -201,6 +201,7 @@ namespace WebApi.OutputCache.V2
                         //ConfigureAwait false to avoid deadlocks
                         var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
                         
+                        actionExecutedContext.Response.Content.Headers.Remove("Content-Length");
 
                         _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                         _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
