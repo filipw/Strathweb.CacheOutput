@@ -17,6 +17,7 @@ namespace WebApi.OutputCache.V2
             var action = context.ActionDescriptor.ActionName;
             var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
             var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+            var rangeHeader = context.Request.Headers.Range;
 
             string parameters;
 
@@ -46,7 +47,7 @@ namespace WebApi.OutputCache.V2
 
             if (parameters == "-") parameters = string.Empty;
 
-            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType);
+            var cachekey = string.Format("{0}{1}{2}:{3}", key, parameters,rangeHeader, mediaType);
             return cachekey;
         }
 
