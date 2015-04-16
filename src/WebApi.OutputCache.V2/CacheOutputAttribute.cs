@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -61,7 +63,12 @@ namespace WebApi.OutputCache.V2
         /// Class used to generate caching keys
         /// </summary>
         public Type CacheKeyGenerator { get; set; }
-        
+
+        /// <summary>
+        /// Comma seperated list of HTTP headers to cache
+        /// </summary>
+        public string HeadersToInclude { get; set; }
+
         private MediaTypeHeaderValue _responseMediaType;
         
         // cache repository
@@ -143,6 +150,8 @@ namespace WebApi.OutputCache.V2
 
             if (!_webApiCache.Contains(cachekey)) return;
 
+            var responseHeaders = _webApiCache.Get(cachekey + Constants.Headers) as string;
+
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
                 var etag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
@@ -152,6 +161,8 @@ namespace WebApi.OutputCache.V2
                     {
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
+                        AddCachedHeaders(quickResponse, cachekey);
+                        if (responseHeaders != null) AddCachedHeaders(quickResponse, responseHeaders);
                         ApplyCacheHeaders(quickResponse, time);
                         actionContext.Response = quickResponse;
                         return;
@@ -170,6 +181,8 @@ namespace WebApi.OutputCache.V2
             actionContext.Response.Content.Headers.ContentType = contenttype;
             var responseEtag = _webApiCache.Get(cachekey + Constants.EtagKey) as string;
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
+
+            if (responseHeaders != null) AddCachedHeaders(actionContext.Response, responseHeaders);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime);
@@ -215,6 +228,16 @@ namespace WebApi.OutputCache.V2
                         _webApiCache.Add(cachekey + Constants.EtagKey,
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
+
+
+                        if (!String.IsNullOrEmpty(HeadersToInclude))
+                        {
+                            string headersSerialized = JsonConvert.SerializeObject(actionExecutedContext.Response.Headers.Where(h => HeadersToInclude.Contains(h.Key)));
+
+                            _webApiCache.Add(cachekey + Constants.Headers,
+                                            headersSerialized,
+                                            cacheTime.AbsoluteExpiration, baseKey);
+                        }
                     }
                 }
             }
@@ -251,6 +274,19 @@ namespace WebApi.OutputCache.V2
             }
         }
 
+        protected virtual void AddCachedHeaders(HttpResponseMessage response, string headers)
+        {
+            var headersDeserialized = JsonConvert.DeserializeObject<IEnumerable<KeyValuePair<string, IEnumerable<string>>>>(headers);
+
+            foreach (var header in headersDeserialized)
+            {
+                foreach (var headerValue in header.Value)
+                {
+                    response.Headers.Add(header.Key, headerValue);
+                }
+            }
+        }
+		
         Task<HttpResponseMessage> IActionFilter.ExecuteActionFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
         {
             if (actionContext == null)
