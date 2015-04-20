@@ -178,23 +178,26 @@ namespace WebAPI.OutputCache
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(WebApiCache.Contains(cachekey)))
                 {
-                    SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
+                    var response = actionExecutedContext.Response;
+                    var actionContext = actionExecutedContext.ActionContext;
+                    SetEtag(response, Guid.NewGuid().ToString());
 
-                    if (actionExecutedContext.Response.Content != null)
+                    
+                    if (response.Content != null)
                     {
-                        actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
+                        response.Content.ReadAsByteArrayAsync().ContinueWith(t =>
                             {
-                                var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                                var baseKey = config.MakeBaseCachekey(actionContext.ControllerContext.ControllerDescriptor.ControllerName, actionContext.ActionDescriptor.ActionName);
                                 
                                 WebApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                                 WebApiCache.Add(cachekey, t.Result, cacheTime.AbsoluteExpiration, baseKey);
 
                                 WebApiCache.Add(cachekey + Constants.ContentTypeKey,
-                                                actionExecutedContext.Response.Content.Headers.ContentType.MediaType,
+                                                response.Content.Headers.ContentType.MediaType,
                                                 cacheTime.AbsoluteExpiration, baseKey);
 
                                 WebApiCache.Add(cachekey + Constants.EtagKey,
-                                                actionExecutedContext.Response.Headers.ETag.Tag,
+                                                response.Headers.ETag.Tag,
                                                 cacheTime.AbsoluteExpiration, baseKey);
                             });
                     }

@@ -193,15 +193,17 @@ namespace WebApi.OutputCache.V2
                 {
                     SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
 
-                    if (actionExecutedContext.Response.Content != null)
+                    var responseContent = actionExecutedContext.Response.Content;
+
+                    if (responseContent != null)
                     {
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                        var contentType = actionExecutedContext.Response.Content.Headers.ContentType;
+                        var contentType = responseContent.Headers.ContentType;
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
                         //ConfigureAwait false to avoid deadlocks
-                        var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                        
-                        actionExecutedContext.Response.Content.Headers.Remove("Content-Length");
+                        var content = await responseContent.ReadAsByteArrayAsync().ConfigureAwait(false);
+
+                        responseContent.Headers.Remove("Content-Length");
 
                         _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                         _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
