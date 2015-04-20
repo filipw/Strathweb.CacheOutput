@@ -180,7 +180,7 @@ namespace WebAPI.OutputCache
                 {
                     var response = actionExecutedContext.Response;
                     var actionContext = actionExecutedContext.ActionContext;
-                    SetEtag(response, Guid.NewGuid().ToString());
+                    SetEtag(response, CreateEtag(actionExecutedContext, cachekey, cacheTime));
 
                     
                     if (response.Content != null)
@@ -205,6 +205,11 @@ namespace WebAPI.OutputCache
             }
 
             ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
+        }
+
+        protected virtual string CreateEtag(HttpActionExecutedContext actionExecutedContext, string cachekey, CacheTime cacheTime)
+        {
+            return Guid.NewGuid().ToString();
         }
 
         private void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)

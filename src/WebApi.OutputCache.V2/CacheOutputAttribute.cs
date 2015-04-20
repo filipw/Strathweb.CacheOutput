@@ -191,7 +191,7 @@ namespace WebApi.OutputCache.V2
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
-                    SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
+                    SetEtag(actionExecutedContext.Response, CreateEtag(actionExecutedContext, cachekey, cacheTime));
 
                     var responseContent = actionExecutedContext.Response.Content;
 
@@ -242,6 +242,11 @@ namespace WebApi.OutputCache.V2
                 response.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
                 response.Headers.Add("Pragma", "no-cache");
             }
+        }
+
+        protected virtual string CreateEtag(HttpActionExecutedContext actionExecutedContext, string cachekey, CacheTime cacheTime)
+        {
+            return Guid.NewGuid().ToString();
         }
 
         private static void SetEtag(HttpResponseMessage message, string etag)
