@@ -161,7 +161,6 @@ namespace WebApi.OutputCache.V2
                     {
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
-                        AddCachedHeaders(quickResponse, cachekey);
                         if (responseHeaders != null) AddCachedHeaders(quickResponse, responseHeaders);
                         ApplyCacheHeaders(quickResponse, time);
                         actionContext.Response = quickResponse;
