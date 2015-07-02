@@ -33,10 +33,10 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json")), Times.Exactly(2));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
 
             var result2 = client.GetAsync(_url + "Get_c100_s100").Result;
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json")), Times.Exactly(4));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(4));
 
             _server.Dispose();
         }
