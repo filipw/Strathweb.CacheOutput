@@ -32,7 +32,7 @@ namespace WebApi.OutputCache.V2
 
             foreach (var action in actions)
             {
-                var key = config.CacheOutputConfiguration().MakeBaseCachekey(controller.ControllerName, action);
+                var key = config.CacheOutputConfiguration().MakeBaseCachekey(controller.ControllerType.FullName, action);
                 if (WebApiCache.Contains(key))
                 {
                     WebApiCache.RemoveStartsWith(key);

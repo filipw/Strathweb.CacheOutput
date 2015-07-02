@@ -66,8 +66,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "sample/Get_c100_s100").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "keykeykey")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
             
             _keyGeneratorA.VerifyAll();
         }
@@ -79,8 +79,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "cachekey/get_custom_key").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "custom_key")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
         }
     }
 }

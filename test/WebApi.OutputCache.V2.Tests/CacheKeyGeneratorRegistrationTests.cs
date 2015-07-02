@@ -89,7 +89,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "cachekey/get_internalregistered").Result;
 
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "internal"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_internalregistered")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "internal"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_internalregistered")), Times.Once());
         }
 
         [Test]

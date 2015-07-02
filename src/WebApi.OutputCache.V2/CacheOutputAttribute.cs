@@ -204,7 +204,7 @@ namespace WebApi.OutputCache.V2
 
                     if (responseContent != null)
                     {
-                        var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
+                        var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerType.FullName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
                         var contentType = responseContent.Headers.ContentType;
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
                         //ConfigureAwait false to avoid deadlocks

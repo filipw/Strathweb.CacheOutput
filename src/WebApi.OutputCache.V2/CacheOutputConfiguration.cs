@@ -54,7 +54,7 @@ namespace WebApi.OutputCache.V2
                 }
             }
 
-            return string.Format("{0}-{1}", typeof(T).Name.Replace("Controller",string.Empty).ToLower(), methodName.ToLower());
+            return string.Format("{0}-{1}", typeof(T).FullName.ToLower(), methodName.ToLower());
         }
 
         private static ICacheKeyGenerator TryActivateCacheKeyGenerator(Type generatorType)
