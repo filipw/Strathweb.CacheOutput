@@ -18,7 +18,7 @@ using WebApi.OutputCache.Core.Time;
 namespace WebApi.OutputCache.V2
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    public class CacheOutputAttribute : FilterAttribute, IActionFilter
+    public class CacheOutputAttribute : ActionFilterAttribute
     {
         protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json") {CharSet = Encoding.UTF8.HeaderName};
 
@@ -125,7 +125,7 @@ namespace WebApi.OutputCache.V2
             return responseMediaType;
         }
 
-        private void OnActionExecuting(HttpActionContext actionContext)
+        public override void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
@@ -175,7 +175,7 @@ namespace WebApi.OutputCache.V2
             ApplyCacheHeaders(actionContext.Response, cacheTime);
         }
 
-        private async Task OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
             if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
 
@@ -191,17 +191,19 @@ namespace WebApi.OutputCache.V2
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
-                    SetEtag(actionExecutedContext.Response, Guid.NewGuid().ToString());
+                    SetEtag(actionExecutedContext.Response, CreateEtag(actionExecutedContext, cachekey, cacheTime));
 
-                    if (actionExecutedContext.Response.Content != null)
+                    var responseContent = actionExecutedContext.Response.Content;
+
+                    if (responseContent != null)
                     {
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                        var contentType = actionExecutedContext.Response.Content.Headers.ContentType;
+                        var contentType = responseContent.Headers.ContentType;
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
                         //ConfigureAwait false to avoid deadlocks
-                        var content = await actionExecutedContext.Response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                        
-                        actionExecutedContext.Response.Content.Headers.Remove("Content-Length");
+                        var content = await responseContent.ReadAsByteArrayAsync().ConfigureAwait(false);
+
+                        responseContent.Headers.Remove("Content-Length");
 
                         _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                         _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
@@ -242,6 +244,11 @@ namespace WebApi.OutputCache.V2
             }
         }
 
+        protected virtual string CreateEtag(HttpActionExecutedContext actionExecutedContext, string cachekey, CacheTime cacheTime)
+        {
+            return Guid.NewGuid().ToString();
+        }
+
         private static void SetEtag(HttpResponseMessage message, string etag)
         {
             if (etag != null)
@@ -250,67 +257,5 @@ namespace WebApi.OutputCache.V2
                 message.Headers.ETag = eTag;
             }
         }
-
-        Task<HttpResponseMessage> IActionFilter.ExecuteActionFilterAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
-        {
-            if (actionContext == null)
-            {
-                throw new ArgumentNullException("actionContext");
-            }
-
-            if (continuation == null)
-            {
-                throw new ArgumentNullException("continuation");
-            }
-
-            OnActionExecuting(actionContext);
-
-            if (actionContext.Response != null)
-            {
-                return Task.FromResult(actionContext.Response);
-            }
-
-            return CallOnActionExecutedAsync(actionContext, cancellationToken, continuation);
-        }
-
-        private async Task<HttpResponseMessage> CallOnActionExecutedAsync(HttpActionContext actionContext, CancellationToken cancellationToken, Func<Task<HttpResponseMessage>> continuation)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            HttpResponseMessage response = null;
-            Exception exception = null;
-            try
-            {
-                response = await continuation();
-            }
-            catch (Exception e)
-            {
-                exception = e;
-            }
-
-            try
-            {
-                var executedContext = new HttpActionExecutedContext(actionContext, exception) { Response = response };
-                await OnActionExecuted(executedContext);
-
-                if (executedContext.Response != null)
-                {
-                    return executedContext.Response;
-                }
-
-                if (executedContext.Exception != null)
-                {
-                    ExceptionDispatchInfo.Capture(executedContext.Exception).Throw();
-                }
-            }
-            catch (Exception e)
-            {
-                actionContext.Response = null;
-                ExceptionDispatchInfo.Capture(e).Throw();
-            }
-
-            throw new InvalidOperationException(GetType().Name);
-        }
-
     }
 } 
