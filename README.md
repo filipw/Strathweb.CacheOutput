@@ -195,7 +195,7 @@ Example:
         }
     }
 
-Decorating the controller with [AutoInvalidateCacheOutput] will automatically flush all cached *GET* data from this controller after a successfull *POST*/*PUT*/*DELETE* request.
+Decorating the controller with [AutoInvalidateCacheOutput] will automatically flush all cached *GET* data from this controller after a successfull *POST*/*PUT*/*DELETE*/*PATCH* request.
 
 You can also use the [AutoInvalidateCacheOutput(TryMatchType = true)] variation. This will only invalidate such *GET* requests that return the same *Type* or *IEnumerable of Type* as the action peformed takes as input parameter. 
 
