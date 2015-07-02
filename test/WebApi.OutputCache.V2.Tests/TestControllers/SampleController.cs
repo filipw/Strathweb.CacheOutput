@@ -146,5 +146,11 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         {
             //do nothing
         }
+
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
+        public IHttpActionResult Get_ihttpactionresult()
+        {
+            return Ok("value");
+        }
     }
 }

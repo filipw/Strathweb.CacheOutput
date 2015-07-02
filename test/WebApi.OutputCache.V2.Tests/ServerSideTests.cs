@@ -237,7 +237,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void etag_match_304_if_none_match()
         {
             _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
-            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+            _cache.Setup(x => x.Get<string>(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
                   .Returns(@"""abc""");
 
             var client = new HttpClient(_server);
@@ -254,8 +254,9 @@ namespace WebApi.OutputCache.V2.Tests
         public void etag_not_match_304_if_none_match()
         {
             _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
-            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
-                  .Returns((object)new EntityTagHeaderValue(@"""abcdef"""));
+            _cache.Setup(x => x.Get<byte[]>(It.IsAny<string>())).Returns((byte[])null);
+            _cache.Setup(x => x.Get<string>(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+                  .Returns(@"""abcdef""");
 
             var client = new HttpClient(_server);
             var req = new HttpRequestMessage(HttpMethod.Get, _url + "etag_match_304");
@@ -265,6 +266,30 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+        }
+
+        [Test]
+        public void can_handle_ihttpactionresult_with_default_media_type()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_ihttpactionresult").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_ihttpactionresult:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_ihttpactionresult")), Times.Once());
+        }
+
+        [Test]
+        public void can_handle_ihttpactionresult_with_non_default_media_type()
+        {
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_ihttpactionresult");
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+            var result = client.SendAsync(req).Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_ihttpactionresult:text/xml; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_ihttpactionresult")), Times.Once());
         }
 
 
