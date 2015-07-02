@@ -237,7 +237,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void etag_match_304_if_none_match()
         {
             _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
-            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+            _cache.Setup(x => x.Get<string>(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
                   .Returns(@"""abc""");
 
             var client = new HttpClient(_server);
@@ -254,8 +254,9 @@ namespace WebApi.OutputCache.V2.Tests
         public void etag_not_match_304_if_none_match()
         {
             _cache.Setup(x => x.Contains(It.Is<string>(i => i.Contains("etag_match_304")))).Returns(true);
-            _cache.Setup(x => x.Get(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
-                  .Returns((object)new EntityTagHeaderValue(@"""abcdef"""));
+            _cache.Setup(x => x.Get<byte[]>(It.IsAny<string>())).Returns((byte[])null);
+            _cache.Setup(x => x.Get<string>(It.Is<string>(i => i.Contains("etag_match_304") && i.Contains(Constants.EtagKey))))
+                  .Returns(@"""abcdef""");
 
             var client = new HttpClient(_server);
             var req = new HttpRequestMessage(HttpMethod.Get, _url + "etag_match_304");
