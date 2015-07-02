@@ -39,7 +39,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Post()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey("InlineInvalidate", "Get_c100_s100"));
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey(this.GetType().FullName, "Get_c100_s100"));
 
             //do nothing
         }

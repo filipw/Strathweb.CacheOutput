@@ -46,8 +46,8 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.PostAsync(_url + "Post", new StringContent(string.Empty)).Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Exactly(1));
         }
 
         [Test]
@@ -58,10 +58,10 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.PostAsync(_url + "Post_2_invalidates", new StringContent(string.Empty)).Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "sample-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "sample-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
         }
 
         [Test]
@@ -72,12 +72,12 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.PostAsync("http://www.strathweb.com/api/autoinvalidate/Post", new StringContent(string.Empty)).Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
         }
 
         [Test]
@@ -88,12 +88,12 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.PutAsync("http://www.strathweb.com/api/autoinvalidate/Put", new StringContent(string.Empty)).Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
         }
 
         [Test]
@@ -104,12 +104,12 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.DeleteAsync("http://www.strathweb.com/api/autoinvalidate/Delete").Result;
             
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-get_s50_exclude_fakecallback")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidate-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
         }
 
         [Test]
@@ -133,24 +133,24 @@ namespace WebApi.OutputCache.V2.Tests
 
             var result2 = client.PostAsync("http://www.strathweb.com/api/autoinvalidatewithtype/PostString", "hi", new JsonMediaTypeFormatter()).Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidatewithtype-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidatewithtype-get_c100_s100_array")), Times.Exactly(1));
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "autoinvalidatewithtype-get_s50_exclude_fakecallback")), Times.Never());
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidatewithtype-get_c100_s100")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidatewithtype-get_c100_s100_array")), Times.Exactly(1));
-            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "autoinvalidatewithtype-get_s50_exclude_fakecallback")), Times.Never());
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100_array")), Times.Exactly(1));
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_s50_exclude_fakecallback")), Times.Never());
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100_array")), Times.Exactly(1));
+            _cache.Verify(s => s.RemoveStartsWith(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_s50_exclude_fakecallback")), Times.Never());
         }
 
         private void SetupCacheForAutoInvalidate()
         {            
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "sample-get_s50_exclude_fakecallback"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "sample-get_c100_s100"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidate-get_c100_s100"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidate-get_s50_exclude_fakecallback"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidate-etag_match_304"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidatewithtype-get_c100_s100"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidatewithtype-get_s50_exclude_fakecallback"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "autoinvalidatewithtype-get_c100_s100_array"))).Returns(true);   
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_s50_exclude_fakecallback"))).Returns(true);
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100_array"))).Returns(true);   
         }
    
         [TearDown]
