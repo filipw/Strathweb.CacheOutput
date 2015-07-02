@@ -99,9 +99,15 @@ namespace WebApi.OutputCache.V2
             var negotiator = config.Services.GetService(typeof(IContentNegotiator)) as IContentNegotiator;
             var returnType = actionContext.ActionDescriptor.ReturnType;
 
-            if (negotiator != null && returnType != typeof(HttpResponseMessage))
+            if (negotiator != null && returnType != typeof(HttpResponseMessage) && (returnType != typeof(IHttpActionResult) || typeof(IHttpActionResult).IsAssignableFrom(returnType)))
             {
                 var negotiatedResult = negotiator.Negotiate(returnType, actionContext.Request, config.Formatters);
+
+                if (negotiatedResult == null)
+                {
+                    return DefaultMediaType;
+                }
+
                 responseMediaType = negotiatedResult.MediaType;
                 if (string.IsNullOrWhiteSpace(responseMediaType.CharSet))
                 {
@@ -113,8 +119,7 @@ namespace WebApi.OutputCache.V2
                 if (actionContext.Request.Headers.Accept != null)
                 {
                     responseMediaType = actionContext.Request.Headers.Accept.FirstOrDefault();
-                    if (responseMediaType == null ||
-                        !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
+                    if (responseMediaType == null || !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
                     {
                         return DefaultMediaType;
                     }

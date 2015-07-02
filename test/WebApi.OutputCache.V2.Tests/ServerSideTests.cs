@@ -267,6 +267,30 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
 
+        [Test]
+        public void can_handle_ihttpactionresult_with_default_media_type()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_ihttpactionresult").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_ihttpactionresult:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_ihttpactionresult")), Times.Once());
+        }
+
+        [Test]
+        public void can_handle_ihttpactionresult_with_non_default_media_type()
+        {
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_ihttpactionresult");
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+            var result = client.SendAsync(req).Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "sample-get_ihttpactionresult:text/xml; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "sample-get_ihttpactionresult:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "sample-get_ihttpactionresult")), Times.Once());
+        }
+
 
         //[Test]
         //public void must_add_querystring_to_cache_params()
