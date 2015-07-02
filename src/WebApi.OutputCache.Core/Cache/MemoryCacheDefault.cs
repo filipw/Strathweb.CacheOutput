@@ -23,6 +23,7 @@ namespace WebApi.OutputCache.Core.Cache
             return o;
         }
 
+        [Obsolete("Use Get<T> instead")]
         public object Get(string key)
         {
             return Cache.Get(key);

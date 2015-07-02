@@ -24,7 +24,7 @@ namespace WebApi.OutputCache.V2
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
-            _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerName;
+            _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerType.FullName;
 
             var config = actionExecutedContext.Request.GetConfiguration();
             EnsureCache(config, actionExecutedContext.Request);
