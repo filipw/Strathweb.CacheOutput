@@ -293,6 +293,19 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
 
+        [Test]
+        public void can_handle_media_type_when_cache_has_expired_during_request()
+        {
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_ihttpactionresult");
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
+            _cache.Setup(o => o.Contains(It.IsAny<string>())).Returns(true);
+            _cache.Setup(o => o.Get<MediaTypeHeaderValue>(It.Is((string key) => key.Contains(Constants.ContentTypeKey)))).Returns((MediaTypeHeaderValue)null);
+            var result = client.SendAsync(req).Result;
+            Assert.That(result.IsSuccessStatusCode, Is.True);
+        }
+
+
         //[Test]
         //public void must_add_querystring_to_cache_params()
         //{
