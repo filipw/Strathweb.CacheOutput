@@ -126,6 +126,29 @@ So you either should use unique method names inside a single controller, or (if 
         }
 
 
+Ignoring caching
+--------------------
+You can set up caching globally (add the caching filter to `HttpConfiguration`) or on controller level (decorate the controller with the cahcing attribute). This means that caching settings will cascade down to all the actions in your entire application (in the first case) or in the controller (in the second case).
+
+You can still instruct a specific action to opt out from caching by using `[IgnoreCacheOutput]` attribute.
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+        public class IgnoreController : ApiController
+        {
+            [Route("cached")]
+            public string GetCached()
+            {
+                return DateTime.Now.ToString();
+            }
+
+            [IgnoreCacheOutput]
+            [Route("uncached")]
+            public string GetUnCached()
+            {
+                return DateTime.Now.ToString();
+            }
+        }
+
 Server side caching
 --------------------
 By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cache on the server side. However, you are free to swap this with anything else
