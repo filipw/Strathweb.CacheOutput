@@ -4,7 +4,6 @@ using System.Web.Http;
 namespace WebApi.OutputCache.V2.Demo
 {
     [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-    [IgnoreCacheOutput]
     [RoutePrefix("ignore")]
     public class IgnoreController : ApiController
     {
@@ -14,6 +13,7 @@ namespace WebApi.OutputCache.V2.Demo
             return DateTime.Now.ToString();
         }
 
+        [IgnoreCacheOutput]
         [Route("uncached")]
         public string GetUnCached()
         {
