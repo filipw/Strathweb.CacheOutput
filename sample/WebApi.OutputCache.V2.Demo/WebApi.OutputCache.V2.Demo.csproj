@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IgnoreController.cs" />
     <Compile Include="Teams2Controller.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Team.cs" />
