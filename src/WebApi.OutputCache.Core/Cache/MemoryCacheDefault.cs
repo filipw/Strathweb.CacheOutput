@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Security.Cryptography.X509Certificates;
 
 namespace WebApi.OutputCache.Core.Cache
 {
@@ -71,7 +72,7 @@ namespace WebApi.OutputCache.Core.Cache
 
         public IEnumerable<string> FindKeysStartingWith(string prefix)
         {
-            throw new NotImplementedException();
+            return Cache.Where(x => x.Key.StartsWith(prefix)).Select(x => x.Key);
         }
     }
 }

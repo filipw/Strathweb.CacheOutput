@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+
 using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
 
@@ -39,6 +41,24 @@ namespace WebApi.OutputCache.Core.Tests
             Assert.IsNull(cache.Get("key1"));
             Assert.IsNull(cache.Get("key2"));
             Assert.IsNull(cache.Get("key3"));
+        }
+
+        [Test]
+        public void find_keys_starting_with_a_prefix()
+        {
+            IApiOutputCache cache = new MemoryCacheDefault();
+            cache.Add("abc1", "abc", DateTime.Now.AddSeconds(60));
+            cache.Add("abc2", "abc", DateTime.Now.AddSeconds(60));
+            cache.Add("abc3", "abc", DateTime.Now.AddSeconds(60));
+            cache.Add("edf1", "abc", DateTime.Now.AddSeconds(60));
+            cache.Add("edf2", "abc", DateTime.Now.AddSeconds(60));
+
+            var keys = cache.FindKeysStartingWith("abc");
+
+            Assert.That(keys.Count(), Is.EqualTo(3));
+            Assert.IsTrue(keys.Any(s => s == "abc1"));
+            Assert.IsTrue(keys.Any(s => s == "abc2"));
+            Assert.IsTrue(keys.Any(s => s == "abc3"));
         }
     }
 }
