@@ -68,5 +68,10 @@ namespace WebApi.OutputCache.Core.Cache
                 return Cache.Select(x => x.Key);
             }
         }
+
+        public IEnumerable<string> FindKeysStartingWith(string prefix)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
