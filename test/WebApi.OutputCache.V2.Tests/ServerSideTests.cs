@@ -305,6 +305,27 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.That(result.IsSuccessStatusCode, Is.True);
         }
 
+        [Test]
+        public void will_cache_if_cacheouput_present_on_controller()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync("http://www.strathweb.com/api/ignore/cached").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached")), Times.Once());
+        }
+
+        [Test]
+        public void will_not_cache_if_cacheouput_present_on_controller_but_action_has_ignorecacheouputattibute()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync("http://www.strathweb.com/api/ignore/uncached").Result;
+
+            _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+        }
 
         //[Test]
         //public void must_add_querystring_to_cache_params()

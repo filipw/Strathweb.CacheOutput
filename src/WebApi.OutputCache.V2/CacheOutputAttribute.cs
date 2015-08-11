@@ -17,7 +17,7 @@ using WebApi.OutputCache.Core.Time;
 
 namespace WebApi.OutputCache.V2
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class CacheOutputAttribute : ActionFilterAttribute
     {
         private const string CurrentRequestMediaType = "CacheOutput:CurrentRequestMediaType";
@@ -73,14 +73,23 @@ namespace WebApi.OutputCache.V2
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
 
-        readonly Func<HttpActionContext, bool, bool> _isCachingAllowed = (ac, anonymous) =>
+        protected virtual bool IsCachingAllowed(HttpActionContext actionContext, bool anonymousOnly)
         {
-            if (anonymous)
+            if (anonymousOnly)
+            {
                 if (Thread.CurrentPrincipal.Identity.IsAuthenticated)
+                {
                     return false;
+                }
+            }
 
-            return ac.Request.Method == HttpMethod.Get;
-        };
+            if (actionContext.ActionDescriptor.GetCustomAttributes<IgnoreCacheOutputAttribute>().Any())
+            {
+                return false;
+            }
+
+            return actionContext.Request.Method == HttpMethod.Get;
+        }
 
         protected virtual void EnsureCacheTimeQuery()
         {
@@ -133,7 +142,7 @@ namespace WebApi.OutputCache.V2
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
-            if (!_isCachingAllowed(actionContext, AnonymousOnly)) return;
+            if (!IsCachingAllowed(actionContext, AnonymousOnly)) return;
 
             var config = actionContext.Request.GetConfiguration();
 
@@ -184,7 +193,7 @@ namespace WebApi.OutputCache.V2
         {
             if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
 
-            if (!_isCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
+            if (!IsCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             if (cacheTime.AbsoluteExpiration > DateTime.Now)

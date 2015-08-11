@@ -62,6 +62,7 @@
     <Compile Include="HttpConfigurationExtensions.cs" />
     <Compile Include="ICacheKeyGenerator.cs" />
     <Compile Include="IKeyPrefixGenerator.cs" />
+    <Compile Include="IgnoreCacheOutputAttribute.cs" />
     <Compile Include="InvalidateCacheOutputAttribute.cs" />
     <Compile Include="InvalidateCacheOutputByPrefixKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
