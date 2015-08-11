@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Dynamic;
 
 using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
@@ -9,10 +9,17 @@ namespace WebApi.OutputCache.Core.Tests
     [TestFixture]
     public class MemoryCacheDefaultTests
     {
+        private IApiOutputCache cache;
+        [SetUp]
+        public void Setup()
+        {
+            cache = new MemoryCacheDefault();
+            this.EmptyCache(cache);
+        }
+
         [Test]
         public void returns_all_keys_in_cache()
         {
-            IApiOutputCache cache = new MemoryCacheDefault();
             cache.Add("base", "abc", DateTime.Now.AddSeconds(60));
             cache.Add("key1", "abc", DateTime.Now.AddSeconds(60), "base");
             cache.Add("key2", "abc", DateTime.Now.AddSeconds(60), "base");
@@ -26,7 +33,6 @@ namespace WebApi.OutputCache.Core.Tests
         [Test]
         public void remove_startswith_cascades_to_all_dependencies()
         {
-            IApiOutputCache cache = new MemoryCacheDefault();
             cache.Add("base", "abc", DateTime.Now.AddSeconds(60));
             cache.Add("key1","abc", DateTime.Now.AddSeconds(60), "base");
             cache.Add("key2", "abc", DateTime.Now.AddSeconds(60), "base");
@@ -46,7 +52,6 @@ namespace WebApi.OutputCache.Core.Tests
         [Test]
         public void find_keys_starting_with_a_prefix()
         {
-            IApiOutputCache cache = new MemoryCacheDefault();
             cache.Add("abc1", "abc", DateTime.Now.AddSeconds(60));
             cache.Add("abc2", "abc", DateTime.Now.AddSeconds(60));
             cache.Add("abc3", "abc", DateTime.Now.AddSeconds(60));
@@ -54,11 +59,16 @@ namespace WebApi.OutputCache.Core.Tests
             cache.Add("edf2", "abc", DateTime.Now.AddSeconds(60));
 
             var keys = cache.FindKeysStartingWith("abc");
+            
+            CollectionAssert.AreEquivalent(new[] { "abc1", "abc2", "abc3" }, keys);
+        }
 
-            Assert.That(keys.Count(), Is.EqualTo(3));
-            Assert.IsTrue(keys.Any(s => s == "abc1"));
-            Assert.IsTrue(keys.Any(s => s == "abc2"));
-            Assert.IsTrue(keys.Any(s => s == "abc3"));
+        private void EmptyCache(IApiOutputCache cache)
+        {
+            foreach (var key in cache.AllKeys)
+            {
+                cache.Remove(key);
+            }
         }
     }
 }
