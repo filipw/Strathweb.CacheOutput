@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
-using System.Security.Cryptography.X509Certificates;
 
 namespace WebApi.OutputCache.Core.Cache
 {
