@@ -53,8 +53,7 @@ namespace WebApi.OutputCache.V2.Tests
                 var expectedKeys = new[] { "keyPrefix-1", "keyPrefix-2" };
 
                 var generatedKeyPrefix = new StubPrefixGenerator().Generate(null, "baseCacheKey");
-                _cache.Setup(x => x.FindKeysStartingWith(It.Is<string>(s => s == generatedKeyPrefix)))
-                    .Returns(expectedKeys);
+                _cache.Setup(x => x.FindKeysStartingWith(It.Is<string>(s => s == generatedKeyPrefix))).Returns(expectedKeys);
 
                 // Act
                 var client = new HttpClient(_server);
