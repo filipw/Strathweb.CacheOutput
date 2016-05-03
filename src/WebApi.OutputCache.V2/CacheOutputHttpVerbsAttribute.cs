@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Web.Http.Filters;
 
 namespace WebApi.OutputCache.V2
 {
@@ -9,7 +10,7 @@ namespace WebApi.OutputCache.V2
 	/// Otherwise GET method only.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
-	public class CacheOutputHttpVerbsAttribute : Attribute
+	public class CacheOutputHttpVerbsAttribute : ActionFilterAttribute
 	{
 		/// <summary>
 		/// Gets or sets the list of HTTP verbs that needs to participate in cache.
@@ -46,7 +47,7 @@ namespace WebApi.OutputCache.V2
 	public sealed class CacheOutputHttpPostAttribute : CacheOutputHttpVerbsAttribute
 	{
 		public CacheOutputHttpPostAttribute()
-			: base("Post")
+			: base("POST")
 		{
 		}
 	}

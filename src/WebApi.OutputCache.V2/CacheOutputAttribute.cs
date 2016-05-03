@@ -89,9 +89,9 @@ namespace WebApi.OutputCache.V2
 			}
 
 
-			var verbsAttrs = actionContext.ActionDescriptor.GetCustomAttributes<CacheOutputHttpVerbsAttribute>();
+			var verbsAttrs = actionContext.ActionDescriptor.GetFilterPipeline().Select(a => a.Instance).OfType<CacheOutputHttpVerbsAttribute>();
 
-			return verbsAttrs.Count > 0
+			return verbsAttrs.Any()
 				? verbsAttrs.SelectMany(a => a.Verbs).Any(a => actionContext.Request.Method == new HttpMethod(a))
 				: actionContext.Request.Method == HttpMethod.Get;
 		}
