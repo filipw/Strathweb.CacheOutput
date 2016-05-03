@@ -1,80 +1,97 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2
 {
-    public class DefaultCacheKeyGenerator : ICacheKeyGenerator
-    {
-        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
-        {
-            var controller = context.ControllerContext.ControllerDescriptor.ControllerType.FullName;
-            var action = context.ActionDescriptor.ActionName;
-            var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+	public class DefaultCacheKeyGenerator : ICacheKeyGenerator
+	{
+		public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
+		{
+			var controller = context.ControllerContext.ControllerDescriptor.ControllerType.FullName;
+			var action = context.ActionDescriptor.ActionName;
+			var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
+			var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
 
-            string parameters;
+			string parameters;
 
-            if (!excludeQueryString)
-            {
-                var queryStringParameters =
-                    context.Request.GetQueryNameValuePairs()
-                           .Where(x => x.Key.ToLower() != "callback")
-                           .Select(x => x.Key + "=" + x.Value);
-                var parametersCollections = actionParameters.Union(queryStringParameters);
-                parameters = "-" + string.Join("&", parametersCollections);
+			if (!excludeQueryString)
+			{
+				var queryStringParameters =
+					context.Request.GetQueryNameValuePairs()
+						   .Where(x => x.Key.ToLower() != "callback")
+						   .Select(x => x.Key + "=" + x.Value);
+				var parametersCollections = actionParameters.Union(queryStringParameters);
+				parameters = "-" + string.Join("&", parametersCollections);
 
-                var callbackValue = GetJsonpCallback(context.Request);
-                if (!string.IsNullOrWhiteSpace(callbackValue))
-                {
-                    var callback = "callback=" + callbackValue;
-                    if (parameters.Contains("&" + callback)) parameters = parameters.Replace("&" + callback, string.Empty);
-                    if (parameters.Contains(callback + "&")) parameters = parameters.Replace(callback + "&", string.Empty);
-                    if (parameters.Contains("-" + callback)) parameters = parameters.Replace("-" + callback, string.Empty);
-                    if (parameters.EndsWith("&")) parameters = parameters.TrimEnd('&');
-                }
-            }
-            else
-            {
-                parameters = "-" + string.Join("&", actionParameters);
-            }
+				var callbackValue = GetJsonpCallback(context.Request);
+				if (!string.IsNullOrWhiteSpace(callbackValue))
+				{
+					var callback = "callback=" + callbackValue;
+					if (parameters.Contains("&" + callback)) parameters = parameters.Replace("&" + callback, string.Empty);
+					if (parameters.Contains(callback + "&")) parameters = parameters.Replace(callback + "&", string.Empty);
+					if (parameters.Contains("-" + callback)) parameters = parameters.Replace("-" + callback, string.Empty);
+					if (parameters.EndsWith("&")) parameters = parameters.TrimEnd('&');
+				}
+			}
+			else
+			{
+				parameters = "-" + string.Join("&", actionParameters);
+			}
 
-            if (parameters == "-") parameters = string.Empty;
+			if (parameters == "-") parameters = string.Empty;
 
-            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType);
-            return cachekey;
-        }
+			var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType);
+			return cachekey;
+		}
 
-        private string GetJsonpCallback(HttpRequestMessage request)
-        {
-            var callback = string.Empty;
-            if (request.Method == HttpMethod.Get)
-            {
-                var query = request.GetQueryNameValuePairs();
+		private string GetJsonpCallback(HttpRequestMessage request)
+		{
+			var callback = string.Empty;
+			if (request.Method == HttpMethod.Get)
+			{
+				var query = request.GetQueryNameValuePairs();
 
-                if (query != null)
-                {
-                    var queryVal = query.FirstOrDefault(x => x.Key.ToLower() == "callback");
-                    if (!queryVal.Equals(default(KeyValuePair<string, string>))) callback = queryVal.Value;
-                }
-            }
-            return callback;
-        }
+				if (query != null)
+				{
+					var queryVal = query.FirstOrDefault(x => x.Key.ToLower() == "callback");
+					if (!queryVal.Equals(default(KeyValuePair<string, string>))) callback = queryVal.Value;
+				}
+			}
+			return callback;
+		}
 
-        private string GetValue(object val)
-        {
-            if (val is IEnumerable && !(val is string))
-            {
-                var concatValue = string.Empty;
-                var paramArray = val as IEnumerable;
-                return paramArray.Cast<object>().Aggregate(concatValue, (current, paramValue) => current + (paramValue + ";"));
-            }
-            return val.ToString();
-        }
-    }
+		private string GetValue(object value)
+		{
+			ICacheKeyComponentGenerator generator;
+
+
+			// Use custom generator if available.
+			var valueType = value.GetType();
+			var keyComponentAttr = valueType.GetCustomAttribute<CacheKeyComponentAttribute>();
+			if (keyComponentAttr != null)
+			{
+				generator = (ICacheKeyComponentGenerator)Activator.CreateInstance(keyComponentAttr.GeneratorType);
+			}
+			// Use a default generator.
+			else if (value is IEnumerable && !(value is string))
+			{
+				generator = new EnumerableCacheKeyComponentGenerator();
+			}
+			else
+			{
+				generator = new AnyCacheKeyComponentGenerator();
+			}
+
+
+			return generator.Generate(value);
+		}
+	}
 }
