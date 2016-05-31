@@ -17,7 +17,7 @@ namespace WebApi.OutputCache.V2
 
         public InvalidateCacheOutputAttribute(string methodName, Type type = null)
         {
-            _controller = type != null ? type.Name.Replace("Controller", string.Empty) : null;
+            _controller = type != null ? type.FullName : null;
             _methodName = methodName;
         }
 
