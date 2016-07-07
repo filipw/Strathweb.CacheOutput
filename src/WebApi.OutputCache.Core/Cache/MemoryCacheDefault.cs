@@ -13,7 +13,10 @@ namespace WebApi.OutputCache.Core.Cache
         {
             lock (Cache)
             {
-                Cache.Remove(key);
+                foreach (string key2Remove in AllKeys.Where(x => x.StartsWith(key)).ToList())
+                {
+                    Cache.Remove(key2Remove);
+                }
             }
         }
 
