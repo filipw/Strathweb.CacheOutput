@@ -152,5 +152,12 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         {
             return Ok("value");
         }
+
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, SharedTimeSpan = 200)]
+        public string Get_c100_s100_sm200()
+        {
+            return "test";
+        }
+
     }
 }

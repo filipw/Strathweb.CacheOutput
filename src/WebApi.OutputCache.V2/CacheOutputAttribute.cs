@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,6 +48,23 @@ namespace WebApi.OutputCache.V2
         /// Corresponds to CacheControl MaxAge HTTP header (in seconds)
         /// </summary>
         public int ClientTimeSpan { get; set; }
+
+
+        private int? _sharedTimeSpan = null;
+
+        /// <summary>
+        /// Corresponds to CacheControl Shared MaxAge HTTP header (in seconds)
+        /// </summary>
+        public int SharedTimeSpan
+        {
+            get // required for property visibility
+            {
+                if (!_sharedTimeSpan.HasValue)
+                    throw new Exception("should not be called without value set"); 
+                return _sharedTimeSpan.Value;
+            }
+            set { _sharedTimeSpan = value; }
+        }
 
         /// <summary>
         /// Corresponds to CacheControl NoCache HTTP header
@@ -98,7 +116,7 @@ namespace WebApi.OutputCache.V2
 
         protected void ResetCacheTimeQuery()
         {
-            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan );
+            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan, _sharedTimeSpan);
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
@@ -247,6 +265,7 @@ namespace WebApi.OutputCache.V2
                 var cachecontrol = new CacheControlHeaderValue
                                        {
                                            MaxAge = cacheTime.ClientTimeSpan,
+                                           SharedMaxAge = cacheTime.SharedTimeSpan,
                                            MustRevalidate = MustRevalidate,
                                            Private = Private
                                        };
