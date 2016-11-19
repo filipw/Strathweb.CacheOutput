@@ -194,12 +194,17 @@ namespace WebApi.OutputCache.V2
             var val = _webApiCache.Get<byte[]>(cachekey);
             if (val == null) return;
 
-            var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? new MediaTypeHeaderValue(cachekey.Split(new[] { ':' }, 2)[1].Split(';')[0]);
+            MediaTypeHeaderValue contentType;
+            var cachedContentType = _webApiCache.Get<string>(cachekey + Constants.ContentTypeKey);
+            if (!MediaTypeHeaderValue.TryParse(cachedContentType, out contentType))
+            {
+                contentType = new MediaTypeHeaderValue(cachekey.Split(new[] { ':' }, 2)[1].Split(';')[0]);
+            }
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
 
-            actionContext.Response.Content.Headers.ContentType = contenttype;
+            actionContext.Response.Content.Headers.ContentType = contentType;
             var responseEtag = _webApiCache.Get<string>(cachekey + Constants.EtagKey);
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
@@ -232,7 +237,7 @@ namespace WebApi.OutputCache.V2
                     if (responseContent != null)
                     {
                         var baseKey = config.MakeBaseCachekey(actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerType.FullName, actionExecutedContext.ActionContext.ActionDescriptor.ActionName);
-                        var contentType = responseContent.Headers.ContentType;
+                        var contentType = responseContent.Headers.ContentType.ToString();
                         string etag = actionExecutedContext.Response.Headers.ETag.Tag;
                         //ConfigureAwait false to avoid deadlocks
                         var content = await responseContent.ReadAsByteArrayAsync().ConfigureAwait(false);
