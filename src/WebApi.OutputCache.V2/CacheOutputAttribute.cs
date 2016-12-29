@@ -146,7 +146,7 @@ namespace WebApi.OutputCache.V2
                 if (actionContext.Request.Headers.Accept != null)
                 {
                     responseMediaType = actionContext.Request.Headers.Accept.FirstOrDefault();
-                    if (responseMediaType == null || !config.Formatters.Any(x => x.SupportedMediaTypes.Contains(responseMediaType)))
+                    if (responseMediaType == null || !config.Formatters.Any(x => x.SupportedMediaTypes.Any(value => value.MediaType == responseMediaType.MediaType)))
                     {
                         return DefaultMediaType;
                     }
