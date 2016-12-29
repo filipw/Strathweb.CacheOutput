@@ -194,7 +194,7 @@ namespace WebApi.OutputCache.V2
             var val = _webApiCache.Get<byte[]>(cachekey);
             if (val == null) return;
 
-            var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? new MediaTypeHeaderValue(cachekey.Split(new[] { ':' }, 2)[1].Split(';')[0]);
+            var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? responseMediaType;
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
