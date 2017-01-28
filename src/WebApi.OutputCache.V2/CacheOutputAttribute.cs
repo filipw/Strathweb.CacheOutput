@@ -60,7 +60,7 @@ namespace WebApi.OutputCache.V2
             get // required for property visibility
             {
                 if (!_sharedTimeSpan.HasValue)
-                    throw new Exception("should not be called without value set"); 
+                    throw new Exception("should not be called without value set");
                 return _sharedTimeSpan.Value;
             }
             set { _sharedTimeSpan = value; }
@@ -80,7 +80,7 @@ namespace WebApi.OutputCache.V2
         /// Class used to generate caching keys
         /// </summary>
         public Type CacheKeyGenerator { get; set; }
-        
+
         // cache repository
         private IApiOutputCache _webApiCache;
 
@@ -106,7 +106,7 @@ namespace WebApi.OutputCache.V2
                 return false;
             }
 
-            return actionContext.Request.Method == HttpMethod.Get;
+          return actionContext.Request.Method == HttpMethod.Get;
         }
 
         protected virtual void EnsureCacheTimeQuery()
@@ -156,12 +156,18 @@ namespace WebApi.OutputCache.V2
             return responseMediaType;
         }
 
+        private bool IsNoCacheHeaderInRequest(HttpActionContext actionContext)
+        {
+            var cacheControl = actionContext.Request.Headers.CacheControl;
+            return cacheControl != null && cacheControl.NoCache;
+        }
+
         public override void OnActionExecuting(HttpActionContext actionContext)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
             if (!IsCachingAllowed(actionContext, AnonymousOnly)) return;
-
+            
             var config = actionContext.Request.GetConfiguration();
 
             EnsureCacheTimeQuery();
@@ -174,6 +180,8 @@ namespace WebApi.OutputCache.V2
             var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
             if (!_webApiCache.Contains(cachekey)) return;
+
+            if (IsNoCacheHeaderInRequest(actionContext)) return;
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
@@ -223,6 +231,11 @@ namespace WebApi.OutputCache.V2
                 var responseMediaType = actionExecutedContext.Request.Properties[CurrentRequestMediaType] as MediaTypeHeaderValue ?? GetExpectedMediaType(httpConfig, actionExecutedContext.ActionContext);
                 var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
+                if (IsNoCacheHeaderInRequest(actionExecutedContext.ActionContext))
+                {
+                    _webApiCache.Remove(cachekey);
+                }
+
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
                     SetEtag(actionExecutedContext.Response, CreateEtag(actionExecutedContext, cachekey, cacheTime));
@@ -242,12 +255,12 @@ namespace WebApi.OutputCache.V2
                         _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
                         _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
 
-                       
+
                         _webApiCache.Add(cachekey + Constants.ContentTypeKey,
                                         contentType,
                                         cacheTime.AbsoluteExpiration, baseKey);
 
-                       
+
                         _webApiCache.Add(cachekey + Constants.EtagKey,
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
@@ -263,12 +276,12 @@ namespace WebApi.OutputCache.V2
             if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate || Private)
             {
                 var cachecontrol = new CacheControlHeaderValue
-                                       {
-                                           MaxAge = cacheTime.ClientTimeSpan,
-                                           SharedMaxAge = cacheTime.SharedTimeSpan,
-                                           MustRevalidate = MustRevalidate,
-                                           Private = Private
-                                       };
+                {
+                    MaxAge = cacheTime.ClientTimeSpan,
+                    SharedMaxAge = cacheTime.SharedTimeSpan,
+                    MustRevalidate = MustRevalidate,
+                    Private = Private
+                };
 
                 response.Headers.CacheControl = cachecontrol;
             }
@@ -293,4 +306,4 @@ namespace WebApi.OutputCache.V2
             }
         }
     }
-} 
+}
