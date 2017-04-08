@@ -54,11 +54,25 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
         [Test]
+        public void nocache_in_request_refreshes_cache()
+        {
+            var client = new HttpClient(_server);
+            client.DefaultRequestHeaders.CacheControl =
+                new CacheControlHeaderValue { NoCache = true };
+            var result = client.GetAsync(_url + "Get_c100_s100").Result;
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Remove(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(1));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
+        }
+
+
+        [Test]
         public void set_cache_to_predefined_value_c100_s0()
         {
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s0").Result;
-            
+
             // NOTE: Should we expect the _cache to not be called at all if the ServerTimeSpan is 0?
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0:application/json; charset=utf-8")), Times.Once());
             // NOTE: Server timespan is 0, so there should not have been any Add at all.
