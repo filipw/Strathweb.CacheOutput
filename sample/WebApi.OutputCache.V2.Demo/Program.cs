@@ -9,7 +9,8 @@ namespace WebApi.OutputCache.V2.Demo
     {
         static void Main(string[] args)
         {
-            var config = new HttpSelfHostConfiguration("http://localhost:999");
+            const string hostUrl = "http://localhost:999";
+            var config = new HttpSelfHostConfiguration(hostUrl);
             config.MapHttpAttributeRoutes();
             config.Routes.MapHttpRoute(
                   name: "DefaultApi",
@@ -22,6 +23,7 @@ namespace WebApi.OutputCache.V2.Demo
 
             server.OpenAsync().Wait();
 
+            Console.WriteLine($"WebAPI Hosted and listening on: {hostUrl}");
             Console.ReadKey();
 
             server.CloseAsync().Wait();

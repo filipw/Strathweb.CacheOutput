@@ -216,8 +216,11 @@ namespace WebApi.OutputCache.V2
         }
 
         public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
-        {
-            if (actionExecutedContext.ActionContext.Response == null || !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode) return;
+        {                
+            if (actionExecutedContext.ActionContext.Response == null || 
+                !actionExecutedContext.ActionContext.Response.IsSuccessStatusCode ||
+                IsNoCacheHeaderInRequest(actionExecutedContext.ActionContext))
+                return;
 
             if (!IsCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
@@ -231,10 +234,10 @@ namespace WebApi.OutputCache.V2
                 var responseMediaType = actionExecutedContext.Request.Properties[CurrentRequestMediaType] as MediaTypeHeaderValue ?? GetExpectedMediaType(httpConfig, actionExecutedContext.ActionContext);
                 var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
-                if (IsNoCacheHeaderInRequest(actionExecutedContext.ActionContext))
-                {
-                    _webApiCache.Remove(cachekey);
-                }
+                //if (IsNoCacheHeaderInRequest(actionExecutedContext.ActionContext))
+                //{
+                //    _webApiCache.Remove(cachekey);
+                //}
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {

@@ -194,6 +194,22 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge, null);
         }
 
+        [Test]
+        public void no_caching_headers_in_response_when_nocache_header_present_in_request_headers()
+        {
+            var client = new HttpClient(_server);
+            client.DefaultRequestHeaders.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue
+            {
+                NoCache = true
+            };
+            var result = client.GetAsync(_url + "Get_c100_s100").Result;
+
+            Assert.IsNull(result.Headers.CacheControl,
+                "Cache-Control should not not be present in response when NoCache is present in request headers.");
+            Assert.IsNull(result.Headers.ETag,
+                "ETag should not not be present in response when NoCache is present in request headers.");
+        }
+
         [TestFixtureTearDown]
         public void fixture_dispose()
         {
