@@ -15,7 +15,7 @@ namespace WebApi.OutputCache.V2.Demo
                 new Team {Id = 2, League = "NHL", Name = "Habs"},
             };
 
-        [CacheOutput(ClientTimeSpan = 3600, ServerTimeSpan = 3600)]
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
         public IEnumerable<Team> Get()
         {
             return Teams;
