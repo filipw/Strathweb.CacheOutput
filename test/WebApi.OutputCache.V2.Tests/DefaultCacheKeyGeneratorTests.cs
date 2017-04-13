@@ -1,7 +1,5 @@
 ﻿using NUnit.Framework;
 using System;
-using System.Net.Http.Headers;
-using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2.Tests
 {
@@ -19,7 +17,8 @@ namespace WebApi.OutputCache.V2.Tests
             var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false);
 
             AssertCacheKeysBasicFormat(cacheKey);
-            Assert.AreEqual(String.Format("{0}-{1}:{2}", BaseCacheKey, requestUri.Query.Substring(1), mediaType), cacheKey, "Key does not match expected <BaseKey>-<QueryString>:<MediaType>");
+            Assert.AreEqual(String.Format("{0}-{1}:{2}", BaseCacheKey, requestUri.Query.Substring(1), mediaType), cacheKey,
+                "Key does not match expected <BaseKey>-<QueryString>:<MediaType>");
         }
 
         [Test]
@@ -28,7 +27,8 @@ namespace WebApi.OutputCache.V2.Tests
             var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true);
 
             AssertCacheKeysBasicFormat(cacheKey);
-            Assert.AreEqual(String.Format("{0}:{1}", BaseCacheKey, mediaType), cacheKey, "Key does not match expected <BaseKey>:<MediaType>");
+            Assert.AreEqual(String.Format("{0}:{1}", BaseCacheKey, mediaType), cacheKey,
+                "Key does not match expected <BaseKey>:<MediaType>");
         }
 
         [Test]
@@ -38,7 +38,8 @@ namespace WebApi.OutputCache.V2.Tests
             var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false);
 
             AssertCacheKeysBasicFormat(cacheKey);
-            Assert.AreEqual(String.Format("{0}-{1}&{2}:{3}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), requestUri.Query.Substring(1), mediaType), cacheKey, "Key does not match expected <BaseKey>-<Arguments>&<QueryString>:<MediaType>");
+            Assert.AreEqual(String.Format("{0}-{1}&{2}:{3}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), requestUri.Query.Substring(1), mediaType), cacheKey,
+                "Key does not match expected <BaseKey>-<Arguments>&<QueryString>:<MediaType>");
         }
 
         [Test]
@@ -48,7 +49,8 @@ namespace WebApi.OutputCache.V2.Tests
             var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true);
 
             AssertCacheKeysBasicFormat(cacheKey);
-            Assert.AreEqual(String.Format("{0}-{1}:{2}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), mediaType), cacheKey, "Key does not match expected <BaseKey>-<Arguments>:<MediaType>");
+            Assert.AreEqual(String.Format("{0}-{1}:{2}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), mediaType), cacheKey,
+                "Key does not match expected <BaseKey>-<Arguments>:<MediaType>");
         }
     }
 }
