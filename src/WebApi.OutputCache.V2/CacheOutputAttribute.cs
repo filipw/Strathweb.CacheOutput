@@ -167,6 +167,8 @@ namespace WebApi.OutputCache.V2
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
             if (!IsCachingAllowed(actionContext, AnonymousOnly)) return;
+
+            if (IsNoCacheHeaderInRequest(actionContext)) return;
             
             var config = actionContext.Request.GetConfiguration();
 
@@ -180,8 +182,6 @@ namespace WebApi.OutputCache.V2
             var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
             if (!_webApiCache.Contains(cachekey)) return;
-
-            if (IsNoCacheHeaderInRequest(actionContext)) return;
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
@@ -233,11 +233,6 @@ namespace WebApi.OutputCache.V2
 
                 var responseMediaType = actionExecutedContext.Request.Properties[CurrentRequestMediaType] as MediaTypeHeaderValue ?? GetExpectedMediaType(httpConfig, actionExecutedContext.ActionContext);
                 var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
-
-                //if (IsNoCacheHeaderInRequest(actionExecutedContext.ActionContext))
-                //{
-                //    _webApiCache.Remove(cachekey);
-                //}
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
