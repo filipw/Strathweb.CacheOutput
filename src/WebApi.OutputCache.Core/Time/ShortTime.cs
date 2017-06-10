@@ -29,11 +29,11 @@ namespace WebApi.OutputCache.Core.Time
         public CacheTime Execute(DateTime model)
         {
             var cacheTime = new CacheTime
-                {
-                    AbsoluteExpiration = model.AddSeconds(serverTimeInSeconds),
-                    ClientTimeSpan = TimeSpan.FromSeconds(clientTimeInSeconds),
-                    SharedTimeSpan = sharedTimeInSecounds.HasValue ? (TimeSpan?) TimeSpan.FromSeconds(sharedTimeInSecounds.Value) : null
-                };
+            {
+                AbsoluteExpiration = model.AddSeconds(serverTimeInSeconds),
+                ClientTimeSpan = TimeSpan.FromSeconds(clientTimeInSeconds),
+                SharedTimeSpan = sharedTimeInSecounds.HasValue ? (TimeSpan?)TimeSpan.FromSeconds(sharedTimeInSecounds.Value) : null
+            };
 
             return cacheTime;
         }

@@ -1,19 +1,19 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Integration.WebApi;
+using Moq;
+using NUnit.Framework;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using Autofac;
-using Autofac.Integration.WebApi;
-using Moq;
-using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    class CacheKeyGeneratorTests : IDisposable
+    internal class CacheKeyGeneratorTests : IDisposable
     {
         public class CustomCacheKeyGenerator : ICacheKeyGenerator
         {
@@ -68,7 +68,7 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "keykeykey")), Times.Exactly(2));
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
-            
+
             _keyGeneratorA.VerifyAll();
         }
 
@@ -91,7 +91,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~CacheKeyGeneratorTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -99,7 +99,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();

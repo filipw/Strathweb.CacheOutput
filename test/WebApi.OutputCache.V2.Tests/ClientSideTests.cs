@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NUnit.Framework;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http;
-using NUnit.Framework;
 using WebApi.OutputCache.Core.Time;
 
 namespace WebApi.OutputCache.V2.Tests
@@ -62,6 +62,7 @@ namespace WebApi.OutputCache.V2.Tests
 
             Assert.IsNull(result.Headers.CacheControl);
         }
+
         [Test]
         public void maxage_cachecontrol_when_no_content()
         {
@@ -71,7 +72,6 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.IsNotNull(result.Headers.CacheControl);
             Assert.AreEqual(TimeSpan.FromSeconds(50), result.Headers.CacheControl.MaxAge);
         }
-
 
         [Test]
         public void maxage_mustrevalidate_headers_correct_with_clienttimeout_zero_with_must_revalidate()
@@ -83,22 +83,21 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.AreEqual(TimeSpan.Zero, result.Headers.CacheControl.MaxAge);
         }
 
+        [Test]
+        public void nocache_headers_correct()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_nocache").Result;
 
-	    [Test]
-	    public void nocache_headers_correct()
-	    {
-			var client = new HttpClient(_server);
-			var result = client.GetAsync(_url + "Get_nocache").Result;
+            Assert.IsTrue(result.Headers.CacheControl.NoCache,
+                "NoCache in result headers was expected to be true when CacheOutput.NoCache=true.");
+            Assert.IsTrue(result.Headers.Contains("Pragma"),
+                "result headers does not contain expected Pragma.");
+            Assert.IsTrue(result.Headers.GetValues("Pragma").Contains("no-cache"),
+                "expected no-cache Pragma was not found");
+        }
 
-			Assert.IsTrue(result.Headers.CacheControl.NoCache,
-				"NoCache in result headers was expected to be true when CacheOutput.NoCache=true.");
-		    Assert.IsTrue(result.Headers.Contains("Pragma"),
-				"result headers does not contain expected Pragma.");
-			Assert.IsTrue(result.Headers.GetValues("Pragma").Contains("no-cache"),
-				"expected no-cache Pragma was not found");
-	    }
-
-	    [Test]
+        [Test]
         public void maxage_mustrevalidate_true_headers_correct()
         {
             var client = new HttpClient(_server);
@@ -124,7 +123,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_until25012015_1700").Result;
             var clientTimeSpanSeconds = new SpecificTime(2018, 01, 25, 17, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds;
-            var resultCacheControlSeconds = ((TimeSpan) result.Headers.CacheControl.MaxAge).TotalSeconds;
+            var resultCacheControlSeconds = ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds;
             Assert.IsTrue(Math.Round(clientTimeSpanSeconds - resultCacheControlSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
         }
@@ -135,7 +134,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_until2355_today").Result;
 
-            Assert.IsTrue(Math.Round(new ThisDay(23,55,59).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
+            Assert.IsTrue(Math.Round(new ThisDay(23, 55, 59).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
         }
 
@@ -145,7 +144,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_until27_thismonth").Result;
 
-            Assert.IsTrue(Math.Round(new ThisMonth(27,0,0,0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
+            Assert.IsTrue(Math.Round(new ThisMonth(27, 0, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds - ((TimeSpan)result.Headers.CacheControl.MaxAge).TotalSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
         }
 
@@ -183,7 +182,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s100_sm200").Result;
-            Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge,TimeSpan.FromSeconds(200));
+            Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge, TimeSpan.FromSeconds(200));
         }
 
         [Test]
@@ -208,7 +207,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~ClientSideTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -216,7 +215,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();

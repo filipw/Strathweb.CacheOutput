@@ -1,11 +1,11 @@
-﻿using System;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Web.Http;
-using Autofac;
+﻿using Autofac;
 using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
+using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Web.Http;
 using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.V2.Tests
@@ -51,9 +51,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result2 = client.SendAsync(req).Result;
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8")), Times.Exactly(2));
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
-
         }
-            
+
         [TearDown]
         public void fixture_dispose()
         {
@@ -68,7 +67,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~ConnegTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -76,7 +75,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Integration.WebApi;
+using Moq;
+using NUnit.Framework;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Principal;
 using System.Threading;
 using System.Web.Http;
-using Autofac;
-using Autofac.Integration.WebApi;
-using Moq;
-using NUnit.Framework;
 using WebApi.OutputCache.Core;
 using WebApi.OutputCache.Core.Cache;
 
@@ -58,7 +58,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s0").Result;
-            
+
             // NOTE: Should we expect the _cache to not be called at all if the ServerTimeSpan is 0?
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0:application/json; charset=utf-8")), Times.Once());
             // NOTE: Server timespan is 0, so there should not have been any Add at all.
@@ -292,7 +292,6 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult")), Times.Once());
         }
 
-
         [Test]
         public void can_handle_media_type_when_cache_has_expired_during_request()
         {
@@ -360,7 +359,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~ServerSideTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -368,7 +367,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();

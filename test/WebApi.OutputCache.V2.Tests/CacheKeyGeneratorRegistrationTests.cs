@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Autofac;
+using Autofac.Integration.WebApi;
+using Moq;
+using NUnit.Framework;
+using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Web.Http;
 using System.Web.Http.Controllers;
-using Autofac;
-using Autofac.Integration.WebApi;
-using Moq;
-using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.V2.Tests
@@ -29,7 +29,7 @@ namespace WebApi.OutputCache.V2.Tests
             _keyGenerator = new Mock<ICacheKeyGenerator>();
 
             var conf = new HttpConfiguration();
-            
+
             var builder = new ContainerBuilder();
             builder.RegisterInstance(_cache.Object);
 
@@ -57,9 +57,10 @@ namespace WebApi.OutputCache.V2.Tests
         [Test]
         public void last_registered_default_is_used()
         {
-            _server.Configuration.CacheOutputConfiguration().RegisterDefaultCacheKeyGeneratorProvider(() => { 
-                                                                                                                Assert.Fail("First registration should have been overwritten");
-                                                                                                                return null;
+            _server.Configuration.CacheOutputConfiguration().RegisterDefaultCacheKeyGeneratorProvider(() =>
+            {
+                Assert.Fail("First registration should have been overwritten");
+                return null;
             });
             _server.Configuration.CacheOutputConfiguration().RegisterDefaultCacheKeyGeneratorProvider(() => _keyGenerator.Object);
 
@@ -109,7 +110,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~CacheKeyGeneratorRegistrationTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -117,7 +118,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();
@@ -127,6 +128,7 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
         #region Helper classes
+
         private class FailCacheKeyGenerator : ICacheKeyGenerator
         {
             public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
@@ -150,6 +152,7 @@ namespace WebApi.OutputCache.V2.Tests
                 return _key;
             }
         }
-        #endregion
+
+        #endregion Helper classes
     }
 }

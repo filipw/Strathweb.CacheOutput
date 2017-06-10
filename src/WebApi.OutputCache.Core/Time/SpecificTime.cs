@@ -24,14 +24,14 @@ namespace WebApi.OutputCache.Core.Time
         public CacheTime Execute(DateTime model)
         {
             var cacheTime = new CacheTime
-                {
-                    AbsoluteExpiration = new DateTime(year,
+            {
+                AbsoluteExpiration = new DateTime(year,
                                                       month,
                                                       day,
                                                       hour,
                                                       minute,
                                                       second),
-                };
+            };
 
             cacheTime.ClientTimeSpan = cacheTime.AbsoluteExpiration.Subtract(model);
 

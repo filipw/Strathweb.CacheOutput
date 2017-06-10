@@ -25,17 +25,17 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test";
         }
 
-        [CacheOutput(NoCache=true)]
+        [CacheOutput(NoCache = true)]
         public string Get_nocache()
         {
             return "test";
         }
 
-		[CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100, MustRevalidate = true)]
-		public string Get_c0_s100_mustR()
-		{
-			return "test";
-		}
+        [CacheOutput(ClientTimeSpan = 0, ServerTimeSpan = 100, MustRevalidate = true)]
+        public string Get_c0_s100_mustR()
+        {
+            return "test";
+        }
 
         [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
         public string Get_c50_mustR()
@@ -64,7 +64,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = false)]
         public string Get_s50_exclude_false(int id)
         {
-            return "test"+id;
+            return "test" + id;
         }
 
         [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = true)]
@@ -73,13 +73,13 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test" + id;
         }
 
-        [CacheOutputUntil(2018,01,25,17,00)]
+        [CacheOutputUntil(2018, 01, 25, 17, 00)]
         public string Get_until25012015_1700()
         {
             return "test";
         }
 
-        [CacheOutputUntilToday(23,55)]
+        [CacheOutputUntilToday(23, 55)]
         public string Get_until2355_today()
         {
             return "value";
@@ -91,7 +91,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "value";
         }
 
-        [CacheOutputUntilThisYear(7,31)]
+        [CacheOutputUntilThisYear(7, 31)]
         public string Get_until731_thisyear()
         {
             return "value";
@@ -125,7 +125,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
         public string Get_request_httpResponseException_noCache()
         {
-            throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Conflict){ReasonPhrase = "Fault shouldn't cache"});
+            throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Conflict) { ReasonPhrase = "Fault shouldn't cache" });
         }
 
         [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
@@ -158,6 +158,5 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         {
             return "test";
         }
-
     }
 }

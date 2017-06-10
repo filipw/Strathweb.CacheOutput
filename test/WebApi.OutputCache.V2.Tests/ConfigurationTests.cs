@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Moq;
+using NUnit.Framework;
+using System;
 using System.Net.Http;
 using System.Web.Http;
-using Moq;
-using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.V2.Tests
@@ -81,7 +81,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~ConfigurationTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -89,7 +89,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();

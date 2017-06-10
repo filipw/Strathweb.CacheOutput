@@ -55,7 +55,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Delete_non_standard_name()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));            
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));
         }
 
         public void Delete_parameterized()

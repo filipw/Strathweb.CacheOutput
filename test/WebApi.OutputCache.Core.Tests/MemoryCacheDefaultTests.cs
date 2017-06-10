@@ -1,5 +1,5 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
+using System;
 using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.Core.Tests
@@ -26,7 +26,7 @@ namespace WebApi.OutputCache.Core.Tests
         {
             IApiOutputCache cache = new MemoryCacheDefault();
             cache.Add("base", "abc", DateTime.Now.AddSeconds(60));
-            cache.Add("key1","abc", DateTime.Now.AddSeconds(60), "base");
+            cache.Add("key1", "abc", DateTime.Now.AddSeconds(60), "base");
             cache.Add("key2", "abc", DateTime.Now.AddSeconds(60), "base");
             cache.Add("key3", "abc", DateTime.Now.AddSeconds(60), "base");
             Assert.IsNotNull(cache.Get<string>("key1"));

@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2

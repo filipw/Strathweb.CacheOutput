@@ -1,13 +1,13 @@
-﻿using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Threading;
-using System.Web.Http;
-using Autofac;
+﻿using Autofac;
 using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
-using WebApi.OutputCache.Core.Cache;
 using System;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading;
+using System.Web.Http;
+using WebApi.OutputCache.Core.Cache;
 
 namespace WebApi.OutputCache.V2.Tests
 {
@@ -104,7 +104,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
 
             var result2 = client.DeleteAsync("http://www.strathweb.com/api/autoinvalidate/Delete").Result;
-            
+
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100")), Times.Exactly(1));
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_s50_exclude_fakecallback")), Times.Exactly(1));
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304")), Times.Exactly(1));
@@ -120,7 +120,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
 
             var result2 = client.PostAsync("http://www.strathweb.com/api/autoinvalidatewithtype/Post", new StringContent(string.Empty)).Result;
-            
+
             Assert.True(result2.IsSuccessStatusCode);
             _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Never());
             _cache.Verify(s => s.RemoveStartsWith(It.IsAny<string>()), Times.Never());
@@ -143,7 +143,7 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
         private void SetupCacheForAutoInvalidate()
-        {            
+        {
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"))).Returns(true);
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"))).Returns(true);
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-get_c100_s100"))).Returns(true);
@@ -151,9 +151,9 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatecontroller-etag_match_304"))).Returns(true);
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100"))).Returns(true);
             _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_s50_exclude_fakecallback"))).Returns(true);
-            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100_array"))).Returns(true);   
+            _cache.Setup(x => x.Contains(It.Is<string>(s => s == "webapi.outputcache.v2.tests.testcontrollers.autoinvalidatewithtypecontroller-get_c100_s100_array"))).Returns(true);
         }
-   
+
         [TearDown]
         public void fixture_dispose()
         {
@@ -168,7 +168,7 @@ namespace WebApi.OutputCache.V2.Tests
 
         ~InvalidateTests()
         {
-            // Finalizer calls Dispose(false)  
+            // Finalizer calls Dispose(false)
             Dispose(false);
         }
 
@@ -176,7 +176,7 @@ namespace WebApi.OutputCache.V2.Tests
         {
             if (disposing)
             {
-                // free managed resources  
+                // free managed resources
                 if (_server != null)
                 {
                     _server.Dispose();
