@@ -73,7 +73,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test" + id;
         }
 
-        [CacheOutputUntil(2017,01,25,17,00)]
+        [CacheOutputUntil(2018,01,25,17,00)]
         public string Get_until25012015_1700()
         {
             return "test";
