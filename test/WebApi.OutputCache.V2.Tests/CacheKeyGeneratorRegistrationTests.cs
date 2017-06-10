@@ -13,7 +13,7 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class CacheKeyGeneratorRegistrationTests
+    public class CacheKeyGeneratorRegistrationTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/";
@@ -99,6 +99,31 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "cachekey/get_unregistered").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "unregistered")), Times.Once());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~CacheKeyGeneratorRegistrationTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
 
         #region Helper classes

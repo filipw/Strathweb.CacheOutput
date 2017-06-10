@@ -6,11 +6,12 @@ using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
+using System;
 
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class InlineInvalidateTests
+    public class InlineInvalidateTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/inlineinvalidate/";
@@ -78,6 +79,31 @@ namespace WebApi.OutputCache.V2.Tests
         public void fixture_dispose()
         {
             if (_server != null) _server.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~InlineInvalidateTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

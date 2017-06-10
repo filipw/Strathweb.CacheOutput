@@ -15,7 +15,7 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ServerSideTests
+    public class ServerSideTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/sample/";
@@ -350,6 +350,31 @@ namespace WebApi.OutputCache.V2.Tests
             customIdentity.SetupGet(x => x.IsAuthenticated).Returns(true);
             var threadCurrentPrincipal = new GenericPrincipal(customIdentity.Object, new string[] { "CustomUser" });
             Thread.CurrentPrincipal = threadCurrentPrincipal;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ServerSideTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

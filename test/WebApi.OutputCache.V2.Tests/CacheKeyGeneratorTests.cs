@@ -13,7 +13,7 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    class CacheKeyGeneratorTests
+    class CacheKeyGeneratorTests : IDisposable
     {
         public class CustomCacheKeyGenerator : ICacheKeyGenerator
         {
@@ -81,6 +81,31 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "custom_key")), Times.Exactly(2));
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~CacheKeyGeneratorTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

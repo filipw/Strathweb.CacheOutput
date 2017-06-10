@@ -11,7 +11,7 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ConnegTests
+    public class ConnegTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/sample/";
@@ -58,6 +58,31 @@ namespace WebApi.OutputCache.V2.Tests
         public void fixture_dispose()
         {
             if (_server != null) _server.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ConnegTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

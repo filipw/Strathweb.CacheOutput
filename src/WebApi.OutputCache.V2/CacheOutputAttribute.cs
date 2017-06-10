@@ -59,11 +59,16 @@ namespace WebApi.OutputCache.V2
         {
             get // required for property visibility
             {
-                if (!_sharedTimeSpan.HasValue)
-                    throw new Exception("should not be called without value set"); 
-                return _sharedTimeSpan.Value;
+                return GetSharedTimeSpan();
             }
             set { _sharedTimeSpan = value; }
+        }
+
+        private int GetSharedTimeSpan()
+        {
+            if (!_sharedTimeSpan.HasValue)
+                throw new Exception("should not be called without value set");
+            return _sharedTimeSpan.Value;
         }
 
         /// <summary>

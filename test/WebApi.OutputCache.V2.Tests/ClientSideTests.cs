@@ -8,12 +8,12 @@ using WebApi.OutputCache.Core.Time;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ClientSideTests
+    public class ClientSideTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/sample/";
 
-        [TestFixtureSetUp]
+        [OneTimeSetUp]
         public void fixture_init()
         {
             var conf = new HttpConfiguration();
@@ -194,10 +194,35 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge, null);
         }
 
-        [TestFixtureTearDown]
+        [OneTimeTearDown]
         public void fixture_dispose()
         {
             if (_server != null) _server.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ClientSideTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

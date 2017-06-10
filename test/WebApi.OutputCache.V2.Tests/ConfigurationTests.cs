@@ -8,7 +8,7 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ConfigurationTests
+    public class ConfigurationTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/sample/";
@@ -71,6 +71,31 @@ namespace WebApi.OutputCache.V2.Tests
             conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache2);
 
             Assert.AreNotSame(((Func<IApiOutputCache>)cache1)(), ((Func<IApiOutputCache>)cache2)());
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ConfigurationTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }

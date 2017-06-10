@@ -7,11 +7,12 @@ using Autofac.Integration.WebApi;
 using Moq;
 using NUnit.Framework;
 using WebApi.OutputCache.Core.Cache;
+using System;
 
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class InvalidateTests
+    public class InvalidateTests : IDisposable
     {
         private HttpServer _server;
         private string _url = "http://www.strathweb.com/api/sample/";
@@ -157,6 +158,31 @@ namespace WebApi.OutputCache.V2.Tests
         public void fixture_dispose()
         {
             if (_server != null) _server.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~InvalidateTests()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // free managed resources  
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+            }
         }
     }
 }
