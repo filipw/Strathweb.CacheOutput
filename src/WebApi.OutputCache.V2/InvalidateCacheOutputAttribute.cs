@@ -4,11 +4,11 @@ using System.Web.Http.Filters;
 
 namespace WebApi.OutputCache.V2
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class InvalidateCacheOutputAttribute : BaseCacheAttribute
     {
-        private string _controller;
         private readonly string _methodName;
+        private string _controller;
 
         public InvalidateCacheOutputAttribute(string methodName)
             : this(methodName, null)
@@ -24,16 +24,16 @@ namespace WebApi.OutputCache.V2
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
-            _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerType.FullName;
+            _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor
+                              .ControllerType.FullName;
 
             var config = actionExecutedContext.Request.GetConfiguration();
             EnsureCache(config, actionExecutedContext.Request);
 
-            var key = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(_controller, _methodName);
+            var key = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration()
+                .MakeBaseCachekey(_controller, _methodName);
             if (WebApiCache.Contains(key))
-            {
                 WebApiCache.RemoveStartsWith(key);
-            }
         }
     }
 }

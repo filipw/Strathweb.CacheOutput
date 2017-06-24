@@ -13,10 +13,10 @@ namespace WebApi.OutputCache.V2.TimeAttributes
         /// <param name="minute">45</param>
         /// <param name="second">0</param>
         public CacheOutputUntilThisYearAttribute(int month,
-                                                 int day,
-                                                 int hour = 0,
-                                                 int minute = 0,
-                                                 int second = 0)
+            int day,
+            int hour = 0,
+            int minute = 0,
+            int second = 0)
         {
             CacheTimeQuery = new ThisYear(month, day, hour, minute, second);
         }

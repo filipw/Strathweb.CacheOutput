@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using WebApi.OutputCache.V2.TimeAttributes;
@@ -119,13 +120,14 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
         public string Get_request_exception_noCache()
         {
-            throw new System.Exception("Fault shouldn't cache");
+            throw new Exception("Fault shouldn't cache");
         }
 
         [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
         public string Get_request_httpResponseException_noCache()
         {
-            throw new HttpResponseException(new HttpResponseMessage(HttpStatusCode.Conflict) { ReasonPhrase = "Fault shouldn't cache" });
+            throw new HttpResponseException(
+                new HttpResponseMessage(HttpStatusCode.Conflict) {ReasonPhrase = "Fault shouldn't cache"});
         }
 
         [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]

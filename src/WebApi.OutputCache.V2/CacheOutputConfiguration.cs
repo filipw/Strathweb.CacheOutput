@@ -47,11 +47,9 @@ namespace WebApi.OutputCache.V2
             var nameAttribs = method.Method.GetCustomAttributes(typeof(ActionNameAttribute), false);
             if (nameAttribs.Any())
             {
-                var actionNameAttrib = (ActionNameAttribute)nameAttribs.FirstOrDefault();
+                var actionNameAttrib = (ActionNameAttribute) nameAttribs.FirstOrDefault();
                 if (actionNameAttrib != null)
-                {
                     methodName = actionNameAttrib.Name;
-                }
             }
 
             return string.Format("{0}-{1}", typeof(T).FullName.ToLower(), methodName.ToLower());
@@ -62,7 +60,7 @@ namespace WebApi.OutputCache.V2
             var hasEmptyOrDefaultConstructor =
                 generatorType.GetConstructor(Type.EmptyTypes) != null ||
                 generatorType.GetConstructors(BindingFlags.Instance | BindingFlags.Public)
-                .Any(x => x.GetParameters().All(p => p.IsOptional));
+                    .Any(x => x.GetParameters().All(p => p.IsOptional));
             return hasEmptyOrDefaultConstructor
                 ? Activator.CreateInstance(generatorType) as ICacheKeyGenerator
                 : null;
@@ -81,8 +79,8 @@ namespace WebApi.OutputCache.V2
                 : request.GetDependencyScope().GetService(generatorType) as ICacheKeyGenerator;
 
             return generator
-                ?? TryActivateCacheKeyGenerator(generatorType)
-                ?? new DefaultCacheKeyGenerator();
+                   ?? TryActivateCacheKeyGenerator(generatorType)
+                   ?? new DefaultCacheKeyGenerator();
         }
 
         public IApiOutputCache GetCacheOutputProvider(HttpRequestMessage request)
@@ -92,7 +90,10 @@ namespace WebApi.OutputCache.V2
 
             var cacheFunc = cache as Func<IApiOutputCache>;
 
-            var cacheOutputProvider = cacheFunc != null ? cacheFunc() : request.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ?? new MemoryCacheDefault();
+            var cacheOutputProvider = cacheFunc != null
+                ? cacheFunc()
+                : request.GetDependencyScope().GetService(typeof(IApiOutputCache)) as IApiOutputCache ??
+                  new MemoryCacheDefault();
             return cacheOutputProvider;
         }
     }

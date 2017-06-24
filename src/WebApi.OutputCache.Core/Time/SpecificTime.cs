@@ -4,12 +4,12 @@ namespace WebApi.OutputCache.Core.Time
 {
     public class SpecificTime : IModelQuery<DateTime, CacheTime>
     {
-        private readonly int year;
-        private readonly int month;
         private readonly int day;
         private readonly int hour;
         private readonly int minute;
+        private readonly int month;
         private readonly int second;
+        private readonly int year;
 
         public SpecificTime(int year, int month, int day, int hour, int minute, int second)
         {
@@ -26,11 +26,11 @@ namespace WebApi.OutputCache.Core.Time
             var cacheTime = new CacheTime
             {
                 AbsoluteExpiration = new DateTime(year,
-                                                      month,
-                                                      day,
-                                                      hour,
-                                                      minute,
-                                                      second),
+                    month,
+                    day,
+                    hour,
+                    minute,
+                    second)
             };
 
             cacheTime.ClientTimeSpan = cacheTime.AbsoluteExpiration.Subtract(model);

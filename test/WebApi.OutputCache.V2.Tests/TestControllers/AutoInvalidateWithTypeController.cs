@@ -15,7 +15,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
         public List<string> Get_c100_s100_array()
         {
-            return new List<string> { "test" };
+            return new List<string> {"test"};
         }
 
         [CacheOutput(ServerTimeSpan = 50)]
@@ -29,7 +29,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             //this should not invalidate
         }
 
-        public void PostString([FromBody]string x)
+        public void PostString([FromBody] string x)
         {
             //this should invalidate string & ienumerable<string>
         }

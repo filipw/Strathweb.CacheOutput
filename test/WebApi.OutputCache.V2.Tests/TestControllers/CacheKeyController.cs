@@ -6,15 +6,8 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
 {
     public class CacheKeyController : ApiController
     {
-        private class UnregisteredCacheKeyGenerator : ICacheKeyGenerator
-        {
-            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
-            {
-                return "unregistered";
-            }
-        }
-
-        [CacheOutput(CacheKeyGenerator = typeof(CacheKeyGeneratorTests.CustomCacheKeyGenerator), ClientTimeSpan = 100, ServerTimeSpan = 100)]
+        [CacheOutput(CacheKeyGenerator = typeof(CacheKeyGeneratorTests.CustomCacheKeyGenerator), ClientTimeSpan = 100,
+            ServerTimeSpan = 100)]
         public string Get_custom_key()
         {
             return "test";
@@ -26,10 +19,20 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test";
         }
 
-        [CacheOutput(CacheKeyGenerator = typeof(CacheKeyGeneratorRegistrationTests.InternalRegisteredCacheKeyGenerator), ServerTimeSpan = 100)]
+        [CacheOutput(CacheKeyGenerator = typeof(CacheKeyGeneratorRegistrationTests.InternalRegisteredCacheKeyGenerator),
+            ServerTimeSpan = 100)]
         public string Get_internalregistered()
         {
             return "test";
+        }
+
+        private class UnregisteredCacheKeyGenerator : ICacheKeyGenerator
+        {
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType,
+                bool excludeQueryString = false)
+            {
+                return "unregistered";
+            }
         }
     }
 }

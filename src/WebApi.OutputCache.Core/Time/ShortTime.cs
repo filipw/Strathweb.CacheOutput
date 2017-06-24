@@ -4,8 +4,8 @@ namespace WebApi.OutputCache.Core.Time
 {
     public class ShortTime : IModelQuery<DateTime, CacheTime>
     {
-        private readonly int serverTimeInSeconds;
         private readonly int clientTimeInSeconds;
+        private readonly int serverTimeInSeconds;
         private readonly int? sharedTimeInSecounds;
 
         public ShortTime(int serverTimeInSeconds, int clientTimeInSeconds, int? sharedTimeInSecounds)
@@ -32,7 +32,9 @@ namespace WebApi.OutputCache.Core.Time
             {
                 AbsoluteExpiration = model.AddSeconds(serverTimeInSeconds),
                 ClientTimeSpan = TimeSpan.FromSeconds(clientTimeInSeconds),
-                SharedTimeSpan = sharedTimeInSecounds.HasValue ? (TimeSpan?)TimeSpan.FromSeconds(sharedTimeInSecounds.Value) : null
+                SharedTimeSpan = sharedTimeInSecounds.HasValue
+                    ? (TimeSpan?) TimeSpan.FromSeconds(sharedTimeInSecounds.Value)
+                    : null
             };
 
             return cacheTime;

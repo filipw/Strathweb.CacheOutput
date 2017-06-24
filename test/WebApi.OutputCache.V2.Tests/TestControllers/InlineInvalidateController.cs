@@ -39,7 +39,8 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Post()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey(this.GetType().FullName, "Get_c100_s100"));
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration()
+                .MakeBaseCachekey(GetType().FullName, "Get_c100_s100"));
 
             //do nothing
         }
@@ -47,7 +48,8 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Put()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100()));
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration()
+                .MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100()));
 
             //do nothing
         }
@@ -55,13 +57,15 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public void Delete_non_standard_name()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration()
+                .MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));
         }
 
         public void Delete_parameterized()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100_with_param(7)));
+            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration()
+                .MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100_with_param(7)));
 
             //do nothing
         }

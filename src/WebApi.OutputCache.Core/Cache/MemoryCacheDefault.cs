@@ -50,11 +50,9 @@ namespace WebApi.OutputCache.Core.Cache
             };
 
             if (!string.IsNullOrWhiteSpace(dependsOnKey))
-            {
                 cachePolicy.ChangeMonitors.Add(
-                    Cache.CreateCacheEntryChangeMonitor(new[] { dependsOnKey })
+                    Cache.CreateCacheEntryChangeMonitor(new[] {dependsOnKey})
                 );
-            }
             lock (Cache)
             {
                 Cache.Add(key, o, cachePolicy);
@@ -63,10 +61,7 @@ namespace WebApi.OutputCache.Core.Cache
 
         public virtual IEnumerable<string> AllKeys
         {
-            get
-            {
-                return Cache.Select(x => x.Key);
-            }
+            get { return Cache.Select(x => x.Key); }
         }
     }
 }

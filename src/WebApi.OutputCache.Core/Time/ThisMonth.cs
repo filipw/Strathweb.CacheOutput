@@ -22,11 +22,11 @@ namespace WebApi.OutputCache.Core.Time
             var cacheTime = new CacheTime
             {
                 AbsoluteExpiration = new DateTime(model.Year,
-                                                      model.Month,
-                                                      day,
-                                                      hour,
-                                                      minute,
-                                                      second),
+                    model.Month,
+                    day,
+                    hour,
+                    minute,
+                    second)
             };
 
             if (cacheTime.AbsoluteExpiration <= model)
