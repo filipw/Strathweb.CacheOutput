@@ -11,8 +11,8 @@ namespace WebApi.OutputCache.V2.TimeAttributes
         /// <param name="minute">45</param>
         /// <param name="second">0</param>
         public CacheOutputUntilToday(int hour = 23,
-                                     int minute = 59,
-                                     int second = 59)
+            int minute = 59,
+            int second = 59)
         {
             CacheTimeQuery = new ThisDay(hour, minute, second);
         }

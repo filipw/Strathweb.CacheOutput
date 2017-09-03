@@ -29,7 +29,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             //this should not invalidate
         }
 
-        public void PostString([FromBody]string x)
+        public void PostString([FromBody] string x)
         {
             //this should invalidate string & ienumerable<string>
         }

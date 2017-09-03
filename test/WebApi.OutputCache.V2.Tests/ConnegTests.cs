@@ -11,12 +11,8 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ConnegTests
+    public class ConnegTests : IDisposable
     {
-        private HttpServer _server;
-        private string _url = "http://www.strathweb.com/api/sample/";
-        private Mock<IApiOutputCache> _cache;
-
         [SetUp]
         public void init()
         {
@@ -28,12 +24,44 @@ namespace WebApi.OutputCache.V2.Tests
 
             conf.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
             conf.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-                );
+                "DefaultApi",
+                "api/{controller}/{action}/{id}",
+                new {id = RouteParameter.Optional}
+            );
 
             _server = new HttpServer(conf);
+        }
+
+        [TearDown]
+        public void fixture_dispose()
+        {
+            if (_server != null) _server.Dispose();
+        }
+
+        private HttpServer _server;
+        private readonly string _url = "http://www.strathweb.com/api/sample/";
+        private Mock<IApiOutputCache> _cache;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~ConnegTests()
+        {
+            // Finalizer calls Dispose(false)
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
         }
 
         [Test]
@@ -42,22 +70,39 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
+            _cache.Verify(
+                s => s.Contains(It.Is<string>(
+                    x => x ==
+                         "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")),
+                Times.Exactly(2));
+            _cache.Verify(
+                s => s.Add(
+                    It.Is<string>(
+                        x => x ==
+                             "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"),
+                    It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")),
+                Times.Once());
 
             var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_c100_s100");
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/xml"));
 
             var result2 = client.SendAsync(req).Result;
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
-
-        }
-            
-        [TearDown]
-        public void fixture_dispose()
-        {
-            if (_server != null) _server.Dispose();
+            _cache.Verify(
+                s => s.Contains(It.Is<string>(
+                    x => x ==
+                         "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8")),
+                Times.Exactly(2));
+            _cache.Verify(
+                s => s.Add(
+                    It.Is<string>(
+                        x => x ==
+                             "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"),
+                    It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")),
+                Times.Once());
         }
     }
 }

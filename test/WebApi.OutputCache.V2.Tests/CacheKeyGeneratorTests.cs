@@ -13,22 +13,8 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    class CacheKeyGeneratorTests
+    internal class CacheKeyGeneratorTests : IDisposable
     {
-        public class CustomCacheKeyGenerator : ICacheKeyGenerator
-        {
-            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
-            {
-                return "custom_key";
-            }
-        }
-
-        private HttpServer _server;
-        private string _url = "http://www.strathweb.com/api/";
-        private Mock<IApiOutputCache> _cache;
-        private Mock<ICacheKeyGenerator> _keyGeneratorA;
-        private CustomCacheKeyGenerator _keyGeneratorB;
-
         [SetUp]
         public void init()
         {
@@ -47,29 +33,49 @@ namespace WebApi.OutputCache.V2.Tests
 
             conf.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
             conf.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-                );
+                "DefaultApi",
+                "api/{controller}/{action}/{id}",
+                new {id = RouteParameter.Optional}
+            );
 
             _server = new HttpServer(conf);
         }
 
-        [Test]
-        public void custom_default_cache_key_generator_called_and_key_used()
+        public class CustomCacheKeyGenerator : ICacheKeyGenerator
         {
-            var client = new HttpClient(_server);
-            _keyGeneratorA.Setup(k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<bool>()))
-                .Returns("keykeykey")
-                .Verifiable("Key generator was never called");
-            // use the samplecontroller to show that no changes are required to existing code
-            var result = client.GetAsync(_url + "sample/Get_c100_s100").Result;
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType,
+                bool excludeQueryString = false)
+            {
+                return "custom_key";
+            }
+        }
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "keykeykey")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "keykeykey:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
-            
-            _keyGeneratorA.VerifyAll();
+        private HttpServer _server;
+        private readonly string _url = "http://www.strathweb.com/api/";
+        private Mock<IApiOutputCache> _cache;
+        private Mock<ICacheKeyGenerator> _keyGeneratorA;
+        private CustomCacheKeyGenerator _keyGeneratorB;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~CacheKeyGeneratorTests()
+        {
+            // Finalizer calls Dispose(false)
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
         }
 
         [Test]
@@ -79,8 +85,46 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "cachekey/get_custom_key").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "custom_key")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")), Times.Once());
+            _cache.Verify(
+                s => s.Add(It.Is<string>(x => x == "custom_key"), It.IsAny<byte[]>(),
+                    It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")),
+                Times.Once());
+            _cache.Verify(
+                s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(),
+                    It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_custom_key")),
+                Times.Once());
+        }
+
+        [Test]
+        public void custom_default_cache_key_generator_called_and_key_used()
+        {
+            var client = new HttpClient(_server);
+            _keyGeneratorA.Setup(k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(),
+                    It.IsAny<bool>()))
+                .Returns("keykeykey")
+                .Verifiable("Key generator was never called");
+            // use the samplecontroller to show that no changes are required to existing code
+            var result = client.GetAsync(_url + "sample/Get_c100_s100").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "keykeykey")), Times.Exactly(2));
+            _cache.Verify(
+                s => s.Add(It.Is<string>(x => x == "keykeykey"), It.IsAny<byte[]>(),
+                    It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")),
+                Times.Once());
+            _cache.Verify(
+                s => s.Add(It.Is<string>(x => x == "keykeykey:response-ct"), It.IsAny<object>(),
+                    It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)),
+                    It.Is<string>(
+                        x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")),
+                Times.Once());
+
+            _keyGeneratorA.VerifyAll();
         }
     }
 }

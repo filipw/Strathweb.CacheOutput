@@ -20,14 +20,14 @@ namespace WebApi.OutputCache.Core.Time
         public CacheTime Execute(DateTime model)
         {
             var cacheTime = new CacheTime
-                {
-                    AbsoluteExpiration = new DateTime(model.Year,
-                                                      model.Month,
-                                                      day,
-                                                      hour,
-                                                      minute,
-                                                      second),
-                };
+            {
+                AbsoluteExpiration = new DateTime(model.Year,
+                    model.Month,
+                    day,
+                    hour,
+                    minute,
+                    second)
+            };
 
             if (cacheTime.AbsoluteExpiration <= model)
                 cacheTime.AbsoluteExpiration = cacheTime.AbsoluteExpiration.AddMonths(1);

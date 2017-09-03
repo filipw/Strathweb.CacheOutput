@@ -1,22 +1,23 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2
 {
     public class DefaultCacheKeyGenerator : ICacheKeyGenerator
     {
-        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
+        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType,
+            bool excludeQueryString = false)
         {
             var controller = context.ControllerContext.ControllerDescriptor.ControllerType.FullName;
             var action = context.ActionDescriptor.ActionName;
-            var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
-            var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+            var key = context.Request.GetConfiguration().CacheOutputConfiguration()
+                .MakeBaseCachekey(controller, action);
+            var actionParameters = context.ActionArguments.Where(x => x.Value != null)
+                .Select(x => x.Key + "=" + GetValue(x.Value));
 
             string parameters;
 
@@ -24,8 +25,8 @@ namespace WebApi.OutputCache.V2
             {
                 var queryStringParameters =
                     context.Request.GetQueryNameValuePairs()
-                           .Where(x => x.Key.ToLower() != "callback")
-                           .Select(x => x.Key + "=" + x.Value);
+                        .Where(x => x.Key.ToLower() != "callback")
+                        .Select(x => x.Key + "=" + x.Value);
                 var parametersCollections = actionParameters.Union(queryStringParameters);
                 parameters = "-" + string.Join("&", parametersCollections);
 
@@ -33,9 +34,12 @@ namespace WebApi.OutputCache.V2
                 if (!string.IsNullOrWhiteSpace(callbackValue))
                 {
                     var callback = "callback=" + callbackValue;
-                    if (parameters.Contains("&" + callback)) parameters = parameters.Replace("&" + callback, string.Empty);
-                    if (parameters.Contains(callback + "&")) parameters = parameters.Replace(callback + "&", string.Empty);
-                    if (parameters.Contains("-" + callback)) parameters = parameters.Replace("-" + callback, string.Empty);
+                    if (parameters.Contains("&" + callback))
+                        parameters = parameters.Replace("&" + callback, string.Empty);
+                    if (parameters.Contains(callback + "&"))
+                        parameters = parameters.Replace(callback + "&", string.Empty);
+                    if (parameters.Contains("-" + callback))
+                        parameters = parameters.Replace("-" + callback, string.Empty);
                     if (parameters.EndsWith("&")) parameters = parameters.TrimEnd('&');
                 }
             }
@@ -72,7 +76,8 @@ namespace WebApi.OutputCache.V2
             {
                 var concatValue = string.Empty;
                 var paramArray = val as IEnumerable;
-                return paramArray.Cast<object>().Aggregate(concatValue, (current, paramValue) => current + (paramValue + ";"));
+                return paramArray.Cast<object>().Aggregate(concatValue,
+                    (current, paramValue) => current + (paramValue + ";"));
             }
             return val.ToString();
         }

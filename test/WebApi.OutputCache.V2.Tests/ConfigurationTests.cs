@@ -8,37 +8,47 @@ using WebApi.OutputCache.Core.Cache;
 namespace WebApi.OutputCache.V2.Tests
 {
     [TestFixture]
-    public class ConfigurationTests
+    public class ConfigurationTests : IDisposable
     {
         private HttpServer _server;
-        private string _url = "http://www.strathweb.com/api/sample/";
+        private readonly string _url = "http://www.strathweb.com/api/sample/";
         private Mock<IApiOutputCache> _cache;
 
-        [Test]
-        public void cache_singleton_in_pipeline()
+        public void Dispose()
         {
-            _cache = new Mock<IApiOutputCache>();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
+        ~ConfigurationTests()
+        {
+            // Finalizer calls Dispose(false)
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+                if (_server != null)
+                {
+                    _server.Dispose();
+                    _server = null;
+                }
+        }
+
+        [Test]
+        public void cache_instance()
+        {
             var conf = new HttpConfiguration();
-            conf.CacheOutputConfiguration().RegisterCacheOutputProvider(() => _cache.Object);
+            conf.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MemoryCacheDefault());
 
-            conf.Routes.MapHttpRoute(
-                name: "DefaultApi",
-                routeTemplate: "api/{controller}/{action}/{id}",
-                defaults: new { id = RouteParameter.Optional }
-                );
+            object cache1;
+            conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache1);
 
-            _server = new HttpServer(conf);
+            object cache2;
+            conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache2);
 
-            var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_c100_s100").Result;
-
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
-
-            var result2 = client.GetAsync(_url + "Get_c100_s100").Result;
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(4));
-
-            _server.Dispose();
+            Assert.AreNotSame(((Func<IApiOutputCache>) cache1)(), ((Func<IApiOutputCache>) cache2)());
         }
 
         [Test]
@@ -55,22 +65,42 @@ namespace WebApi.OutputCache.V2.Tests
             object cache2;
             conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache2);
 
-            Assert.AreSame(((Func<IApiOutputCache>)cache1)(), ((Func<IApiOutputCache>)cache2)());
+            Assert.AreSame(((Func<IApiOutputCache>) cache1)(), ((Func<IApiOutputCache>) cache2)());
         }
 
         [Test]
-        public void cache_instance()
+        public void cache_singleton_in_pipeline()
         {
+            _cache = new Mock<IApiOutputCache>();
+
             var conf = new HttpConfiguration();
-            conf.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MemoryCacheDefault());
+            conf.CacheOutputConfiguration().RegisterCacheOutputProvider(() => _cache.Object);
 
-            object cache1;
-            conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache1);
+            conf.Routes.MapHttpRoute(
+                "DefaultApi",
+                "api/{controller}/{action}/{id}",
+                new {id = RouteParameter.Optional}
+            );
 
-            object cache2;
-            conf.Properties.TryGetValue(typeof(IApiOutputCache), out cache2);
+            _server = new HttpServer(conf);
 
-            Assert.AreNotSame(((Func<IApiOutputCache>)cache1)(), ((Func<IApiOutputCache>)cache2)());
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c100_s100").Result;
+
+            _cache.Verify(
+                s => s.Contains(It.Is<string>(
+                    x => x ==
+                         "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")),
+                Times.Exactly(2));
+
+            var result2 = client.GetAsync(_url + "Get_c100_s100").Result;
+            _cache.Verify(
+                s => s.Contains(It.Is<string>(
+                    x => x ==
+                         "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")),
+                Times.Exactly(4));
+
+            _server.Dispose();
         }
     }
 }
