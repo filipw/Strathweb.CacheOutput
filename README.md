@@ -125,6 +125,18 @@ So you either should use unique method names inside a single controller, or (if 
             return Teams;
         }
 
+If you want to bypass the content negotiation process, you can do so by using the `MediaType` property:
+
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50, MediaType = "image/jpeg")]
+        public HttpResponseMessage Get(int id)
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            response.Content = GetImage(id); // e.g. StreamContent, ByteArrayContent,...
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            return response;
+        }
+
+This will always return a response with `image/jpeg` as value for the `Content-Type` header.
 
 Ignoring caching
 --------------------

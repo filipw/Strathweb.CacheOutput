@@ -49,7 +49,7 @@ namespace WebApi.OutputCache.V2
         /// </summary>
         public int ClientTimeSpan { get; set; }
 
-
+        
         private int? _sharedTimeSpan = null;
 
         /// <summary>
@@ -80,7 +80,12 @@ namespace WebApi.OutputCache.V2
         /// Class used to generate caching keys
         /// </summary>
         public Type CacheKeyGenerator { get; set; }
-        
+
+        /// <summary>
+        /// If set to something else than an empty string, this value will always be used for the Content-Type header, regardless of content negotiation.
+        /// </summary>
+        public string MediaType { get; set; }
+
         // cache repository
         private IApiOutputCache _webApiCache;
 
@@ -121,6 +126,11 @@ namespace WebApi.OutputCache.V2
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
         {
+            if (!string.IsNullOrEmpty(MediaType))
+            {
+                return new MediaTypeHeaderValue(MediaType);
+            }
+
             MediaTypeHeaderValue responseMediaType = null;
 
             var negotiator = config.Services.GetService(typeof(IContentNegotiator)) as IContentNegotiator;

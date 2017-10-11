@@ -338,6 +338,19 @@ namespace WebApi.OutputCache.V2.Tests
         //    _cache.Verify(s => s.Add(It.Is<string>(x => x == "custom_key:response-ct"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "cachekey-get_custom_key")), Times.Once());
         //}
 
+        [Test]
+        public void override_mediatype()
+        {
+            var client = new HttpClient(_server);
+            var req = new HttpRequestMessage(HttpMethod.Get, _url + "Get_c50_s50_image");
+            var result = client.SendAsync(req).Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image:image/jpeg")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image:image/jpeg"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image")), Times.Once());
+            Assert.That(result.Content.Headers.ContentType, Is.EqualTo(new MediaTypeHeaderValue("image/jpeg")));
+        }
+
         [TearDown]
         public void fixture_dispose()
         {
