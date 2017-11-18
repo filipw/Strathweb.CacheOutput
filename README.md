@@ -32,73 +32,82 @@ For Web API 1 (.NET 4.0)
 Usage
 --------------------
 
-	//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds
-        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+```csharp
+//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds
+[CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100)]
+public IEnumerable<string> Get()
+{
+    return new string[] { "value1", "value2" };
+}
 
-	//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds. Cache for anonymous users only.
-        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, AnonymousOnly = true)]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+//Cache for 100 seconds on the server, inform the client that response is valid for 100 seconds. Cache for anonymous users only.
+[CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, AnonymousOnly = true)]
+public IEnumerable<string> Get()
+{
+    return new string[] { "value1", "value2" };
+}
 
-	//Inform the client that response is valid for 50 seconds. Force client to revalidate.
-        [CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+//Inform the client that response is valid for 50 seconds. Force client to revalidate.
+[CacheOutput(ClientTimeSpan = 50, MustRevalidate = true)]
+public string Get(int id)
+{
+    return "value";
+}
 
-	//Cache for 50 seconds on the server. Ignore querystring parameters when serving cached content.
-        [CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = true)]
-        public string Get(int id)
-        {
-            return "value";
-        }
+//Cache for 50 seconds on the server. Ignore querystring parameters when serving cached content.
+[CacheOutput(ServerTimeSpan = 50, ExcludeQueryStringFromCacheKey = true)]
+public string Get(int id)
+{
+    return "value";
+}
+```
 
 
 Variations
 --------------------
 *CacheOutputUntil* is used to cache data until a specific moment in time. This applies to both client and server.
-	
-	//Cache until 01/25/2013 17:00
-        [CacheOutputUntil(2013,01,25,17,00)]
-        public string Get_until25012013_1700()
-        {
-            return "test";
-        }
 
+```csharp
+//Cache until 01/25/2013 17:00
+[CacheOutputUntil(2013,01,25,17,00)]
+public string Get_until25012013_1700()
+{
+    return "test";
+}
+```
 
 *CacheOutputUntilToday* is used to cache data until a specific hour later on the same day. This applies to both client and server.
 
-	//Cache until 23:55:00 today
-        [CacheOutputUntilToday(23,55)]
-        public string Get_until2355_today()
-        {
-            return "value";
-        }
+```csharp
+//Cache until 23:55:00 today
+[CacheOutputUntilToday(23,55)]
+public string Get_until2355_today()
+{
+    return "value";
+}
+```
 
 *CacheOutputUntilThisMonth* is used to cache data until a specific point later this month. This applies to both client and server.
 
-	//Cache until the 31st day of the current month
-        [CacheOutputUntilThisMonth(31)]
-        public string Get_until31_thismonth()
-        {
-            return "value";
-        }
+```csharp
+//Cache until the 31st day of the current month
+[CacheOutputUntilThisMonth(31)]
+public string Get_until31_thismonth()
+{
+    return "value";
+}
+```
 
 *CacheOutputUntilThisYear* is used to cache data until a specific point later this year. This applies to both client and server.
 
-	//Cache until the 31st of July this year
-        [CacheOutputUntilThisYear(7,31)]
-        public string Get_until731_thisyear()
-        {
-            return "value";
-        }
+```csharp
+//Cache until the 31st of July this year
+[CacheOutputUntilThisYear(7,31)]
+public string Get_until731_thisyear()
+{
+    return "value";
+}
+```
 
 Each of these can obviously be combined with the 5 general properties mentioned in the beginning.
 
@@ -112,29 +121,33 @@ Each individual content type response is cached separately (so out of the box, y
 
 So you either should use unique method names inside a single controller, or (if you really want to keep them the same names when overloading) you need to use *ActionName* attribute to provide uniqeness for caching. Example:
 
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Team> Get()
-        {
-            return Teams;
-        }
+```csharp
+[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+public IEnumerable<Team> Get()
+{
+    return Teams;
+}
 
-        [ActionName("GetById")]
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Team> Get(int id)
-        {
-            return Teams;
-        }
+[ActionName("GetById")]
+[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+public IEnumerable<Team> Get(int id)
+{
+    return Teams;
+}
+```
 
 If you want to bypass the content negotiation process, you can do so by using the `MediaType` property:
 
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50, MediaType = "image/jpeg")]
-        public HttpResponseMessage Get(int id)
-        {
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = GetImage(id); // e.g. StreamContent, ByteArrayContent,...
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            return response;
-        }
+```csharp
+[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50, MediaType = "image/jpeg")]
+public HttpResponseMessage Get(int id)
+{
+    var response = new HttpResponseMessage(HttpStatusCode.OK);
+    response.Content = GetImage(id); // e.g. StreamContent, ByteArrayContent,...
+    response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+    return response;
+}
+```
 
 This will always return a response with `image/jpeg` as value for the `Content-Type` header.
 
@@ -144,59 +157,70 @@ You can set up caching globally (add the caching filter to `HttpConfiguration`) 
 
 You can still instruct a specific action to opt out from caching by using `[IgnoreCacheOutput]` attribute.
 
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public class IgnoreController : ApiController
-        {
-            [Route("cached")]
-            public string GetCached()
-            {
-                return DateTime.Now.ToString();
-            }
+```csharp
+[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+public class IgnoreController : ApiController
+{
+    [Route("cached")]
+    public string GetCached()
+    {
+	return DateTime.Now.ToString();
+    }
 
-            [IgnoreCacheOutput]
-            [Route("uncached")]
-            public string GetUnCached()
-            {
-                return DateTime.Now.ToString();
-            }
-        }
+    [IgnoreCacheOutput]
+    [Route("uncached")]
+    public string GetUnCached()
+    {
+	return DateTime.Now.ToString();
+    }
+}
+```
 
 Server side caching
 --------------------
 By default **CacheOutput** will use *System.Runtime.Caching.MemoryCache* to cache on the server side. However, you are free to swap this with anything else
 (static Dictionary, Memcached, Redis, whatever..) as long as you implement the following *IApiOutputCache* interface (part of the distributed assembly).
 
-    public interface IApiOutputCache
-    {
-        T Get<T>(string key) where T : class;
-        object Get(string key);
-        void Remove(string key);
-        void RemoveStartsWith(string key);
-        bool Contains(string key);
-        void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
-    }
+```csharp
+public interface IApiOutputCache
+{
+	T Get<T>(string key) where T : class;
+	object Get(string key);
+	void Remove(string key);
+	void RemoveStartsWith(string key);
+	bool Contains(string key);
+	void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
+}
+``
 
 Suppose you have a custom implementation:
 
-    public class MyCache : IApiOutputCache {
-      //omitted for brevity
-    }
+```csharp
+public class MyCache : IApiOutputCache
+{
+	// omitted for brevity
+}
+```
 
 You can register your implementation using a handy *GlobalConfiguration* extension method:
 
-    //instance
-    configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MyCache());
+```csharp
+//instance
+configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => new MyCache());
 
-    //singleton
-    var cache = new MyCache();
-    configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => cache);	
+// singleton
+var cache = new MyCache();
+configuration.CacheOutputConfiguration().RegisterCacheOutputProvider(() => cache);
+```
 
 If you prefer **CacheOutput** to use resolve the cache implementation directly from your dependency injection provider, that's also possible. Simply register your *IApiOutputCache* implementation in your Web API DI and that's it. Whenever **CacheOutput** does not find an implementation in the *GlobalConiguration*, it will fall back to the DI resolver. Example (using Autofac for Web API):
 
-    cache = new MyCache();
-    var builder = new ContainerBuilder();
-    builder.RegisterInstance(cache);
-    config.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
+```csharp
+cache = new MyCache();
+var builder = new ContainerBuilder();
+builder.RegisterInstance(cache);
+config.DependencyResolver = new AutofacWebApiDependencyResolver(builder.Build());
+```
 
 If no implementation is available in neither *GlobalConfiguration* or *DependencyResolver*, we will default to *System.Runtime.Caching.MemoryCache*.
 
@@ -215,20 +239,22 @@ There are three ways to invalidate cache:
 
 Example:
 
-    [AutoInvalidateCacheOutput]
-    public class Teams2Controller : ApiController
-    {
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Team> Get()
-        {
-            return Teams;
-        }
+```csharp
+[AutoInvalidateCacheOutput]
+public class Teams2Controller : ApiController
+{
+	[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+	public IEnumerable<Team> Get()
+	{
+	    return Teams;
+	}
 
-        public void Post(Team value)
-        {
-            //do stuff
-        }
-    }
+	public void Post(Team value)
+	{
+	    //do stuff
+	}
+}
+```
 
 Decorating the controller with [AutoInvalidateCacheOutput] will automatically flush all cached *GET* data from this controller after a successfull *POST*/*PUT*/*DELETE* request.
 
@@ -236,79 +262,89 @@ You can also use the [AutoInvalidateCacheOutput(TryMatchType = true)] variation.
 
 For example:
 
-    [AutoInvalidateCacheOutput(TryMatchType = true)]
-    public class TeamsController : ApiController
-    {
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Team> Get()
-        {
-            return Teams;
-        }
+```csharp
+[AutoInvalidateCacheOutput(TryMatchType = true)]
+public class TeamsController : ApiController
+{
+	[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+	public IEnumerable<Team> Get()
+	{
+	    return Teams;
+	}
 
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Player> GetTeamPlayers(int id)
-        {
-            //return something
-        }
+	[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+	public IEnumerable<Player> GetTeamPlayers(int id)
+	{
+	    //return something
+	}
 
-        public void Post(Team value)
-        {
-            //this will only invalidate Get, not GetTeamPlayers since TryMatchType is enabled
-        }
-    }
+	public void Post(Team value)
+	{
+	    //this will only invalidate Get, not GetTeamPlayers since TryMatchType is enabled
+	}
+}
+```
 
 Invalidation on action level is similar - done through attributes. For example:
 
-    public class TeamsController : ApiController
-    {
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Team> Get()
-        {
-            return Teams;
-        }
+```csharp
+public class TeamsController : ApiController
+{
+	[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+	public IEnumerable<Team> Get()
+	{
+	    return Teams;
+	}
 
-        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
-        public IEnumerable<Player> GetTeamPlayers(int id)
-        {
-            //return something
-        }
+	[CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50)]
+	public IEnumerable<Player> GetTeamPlayers(int id)
+	{
+	    //return something
+	}
 
-        [InvalidateCacheOutput("Get")]
-        public void Post(Team value)
-        {
-            //this invalidates Get action cache
-        }
-    }
+	[InvalidateCacheOutput("Get")]
+	public void Post(Team value)
+	{
+	    //this invalidates Get action cache
+	}
+}
+```
 
 Obviously, multiple attributes are supported. You can also invalidate methods from separate controller:
 
-        [InvalidateCacheOutput("Get", typeof(OtherController))] //this will invalidate Get in a different controller
-        [InvalidateCacheOutput("Get")] //this will invalidate Get in this controller
-        public void Post(Team value)
-        {
-            //do stuff
-        }
+```csharp
+[InvalidateCacheOutput("Get", typeof(OtherController))] //this will invalidate Get in a different controller
+[InvalidateCacheOutput("Get")] //this will invalidate Get in this controller
+public void Post(Team value)
+{
+    //do stuff
+}
+```
 
 Finally, you can also invalidate manually. For example:
 
-        public void Put(int id, Team value)
-        {
-            //do stuff, update resource etc.
+```csharp
+public void Put(int id, Team value)
+{
+    // do stuff, update resource etc.
 
-            //now get cache instance
-            var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
+    // now get cache instance
+    var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
 
-            //and invalidate cache for method "Get" of "TeamsController"
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.Get()));
-        }
+    // and invalidate cache for method "Get" of "TeamsController"
+    cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.Get()));
+}
+```
 
 As you see, you can we use expression try to allow you to point to the method in a strongly typed way (we can't unfortunately do that in the attributes, since C# doesn't support lambdas/expression trees in attributes). 
 
 If your method takes in arguments, you can pass whatever - we only use the expression tree to get the name of the controller and the name of the action - and we invalidate all variations.
 
 You can also point to the method in a traditional way:
-            
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey("TeamsController","Get"));
+
+```csharp
+cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey("TeamsController", "Get"));
+```
 
 Customizing the cache keys
 --------------------------
