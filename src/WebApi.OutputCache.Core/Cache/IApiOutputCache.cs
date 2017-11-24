@@ -19,5 +19,7 @@ namespace WebApi.OutputCache.Core.Cache
         void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
 
         IEnumerable<string> AllKeys { get; }
+
+        IEnumerable<string> FindKeysStartingWith(string prefix);
     }
 }
