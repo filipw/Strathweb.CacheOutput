@@ -166,7 +166,7 @@ namespace WebApi.OutputCache.V2
             return responseMediaType;
         }
 
-        public override void OnActionExecuting(HttpActionContext actionContext)
+        public override async Task OnActionExecutingAsync(HttpActionContext actionContext, CancellationToken cancellationToken)
         {
             if (actionContext == null) throw new ArgumentNullException("actionContext");
 
@@ -183,11 +183,11 @@ namespace WebApi.OutputCache.V2
             actionContext.Request.Properties[CurrentRequestMediaType] = responseMediaType;
             var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
-            if (!_webApiCache.Contains(cachekey)) return;
+            if (await _webApiCache.ContainsAsync(cachekey) == false) return;
 
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
-                var etag = _webApiCache.Get<string>(cachekey + Constants.EtagKey);
+                var etag = await _webApiCache.GetAsync<string>(cachekey + Constants.EtagKey);
                 if (etag != null)
                 {
                     if (actionContext.Request.Headers.IfNoneMatch.Any(x => x.Tag ==  etag))
@@ -203,11 +203,11 @@ namespace WebApi.OutputCache.V2
                 }
             }
 
-            var val = _webApiCache.Get<byte[]>(cachekey);
+            var val = await _webApiCache.GetAsync<byte[]>(cachekey);
             if (val == null) return;
 
-            var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? responseMediaType;
-            var contentGeneration = _webApiCache.Get<string>(cachekey + Constants.GenerationTimestampKey);
+            var contenttype = await _webApiCache.GetAsync<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? responseMediaType;
+            var contentGeneration = await _webApiCache.GetAsync<string>(cachekey + Constants.GenerationTimestampKey);
 
             DateTimeOffset? contentGenerationTimestamp = null;
             if (contentGeneration != null)
@@ -222,7 +222,7 @@ namespace WebApi.OutputCache.V2
             actionContext.Response.Content = new ByteArrayContent(val);
 
             actionContext.Response.Content.Headers.ContentType = contenttype;
-            var responseEtag = _webApiCache.Get<string>(cachekey + Constants.EtagKey);
+            var responseEtag = await _webApiCache.GetAsync<string>(cachekey + Constants.EtagKey);
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
@@ -246,7 +246,7 @@ namespace WebApi.OutputCache.V2
                 var responseMediaType = actionExecutedContext.Request.Properties[CurrentRequestMediaType] as MediaTypeHeaderValue ?? GetExpectedMediaType(httpConfig, actionExecutedContext.ActionContext);
                 var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
 
-                if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
+                if (!string.IsNullOrWhiteSpace(cachekey) && !(await _webApiCache.ContainsAsync(cachekey)))
                 {
                     SetEtag(actionExecutedContext.Response, CreateEtag(actionExecutedContext, cachekey, cacheTime));
 
@@ -262,16 +262,14 @@ namespace WebApi.OutputCache.V2
 
                         responseContent.Headers.Remove("Content-Length");
 
-                        _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                        _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
-
+                        await _webApiCache.AddAsync(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
+                        await _webApiCache.AddAsync(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
                        
-                        _webApiCache.Add(cachekey + Constants.ContentTypeKey,
+                        await _webApiCache.AddAsync(cachekey + Constants.ContentTypeKey,
                                         contentType,
                                         cacheTime.AbsoluteExpiration, baseKey);
-
-                       
-                        _webApiCache.Add(cachekey + Constants.EtagKey,
+                        
+                        await _webApiCache.AddAsync(cachekey + Constants.EtagKey,
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
 

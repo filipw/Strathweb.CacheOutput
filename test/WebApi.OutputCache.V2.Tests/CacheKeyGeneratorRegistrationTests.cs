@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using Autofac;
@@ -26,6 +27,8 @@ namespace WebApi.OutputCache.V2.Tests
             Thread.CurrentPrincipal = null;
 
             _cache = new Mock<IApiOutputCache>();
+            _cache.Setup(cache => cache.ContainsAsync(It.IsAny<string>())).Returns(Task.FromResult(It.IsAny<bool>()));
+            _cache.Setup(cache => cache.AddAsync(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>())).Returns(Task.FromResult(default(object)));
             _keyGenerator = new Mock<ICacheKeyGenerator>();
 
             var conf = new HttpConfiguration();
@@ -89,7 +92,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "cachekey/get_internalregistered").Result;
 
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "internal"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_internalregistered")), Times.Once());
+            _cache.Verify(s => s.AddAsync(It.Is<string>(x => x == "internal"), It.IsAny<byte[]>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.cachekeycontroller-get_internalregistered")), Times.Once());
         }
 
         [Test]
@@ -98,7 +101,7 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "cachekey/get_unregistered").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "unregistered")), Times.Once());
+            _cache.Verify(s => s.ContainsAsync(It.Is<string>(x => x == "unregistered")), Times.Once());
         }
 
         #region Helper classes

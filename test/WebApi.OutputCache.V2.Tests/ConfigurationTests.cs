@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Moq;
 using NUnit.Framework;
@@ -18,6 +19,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void cache_singleton_in_pipeline()
         {
             _cache = new Mock<IApiOutputCache>();
+            _cache.Setup(cache => cache.ContainsAsync(It.IsAny<string>())).Returns(Task.FromResult(It.IsAny<bool>()));
 
             var conf = new HttpConfiguration();
             conf.CacheOutputConfiguration().RegisterCacheOutputProvider(() => _cache.Object);
@@ -33,10 +35,10 @@ namespace WebApi.OutputCache.V2.Tests
             var client = new HttpClient(_server);
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.ContainsAsync(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
 
             var result2 = client.GetAsync(_url + "Get_c100_s100").Result;
-            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(4));
+            _cache.Verify(s => s.ContainsAsync(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(4));
 
             _server.Dispose();
         }
