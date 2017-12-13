@@ -178,6 +178,22 @@ namespace WebApi.OutputCache.V2.Tests
             Assert.IsTrue(result.Headers.CacheControl.Private);
         }
 
+        [Test]
+        public void shared_max_age_header_correct()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c100_s100_sm200").Result;
+            Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge,TimeSpan.FromSeconds(200));
+        }
+
+        [Test]
+        public void shared_max_age_header_not_present()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "Get_c100_s100").Result;
+            Assert.AreEqual(result.Headers.CacheControl.SharedMaxAge, null);
+        }
+
         [TestFixtureTearDown]
         public void fixture_dispose()
         {

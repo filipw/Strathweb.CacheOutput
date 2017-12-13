@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using WebApi.OutputCache.V2.TimeAttributes;
 
@@ -134,6 +135,14 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return Request.CreateResponse(HttpStatusCode.Accepted);
         }
 
+        [CacheOutput(ClientTimeSpan = 50, ServerTimeSpan = 50, MediaType = "image/jpeg")]
+        public HttpResponseMessage Get_c50_s50_image()
+        {
+            var response = new HttpResponseMessage(HttpStatusCode.OK) {Content = new ByteArrayContent(new byte[0])};
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            return response;
+        }
+
         [InvalidateCacheOutput("Get_c100_s100")]
         public void Post()
         {
@@ -152,5 +161,12 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         {
             return Ok("value");
         }
+
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, SharedTimeSpan = 200)]
+        public string Get_c100_s100_sm200()
+        {
+            return "test";
+        }
+
     }
 }
