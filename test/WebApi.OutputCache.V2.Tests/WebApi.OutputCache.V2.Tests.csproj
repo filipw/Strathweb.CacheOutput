@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="CacheKeyGeneratorRegistrationTests.cs" />
     <Compile Include="CacheKeyGeneratorTests.cs" />
+    <Compile Include="CacheKeyGenerationTestsBase.cs" />
     <Compile Include="ClientSideTests.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -83,6 +84,8 @@
     <Compile Include="ConnegTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PerUserCacheKeyGeneratorTests.cs" />
+    <Compile Include="DefaultCacheKeyGeneratorTests.cs" />
     <Compile Include="InlineInvalidateTests.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -95,6 +98,7 @@
     <Compile Include="TestControllers\AutoInvalidateController.cs" />
     <Compile Include="TestControllers\AutoInvalidateWithTypeController.cs" />
     <Compile Include="TestControllers\CacheKeyController.cs" />
+    <Compile Include="TestControllers\CacheKeyGenerationController.cs" />
     <Compile Include="TestControllers\IgnoreController.cs" />
     <Compile Include="TestControllers\InlineInvalidateController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
