@@ -1,1 +1,1 @@
-%systemroot%\Microsoft.Net\Framework\v4.0.30319\MSBuild.exe /m build.proj /t:%*
+"c:/Program Files (x86)/Microsoft Visual Studio/2017/Enterprise/MSBuild/15.0/Bin/msbuild.exe" /m build.proj /t:%*

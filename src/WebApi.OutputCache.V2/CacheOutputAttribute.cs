@@ -205,7 +205,16 @@ namespace WebApi.OutputCache.V2
             if (val == null) return;
 
             var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? responseMediaType;
-            var contentGenerationTimestamp = DateTimeOffset.Parse(_webApiCache.Get<string>(cachekey + Constants.GenerationTimestampKey));
+            var contentGeneration = _webApiCache.Get<string>(cachekey + Constants.GenerationTimestampKey);
+
+            DateTimeOffset? contentGenerationTimestamp = null;
+            if (contentGeneration != null)
+            {
+                if (DateTimeOffset.TryParse(contentGeneration, out DateTimeOffset parsedContentGenerationTimestamp))
+                {
+                    contentGenerationTimestamp = parsedContentGenerationTimestamp;
+                }
+            };
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
