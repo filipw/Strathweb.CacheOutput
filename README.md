@@ -191,7 +191,7 @@ public interface IApiOutputCache
 	bool Contains(string key);
 	void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
 }
-``
+```
 
 Suppose you have a custom implementation:
 

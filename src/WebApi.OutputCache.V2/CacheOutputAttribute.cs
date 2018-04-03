@@ -205,6 +205,7 @@ namespace WebApi.OutputCache.V2
             if (val == null) return;
 
             var contenttype = _webApiCache.Get<MediaTypeHeaderValue>(cachekey + Constants.ContentTypeKey) ?? responseMediaType;
+            var contentGenerationTimestamp = DateTimeOffset.Parse(_webApiCache.Get<string>(cachekey + Constants.GenerationTimestampKey));
 
             actionContext.Response = actionContext.Request.CreateResponse();
             actionContext.Response.Content = new ByteArrayContent(val);
@@ -214,7 +215,7 @@ namespace WebApi.OutputCache.V2
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            ApplyCacheHeaders(actionContext.Response, cacheTime);
+            ApplyCacheHeaders(actionContext.Response, cacheTime, contentGenerationTimestamp);
         }
 
         public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
@@ -223,8 +224,9 @@ namespace WebApi.OutputCache.V2
 
             if (!IsCachingAllowed(actionExecutedContext.ActionContext, AnonymousOnly)) return;
 
-            var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            if (cacheTime.AbsoluteExpiration > DateTime.Now)
+            var actionExecutionTimestamp = DateTimeOffset.Now;
+            var cacheTime = CacheTimeQuery.Execute(actionExecutionTimestamp.DateTime);
+            if (cacheTime.AbsoluteExpiration > actionExecutionTimestamp)
             {
                 var httpConfig = actionExecutedContext.Request.GetConfiguration();
                 var config = httpConfig.CacheOutputConfiguration();
@@ -261,14 +263,19 @@ namespace WebApi.OutputCache.V2
                         _webApiCache.Add(cachekey + Constants.EtagKey,
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
+
+
+                        _webApiCache.Add(cachekey + Constants.GenerationTimestampKey,
+                                        actionExecutionTimestamp.ToString(),
+                                        cacheTime.AbsoluteExpiration, baseKey);
                     }
                 }
             }
 
-            ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime);
+            ApplyCacheHeaders(actionExecutedContext.ActionContext.Response, cacheTime, actionExecutionTimestamp);
         }
 
-        protected virtual void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime)
+        protected virtual void ApplyCacheHeaders(HttpResponseMessage response, CacheTime cacheTime, DateTimeOffset? contentGenerationTimestamp = null)
         {
             if (cacheTime.ClientTimeSpan > TimeSpan.Zero || MustRevalidate || Private)
             {
@@ -286,6 +293,10 @@ namespace WebApi.OutputCache.V2
             {
                 response.Headers.CacheControl = new CacheControlHeaderValue { NoCache = true };
                 response.Headers.Add("Pragma", "no-cache");
+            }
+            if ((response.Content != null) && contentGenerationTimestamp.HasValue)
+            {
+                response.Content.Headers.LastModified = contentGenerationTimestamp.Value;
             }
         }
 

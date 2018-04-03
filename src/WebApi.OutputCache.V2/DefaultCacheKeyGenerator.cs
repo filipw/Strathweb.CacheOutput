@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2
@@ -13,9 +11,21 @@ namespace WebApi.OutputCache.V2
     {
         public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
         {
+            var key = MakeBaseKey(context);
+            var parameters = FormatParameters(context, excludeQueryString);
+
+            return string.Format("{0}{1}:{2}", key, parameters, mediaType);
+        }
+
+        protected virtual string MakeBaseKey(HttpActionContext context)
+        {
             var controller = context.ControllerContext.ControllerDescriptor.ControllerType.FullName;
             var action = context.ActionDescriptor.ActionName;
-            var key = context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
+            return context.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(controller, action);
+        }
+
+        protected virtual string FormatParameters(HttpActionContext context, bool excludeQueryString)
+        {
             var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
 
             string parameters;
@@ -45,9 +55,7 @@ namespace WebApi.OutputCache.V2
             }
 
             if (parameters == "-") parameters = string.Empty;
-
-            var cachekey = string.Format("{0}{1}:{2}", key, parameters, mediaType);
-            return cachekey;
+            return parameters;
         }
 
         private string GetJsonpCallback(HttpRequestMessage request)
