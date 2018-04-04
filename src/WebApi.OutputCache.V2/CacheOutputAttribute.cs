@@ -194,6 +194,8 @@ namespace WebApi.OutputCache.V2
                     {
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
+                        
+                        SetEtag(quickResponse, etag);
                         ApplyCacheHeaders(quickResponse, time);
                         actionContext.Response = quickResponse;
                         return;
