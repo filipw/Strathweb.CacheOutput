@@ -14,7 +14,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         private readonly string[] Values = new string[] { "first", "second", "third" };
 
         [Route("")]
-        public IEnumerable<string> Get([FromUri(Name="filter")]string filterExpression)
+        public IEnumerable<string> Get([FromUri(Name = "filter")]string filterExpression)
         {
             return String.IsNullOrWhiteSpace(filterExpression) ? Values : Values.Where(x => x.Contains(filterExpression));
         }
@@ -23,6 +23,22 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         public string GetByIndex(int index)
         {
             return Values[index];
+        }
+
+        private static readonly IList<object> List = new List<object>();
+
+        [HttpPost]
+        public IList<object> Post(object value)
+        {
+            List.Add(value);
+            return List;
+        }
+
+        [HttpPut]
+        public IList<object> Put(object value)
+        {
+            List.Add(value);
+            return List;
         }
     }
 }

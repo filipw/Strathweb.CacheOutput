@@ -1,9 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Web.Http.Controllers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace WebApi.OutputCache.V2
 {
@@ -55,6 +60,17 @@ namespace WebApi.OutputCache.V2
             }
 
             if (parameters == "-") parameters = string.Empty;
+            if (excludeQueryString || !(context.Request.Method == HttpMethod.Post || context.Request.Method == HttpMethod.Put))
+                return parameters;
+
+            var postBody = GetPostBody(context);
+            if (string.IsNullOrEmpty(postBody))
+                return parameters;
+
+            var postParameters = JObject.Parse(postBody);
+            if (postParameters == null)
+                return parameters;
+            parameters += FormatPostParameters(postParameters);
             return parameters;
         }
 
@@ -83,6 +99,50 @@ namespace WebApi.OutputCache.V2
                 return paramArray.Cast<object>().Aggregate(concatValue, (current, paramValue) => current + (paramValue + ";"));
             }
             return val.ToString();
+        }
+
+        private static string FormatPostParameters(JObject postParameters)
+        {
+            var parametersAsString = "-";
+            foreach (var param in postParameters)
+            {
+                var val = param.Value?.ToString(Formatting.None);
+                if (string.IsNullOrEmpty(param.Key) || string.IsNullOrEmpty(val))
+                    continue;
+
+                val = val.Replace(Environment.NewLine, "")
+                    .Replace(":", "=")
+                    .Replace("{", "")
+                    .Replace("}", "")
+                    .Replace(",", "_")
+                    .Replace("[", "")
+                    .Replace("]", "")
+                    .Replace("\"", "")
+                    .Trim()
+                    .ToLower();
+                if (string.IsNullOrEmpty(val))
+                    continue;
+
+                parametersAsString += param.Key.ToLower() + "=" + val + "-";
+            }
+
+            return parametersAsString.TrimEnd('-');
+        }
+
+        private static string GetPostBody(HttpActionContext context)
+        {
+            if (context.Request.Content == null)
+                return null;
+            string postBody;
+            using (var stream = new MemoryStream())
+            {
+                var inputStream = context.Request.Content.ReadAsStreamAsync().Result;
+                inputStream.Seek(0, SeekOrigin.Begin);
+                inputStream.CopyTo(stream);
+                postBody = Encoding.UTF8.GetString(stream.ToArray());
+            }
+
+            return postBody;
         }
     }
 }

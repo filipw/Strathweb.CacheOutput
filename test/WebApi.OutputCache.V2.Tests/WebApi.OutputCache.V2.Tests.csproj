@@ -84,6 +84,7 @@
     <Compile Include="ConnegTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DefaultCacheKeyGeneratorPostRequestTests.cs" />
     <Compile Include="PerUserCacheKeyGeneratorTests.cs" />
     <Compile Include="DefaultCacheKeyGeneratorTests.cs" />
     <Compile Include="InlineInvalidateTests.cs">
