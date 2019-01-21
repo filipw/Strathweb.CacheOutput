@@ -54,7 +54,7 @@ namespace WebApi.OutputCache.Core.Cache
             {
                 Cache.Add(key, o, cachePolicy);
             }
-       }
+        }
 
         public virtual Task<IEnumerable<string>> AllKeysAsync
         {
@@ -66,7 +66,8 @@ namespace WebApi.OutputCache.Core.Cache
 
         public virtual Task RemoveStartsWithAsync(string key)
         {
-            return Task.Run(() => RemoveStartsWith(key));
+            RemoveStartsWith(key);
+            return Task.FromResult(0);
         }
 
         public virtual Task<T> GetAsync<T>(string key) where T : class
@@ -76,7 +77,8 @@ namespace WebApi.OutputCache.Core.Cache
 
         public virtual Task RemoveAsync(string key)
         {
-            return Task.Run(() => Remove(key));
+            Remove(key);
+            return Task.FromResult(0);
         }
 
         public virtual Task<bool> ContainsAsync(string key)
@@ -86,7 +88,8 @@ namespace WebApi.OutputCache.Core.Cache
 
         public virtual Task AddAsync(string key, object value, DateTimeOffset expiration, string dependsOnKey = null)
         {
-            return Task.Run(() => Add(key, value, expiration, dependsOnKey));
+            Add(key, value, expiration, dependsOnKey);
+            return Task.FromResult(0);
         }
     }
 }
