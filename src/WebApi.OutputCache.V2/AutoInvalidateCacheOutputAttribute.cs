@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -15,7 +17,7 @@ namespace WebApi.OutputCache.V2
     {
         public bool TryMatchType { get; set; }
 
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
             if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
             if (actionExecutedContext.ActionContext.Request.Method != HttpMethod.Post &&
@@ -33,9 +35,9 @@ namespace WebApi.OutputCache.V2
             foreach (var action in actions)
             {
                 var key = config.CacheOutputConfiguration().MakeBaseCachekey(controller.ControllerType.FullName, action);
-                if (WebApiCache.Contains(key))
+                if (await WebApiCache.ContainsAsync(key))
                 {
-                    WebApiCache.RemoveStartsWith(key);
+                    await WebApiCache.RemoveStartsWithAsync(key);
                 }
             }
         }

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using WebApi.OutputCache.V2.TimeAttributes;
 
@@ -37,7 +38,7 @@ namespace WebApi.OutputCache.V2.Demo
             Teams.Add(value);
         }
 
-        public void Put(int id, Team value)
+        public async Task Put(int id, Team value)
         {
             if (!ModelState.IsValid) throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState));
 
@@ -48,7 +49,7 @@ namespace WebApi.OutputCache.V2.Demo
             team.Name = value.Name;
 
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.GetById(0)));
+            await cache.RemoveStartsWithAsync(Configuration.CacheOutputConfiguration().MakeBaseCachekey((TeamsController t) => t.GetById(0)));
         }
 
         public void Delete(int id)

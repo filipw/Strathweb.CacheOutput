@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http.Filters;
 
 namespace WebApi.OutputCache.V2
@@ -21,7 +23,7 @@ namespace WebApi.OutputCache.V2
             _methodName = methodName;
         }
 
-        public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
+        public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
         {
             if (actionExecutedContext.Response != null && !actionExecutedContext.Response.IsSuccessStatusCode) return;
             _controller = _controller ?? actionExecutedContext.ActionContext.ControllerContext.ControllerDescriptor.ControllerType.FullName;
@@ -30,9 +32,9 @@ namespace WebApi.OutputCache.V2
             EnsureCache(config, actionExecutedContext.Request);
 
             var key = actionExecutedContext.Request.GetConfiguration().CacheOutputConfiguration().MakeBaseCachekey(_controller, _methodName);
-            if (WebApiCache.Contains(key))
+            if (await WebApiCache.ContainsAsync(key))
             {
-                WebApiCache.RemoveStartsWith(key);
+                await WebApiCache.RemoveStartsWithAsync(key);
             }
         }
     }

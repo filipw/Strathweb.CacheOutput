@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace WebApi.OutputCache.V2.Tests.TestControllers
 {
@@ -36,32 +37,32 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "value";
         }
 
-        public void Post()
+        public async Task Post()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey(this.GetType().FullName, "Get_c100_s100"));
+            await cache.RemoveStartsWithAsync(Configuration.CacheOutputConfiguration().MakeBaseCachekey(this.GetType().FullName, "Get_c100_s100"));
 
             //do nothing
         }
 
-        public void Put()
+        public async Task Put()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100()));
+            await cache.RemoveStartsWithAsync(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100()));
 
             //do nothing
         }
 
-        public void Delete_non_standard_name()
+        public async Task Delete_non_standard_name()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));            
+            await cache.RemoveStartsWithAsync(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100(7)));            
         }
 
-        public void Delete_parameterized()
+        public async Task Delete_parameterized()
         {
             var cache = Configuration.CacheOutputConfiguration().GetCacheOutputProvider(Request);
-            cache.RemoveStartsWith(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100_with_param(7)));
+            await cache.RemoveStartsWithAsync(Configuration.CacheOutputConfiguration().MakeBaseCachekey((InlineInvalidateController x) => x.Get_c100_s100_with_param(7)));
 
             //do nothing
         }

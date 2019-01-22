@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Caching;
+using System.Threading.Tasks;
 
 namespace WebApi.OutputCache.Core.Cache
 {
@@ -9,7 +10,7 @@ namespace WebApi.OutputCache.Core.Cache
     {
         private static readonly MemoryCache Cache = MemoryCache.Default;
 
-        public virtual void RemoveStartsWith(string key)
+        private static void RemoveStartsWith(string key)
         {
             lock (Cache)
             {
@@ -17,19 +18,13 @@ namespace WebApi.OutputCache.Core.Cache
             }
         }
 
-        public virtual T Get<T>(string key) where T : class
+        private static T Get<T>(string key) where T : class
         {
             var o = Cache.Get(key) as T;
             return o;
         }
 
-        [Obsolete("Use Get<T> instead")]
-        public virtual object Get(string key)
-        {
-            return Cache.Get(key);
-        }
-
-        public virtual void Remove(string key)
+        private static void Remove(string key)
         {
             lock (Cache)
             {
@@ -37,12 +32,12 @@ namespace WebApi.OutputCache.Core.Cache
             }
         }
 
-        public virtual bool Contains(string key)
+        private static bool Contains(string key)
         {
             return Cache.Contains(key);
         }
 
-        public virtual void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null)
+        private static void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null)
         {
             var cachePolicy = new CacheItemPolicy
             {
@@ -61,12 +56,40 @@ namespace WebApi.OutputCache.Core.Cache
             }
         }
 
-        public virtual IEnumerable<string> AllKeys
+        public virtual Task<IEnumerable<string>> AllKeysAsync
         {
             get
             {
-                return Cache.Select(x => x.Key);
+                return Task.FromResult(Cache.Select(x => x.Key));
             }
+        }
+
+        public virtual Task RemoveStartsWithAsync(string key)
+        {
+            RemoveStartsWith(key);
+            return Task.FromResult(0);
+        }
+
+        public virtual Task<T> GetAsync<T>(string key) where T : class
+        {
+            return Task.FromResult(Get<T>(key));
+        }
+
+        public virtual Task RemoveAsync(string key)
+        {
+            Remove(key);
+            return Task.FromResult(0);
+        }
+
+        public virtual Task<bool> ContainsAsync(string key)
+        {
+            return Task.FromResult(Contains(key));
+        }
+
+        public virtual Task AddAsync(string key, object value, DateTimeOffset expiration, string dependsOnKey = null)
+        {
+            Add(key, value, expiration, dependsOnKey);
+            return Task.FromResult(0);
         }
     }
 }
