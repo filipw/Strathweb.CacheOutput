@@ -274,7 +274,7 @@ namespace WebApi.OutputCache.V2
                                         cacheTime.AbsoluteExpiration, baseKey);
 
 
-                        _webApiCache.Add(cachekey + Constants.GenerationTimestampKey,
+                        await _webApiCache.AddAsync(cachekey + Constants.GenerationTimestampKey,
                                         actionExecutionTimestamp.ToString(),
                                         cacheTime.AbsoluteExpiration, baseKey);
                     }
