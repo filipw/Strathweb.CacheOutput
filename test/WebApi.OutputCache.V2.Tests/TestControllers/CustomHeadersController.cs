@@ -73,7 +73,7 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
         }
 
         [HttpGet]
-        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, IncludeCustomHeaders = "Content-Encoding")]
+        [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 100, IncludeCustomHeaders = "Content-Encoding,NotExistingHeader")]
         public IHttpActionResult Cache_Part_Of_Custom_Headers()
         {
             var result = new CustomHeadersContent<string>("test", this)
