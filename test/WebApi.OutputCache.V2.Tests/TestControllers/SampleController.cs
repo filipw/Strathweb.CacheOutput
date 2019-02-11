@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -74,8 +75,8 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test" + id;
         }
 
-        [CacheOutputUntil(2019,01,25,17,00)]
-        public string Get_until25012015_1700()
+        [CacheOutputUntil(2100, 01,25,17,00)]
+        public string Get_until25012100_1700()
         {
             return "test";
         }

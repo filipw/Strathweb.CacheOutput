@@ -122,8 +122,8 @@ namespace WebApi.OutputCache.V2.Tests
         public void maxage_mustrevalidate_headers_correct_with_cacheuntil()
         {
             var client = new HttpClient(_server);
-            var result = client.GetAsync(_url + "Get_until25012015_1700").Result;
-            var clientTimeSpanSeconds = new SpecificTime(2019, 01, 25, 17, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds;
+            var result = client.GetAsync(_url + "Get_until25012100_1700").Result;
+            var clientTimeSpanSeconds = new SpecificTime(2100, 01, 25, 17, 0, 0).Execute(DateTime.Now).ClientTimeSpan.TotalSeconds;
             var resultCacheControlSeconds = ((TimeSpan) result.Headers.CacheControl.MaxAge).TotalSeconds;
             Assert.IsTrue(Math.Round(clientTimeSpanSeconds - resultCacheControlSeconds) == 0);
             Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
