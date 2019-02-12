@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -80,6 +81,11 @@ namespace WebApi.OutputCache.V2
         /// Class used to generate caching keys
         /// </summary>
         public Type CacheKeyGenerator { get; set; }
+
+        /// <summary>
+        /// Comma seperated list of HTTP headers to cache
+        /// </summary>
+        public string IncludeCustomHeaders { get; set; }
 
         /// <summary>
         /// If set to something else than an empty string, this value will always be used for the Content-Type header, regardless of content negotiation.
@@ -185,6 +191,9 @@ namespace WebApi.OutputCache.V2
 
             if (!_webApiCache.Contains(cachekey)) return;
 
+            var responseHeaders = _webApiCache.Get<Dictionary<string, List<string>>>(cachekey + Constants.CustomHeaders);
+            var responseContentHeaders = _webApiCache.Get<Dictionary<string, List<string>>>(cachekey + Constants.CustomContentHeaders);
+
             if (actionContext.Request.Headers.IfNoneMatch != null)
             {
                 var etag = _webApiCache.Get<string>(cachekey + Constants.EtagKey);
@@ -194,7 +203,8 @@ namespace WebApi.OutputCache.V2
                     {
                         var time = CacheTimeQuery.Execute(DateTime.Now);
                         var quickResponse = actionContext.Request.CreateResponse(HttpStatusCode.NotModified);
-                        
+                        if (responseHeaders != null) AddCustomCachedHeaders(quickResponse, responseHeaders, responseContentHeaders);
+
                         SetEtag(quickResponse, etag);
                         ApplyCacheHeaders(quickResponse, time);
                         actionContext.Response = quickResponse;
@@ -224,6 +234,8 @@ namespace WebApi.OutputCache.V2
             actionContext.Response.Content.Headers.ContentType = contenttype;
             var responseEtag = _webApiCache.Get<string>(cachekey + Constants.EtagKey);
             if (responseEtag != null) SetEtag(actionContext.Response,  responseEtag);
+
+            if (responseHeaders != null) AddCustomCachedHeaders(actionContext.Response, responseHeaders, responseContentHeaders);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
             ApplyCacheHeaders(actionContext.Response, cacheTime, contentGenerationTimestamp);
@@ -275,10 +287,27 @@ namespace WebApi.OutputCache.V2
                                         etag,
                                         cacheTime.AbsoluteExpiration, baseKey);
 
-
                         _webApiCache.Add(cachekey + Constants.GenerationTimestampKey,
                                         actionExecutionTimestamp.ToString(),
                                         cacheTime.AbsoluteExpiration, baseKey);
+
+                        if (!String.IsNullOrEmpty(IncludeCustomHeaders))
+                        {
+                            // convert to dictionary of lists to ensure thread safety if implementation of IEnumerable is changed
+                            var headers = actionExecutedContext.Response.Headers.Where(h => IncludeCustomHeaders.Contains(h.Key))
+                                .ToDictionary(x => x.Key, x => x.Value.ToList());
+
+                            var contentHeaders = actionExecutedContext.Response.Content.Headers.Where(h => IncludeCustomHeaders.Contains(h.Key))
+                                .ToDictionary(x => x.Key, x => x.Value.ToList());
+
+                            _webApiCache.Add(cachekey + Constants.CustomHeaders,
+                                            headers,
+                                            cacheTime.AbsoluteExpiration, baseKey);
+
+                            _webApiCache.Add(cachekey + Constants.CustomContentHeaders,
+                                            contentHeaders,
+                                            cacheTime.AbsoluteExpiration, baseKey);
+                        }
                     }
                 }
             }
@@ -308,6 +337,25 @@ namespace WebApi.OutputCache.V2
             if ((response.Content != null) && contentGenerationTimestamp.HasValue)
             {
                 response.Content.Headers.LastModified = contentGenerationTimestamp.Value;
+            }
+        }
+
+        protected virtual void AddCustomCachedHeaders(HttpResponseMessage response, Dictionary<string, List<string>> headers, Dictionary<string, List<string>> contentHeaders)
+        {
+            foreach (var headerKey in headers.Keys)
+            {
+                foreach (var headerValue in headers[headerKey])
+                {
+                    response.Headers.Add(headerKey, headerValue);
+                }
+            }
+
+            foreach (var headerKey in contentHeaders.Keys)
+            {
+                foreach (var headerValue in contentHeaders[headerKey])
+                {
+                    response.Content.Headers.Add(headerKey, headerValue);
+                }
             }
         }
 

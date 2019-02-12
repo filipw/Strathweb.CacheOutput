@@ -84,6 +84,8 @@
     <Compile Include="ConnegTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CustomHeadersContent.cs" />
+    <Compile Include="MemoryCacheForTests.cs" />
     <Compile Include="PerUserCacheKeyGeneratorTests.cs" />
     <Compile Include="DefaultCacheKeyGeneratorTests.cs" />
     <Compile Include="InlineInvalidateTests.cs">
@@ -92,6 +94,7 @@
     <Compile Include="InvalidateTests.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CustomHeadersTests.cs" />
     <Compile Include="ServerSideTests.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -99,6 +102,7 @@
     <Compile Include="TestControllers\AutoInvalidateWithTypeController.cs" />
     <Compile Include="TestControllers\CacheKeyController.cs" />
     <Compile Include="TestControllers\CacheKeyGenerationController.cs" />
+    <Compile Include="TestControllers\CustomHeadersController.cs" />
     <Compile Include="TestControllers\IgnoreController.cs" />
     <Compile Include="TestControllers\InlineInvalidateController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,6 +123,9 @@
       <Project>{7a6f57f6-38e1-4287-812e-ad7d1025ba5e}</Project>
       <Name>WebApi2.OutputCache</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
