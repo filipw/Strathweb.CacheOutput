@@ -10,13 +10,22 @@ namespace WebApi.OutputCache.V2.Tests
     /// </summary>
     public abstract class CacheKeyGenerationTestsBase<TCacheKeyGenerator> where TCacheKeyGenerator : ICacheKeyGenerator
     {
-        private const string ArgumentKey = "filterExpression";
-        private const string ArgumentValue = "val";
+        private const string Argument1Key = "filterExpression1";
+        private const string Argument1Value = "val";
+        private const string Argument2WithFromUriAttributeKey = "filterExpression2";
+        private static readonly ClassArgument Argument2WithFromUriAttributeValue = new ClassArgument() { Value1 = "val1", Value2 = 7 };
         protected HttpActionContext context;
         protected MediaTypeHeaderValue mediaType;
         protected Uri requestUri;
         protected TCacheKeyGenerator cacheKeyGenerator;
         protected string BaseCacheKey;
+
+        private class ClassArgument
+        {
+            public string Value1 { get; set; }
+
+            public int Value2 { get; set; }
+        }
 
         [SetUp]
         public virtual void Setup()
@@ -49,12 +58,13 @@ namespace WebApi.OutputCache.V2.Tests
 
         protected void AddActionArgumentsToContext()
         {
-            context.ActionArguments.Add(ArgumentKey, ArgumentValue);
+            context.ActionArguments.Add(Argument1Key, Argument1Value);
+            context.ActionArguments.Add(Argument2WithFromUriAttributeKey, Argument2WithFromUriAttributeValue);
         }
 
         protected string FormatActionArgumentsForKeyAssertion()
         {
-            return String.Format("{0}={1}", ArgumentKey, ArgumentValue);
+            return String.Format("{0}={1}", Argument1Key, Argument1Value);
         }
     }
 }

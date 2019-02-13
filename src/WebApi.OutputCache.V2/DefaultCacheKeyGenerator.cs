@@ -26,7 +26,10 @@ namespace WebApi.OutputCache.V2
 
         protected virtual string FormatParameters(HttpActionContext context, bool excludeQueryString)
         {
-            var actionParameters = context.ActionArguments.Where(x => x.Value != null).Select(x => x.Key + "=" + GetValue(x.Value));
+            var actionParameters = context
+                .ActionArguments
+                .Where(x => x.Value != null && (x.Value is string || x.Value.GetType().IsValueType))
+                .Select(x => x.Key + "=" + GetValue(x.Value));
 
             string parameters;
 
