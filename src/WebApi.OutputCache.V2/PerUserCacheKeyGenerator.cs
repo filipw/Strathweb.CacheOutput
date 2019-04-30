@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+using Microsoft.AspNet.Identity;
+using System.Net.Http.Headers;
 using System.Web.Http.Controllers;
 
 namespace WebApi.OutputCache.V2
@@ -16,7 +17,7 @@ namespace WebApi.OutputCache.V2
 
         protected virtual string FormatUserIdentity(HttpActionContext context)
         {
-            return context.RequestContext.Principal.Identity.Name.ToLower();
+            return context.RequestContext.Principal.Identity.GetUserId();
         }
     }
 }
