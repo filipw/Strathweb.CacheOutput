@@ -10,5 +10,7 @@ namespace WebApi.OutputCache.Core.Time
         public TimeSpan? SharedTimeSpan { get; set; }
 
         public DateTimeOffset AbsoluteExpiration { get; set; }
+
+        public TimeSpan SlidingExpiration { get; set; }
     }
 }

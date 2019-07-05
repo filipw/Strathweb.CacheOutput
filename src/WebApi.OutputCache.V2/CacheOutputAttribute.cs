@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,6 +15,7 @@ using System.Web.Http.Filters;
 using WebApi.OutputCache.Core;
 using WebApi.OutputCache.Core.Cache;
 using WebApi.OutputCache.Core.Time;
+using System.Collections.Generic;
 
 namespace WebApi.OutputCache.V2
 {
@@ -50,7 +50,6 @@ namespace WebApi.OutputCache.V2
         /// </summary>
         public int ClientTimeSpan { get; set; }
 
-        
         private int? _sharedTimeSpan = null;
 
         /// <summary>
@@ -76,6 +75,11 @@ namespace WebApi.OutputCache.V2
         /// Corresponds to CacheControl Private HTTP header. Response can be cached by browser but not by intermediary cache
         /// </summary>
         public bool Private { get; set; }
+
+        /// <summary>
+        /// Sets cache expiration to from absolute to sliding. When cache expiration is set to sliding, the Cache-Control HTTP header will be renewed with each response.
+        /// </summary>
+        public bool Slide { get; set; }
 
         /// <summary>
         /// Class used to generate caching keys
@@ -127,7 +131,7 @@ namespace WebApi.OutputCache.V2
 
         protected void ResetCacheTimeQuery()
         {
-            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan, _sharedTimeSpan);
+            CacheTimeQuery = new ShortTime(ServerTimeSpan, ClientTimeSpan, _sharedTimeSpan, Slide);
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
@@ -238,7 +242,7 @@ namespace WebApi.OutputCache.V2
             if (responseHeaders != null) AddCustomCachedHeaders(actionContext.Response, responseHeaders, responseContentHeaders);
 
             var cacheTime = CacheTimeQuery.Execute(DateTime.Now);
-            ApplyCacheHeaders(actionContext.Response, cacheTime, contentGenerationTimestamp);
+            ApplyCacheHeaders(actionContext.Response, cacheTime, Slide ? DateTimeOffset.Now : contentGenerationTimestamp);
         }
 
         public override async Task OnActionExecutedAsync(HttpActionExecutedContext actionExecutedContext, CancellationToken cancellationToken)
@@ -249,7 +253,7 @@ namespace WebApi.OutputCache.V2
 
             var actionExecutionTimestamp = DateTimeOffset.Now;
             var cacheTime = CacheTimeQuery.Execute(actionExecutionTimestamp.DateTime);
-            if (cacheTime.AbsoluteExpiration > actionExecutionTimestamp)
+            if (cacheTime.AbsoluteExpiration > actionExecutionTimestamp || Slide)
             {
                 var httpConfig = actionExecutedContext.Request.GetConfiguration();
                 var config = httpConfig.CacheOutputConfiguration();
@@ -274,22 +278,23 @@ namespace WebApi.OutputCache.V2
 
                         responseContent.Headers.Remove("Content-Length");
 
-                        _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration);
-                        _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey);
+                        _webApiCache.Add(baseKey, string.Empty, cacheTime.AbsoluteExpiration, null, cacheTime.SlidingExpiration, Slide);
+                        _webApiCache.Add(cachekey, content, cacheTime.AbsoluteExpiration, baseKey, cacheTime.SlidingExpiration, Slide);
 
                        
                         _webApiCache.Add(cachekey + Constants.ContentTypeKey,
                                         contentType,
-                                        cacheTime.AbsoluteExpiration, baseKey);
+                                        cacheTime.AbsoluteExpiration, baseKey, cacheTime.SlidingExpiration, Slide);
 
                        
                         _webApiCache.Add(cachekey + Constants.EtagKey,
                                         etag,
-                                        cacheTime.AbsoluteExpiration, baseKey);
+                                        cacheTime.AbsoluteExpiration, baseKey, cacheTime.SlidingExpiration, Slide);
+
 
                         _webApiCache.Add(cachekey + Constants.GenerationTimestampKey,
                                         actionExecutionTimestamp.ToString(),
-                                        cacheTime.AbsoluteExpiration, baseKey);
+                                        cacheTime.AbsoluteExpiration, baseKey, cacheTime.SlidingExpiration, Slide);
 
                         if (!String.IsNullOrEmpty(IncludeCustomHeaders))
                         {

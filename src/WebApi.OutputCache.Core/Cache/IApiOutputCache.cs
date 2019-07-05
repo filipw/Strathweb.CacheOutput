@@ -16,7 +16,7 @@ namespace WebApi.OutputCache.Core.Cache
 
         bool Contains(string key);
 
-        void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null);
+        void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null, TimeSpan slidingExpiration = default(TimeSpan), bool slide = false);
 
         IEnumerable<string> AllKeys { get; }
     }

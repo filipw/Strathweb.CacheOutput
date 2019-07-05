@@ -42,18 +42,18 @@ namespace WebApi.OutputCache.Core.Cache
             return Cache.Contains(key);
         }
 
-        public virtual void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null)
+        public virtual void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null, TimeSpan slidingExpiration = default(TimeSpan), bool slide = false)
         {
-            var cachePolicy = new CacheItemPolicy
-            {
-                AbsoluteExpiration = expiration
-            };
+            var cachePolicy = new CacheItemPolicy();
 
-            if (!string.IsNullOrWhiteSpace(dependsOnKey))
+            if (slide)
+                cachePolicy.SlidingExpiration = slidingExpiration;
+            else
+                cachePolicy.AbsoluteExpiration = expiration;
+
+            if (!string.IsNullOrWhiteSpace(dependsOnKey) && !slide)
             {
-                cachePolicy.ChangeMonitors.Add(
-                    Cache.CreateCacheEntryChangeMonitor(new[] { dependsOnKey })
-                );
+                cachePolicy.ChangeMonitors.Add(Cache.CreateCacheEntryChangeMonitor(new[] { dependsOnKey }));
             }
             lock (Cache)
             {

@@ -42,7 +42,7 @@ namespace WebApi.OutputCache.V2.Tests
             return _cachedItems.ContainsKey(key);
         }
 
-        public virtual void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null)
+        public virtual void Add(string key, object o, DateTimeOffset expiration, string dependsOnKey = null, TimeSpan slidingExpiration = default(TimeSpan), bool slide = false)
         {
             _cachedItems.Add(key, o);
         }
