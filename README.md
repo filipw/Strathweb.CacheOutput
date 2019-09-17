@@ -10,7 +10,7 @@ You can specify the following properties:
  - *MustRevalidate* (corresponds to MustRevalidate HTTP header - indicates whether the origin server requires revalidation of 
 a cache entry on any subsequent use when the cache entry becomes stale)
  - *ExcludeQueryStringFromCacheKey* (do not vary cache by querystring values)
- - *ServerTimeSpan* (time how long the response should be cached on the server side)
+ - *ServerTimeSpan* (time in seconds how long the response should be cached on the server side)
  - *AnonymousOnly* (cache enabled only for requests when Thread.CurrentPrincipal is not set)
  
 Additionally, the library is setting ETags for you, and keeping them unchanged for the duration of the caching period.
