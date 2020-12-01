@@ -5,8 +5,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,16 +41,21 @@ namespace WebApi.OutputCache.V2
         /// <summary>
         /// How long response should be cached on the server side (in seconds)
         /// </summary>
-        public int ServerTimeSpan { get; set; }
+        public int ServerTimeSpan
+        {
+            get => (int) _serverTimeout.TotalSeconds;
+            set => _serverTimeout = TimeSpan.FromSeconds(value);
+        }
 
         /// <summary>
         /// Corresponds to CacheControl MaxAge HTTP header (in seconds)
         /// </summary>
-        public int ClientTimeSpan { get; set; }
-
+        public int ClientTimeSpan
+        {
+            get => (int)_clientTimeout.TotalSeconds;
+            set => _clientTimeout = TimeSpan.FromSeconds(value);
+        }
         
-        private int? _sharedTimeSpan = null;
-
         /// <summary>
         /// Corresponds to CacheControl Shared MaxAge HTTP header (in seconds)
         /// </summary>
@@ -60,11 +63,32 @@ namespace WebApi.OutputCache.V2
         {
             get // required for property visibility
             {
-                if (!_sharedTimeSpan.HasValue)
-                    throw new Exception("should not be called without value set"); 
-                return _sharedTimeSpan.Value;
+                if (!_sharedTimeout.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                } 
+                return (int) _sharedTimeout.Value.TotalSeconds;
             }
-            set { _sharedTimeSpan = value; }
+            set => _sharedTimeout = TimeSpan.FromSeconds(value);
+        }
+
+
+        public TimeSpan ClientTimeout
+        {
+            get => _clientTimeout;
+            set => _clientTimeout = value;
+        }
+
+        public TimeSpan ServerTimeout
+        {
+            get => _serverTimeout;
+            set => _serverTimeout = value;
+        }
+
+        public TimeSpan? SharedTimeout
+        {
+            get => _sharedTimeout;
+            set => _sharedTimeout = value;
         }
 
         /// <summary>
@@ -101,6 +125,9 @@ namespace WebApi.OutputCache.V2
         }
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
+        private TimeSpan _clientTimeout;
+        private TimeSpan _serverTimeout;
+        private TimeSpan? _sharedTimeout;
 
         protected virtual bool IsCachingAllowed(HttpActionContext actionContext, bool anonymousOnly)
         {
@@ -127,7 +154,7 @@ namespace WebApi.OutputCache.V2
 
         protected void ResetCacheTimeQuery()
         {
-            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan, _sharedTimeSpan);
+            CacheTimeQuery = new PreciseTime(_serverTimeout, _clientTimeout, _sharedTimeout);
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)

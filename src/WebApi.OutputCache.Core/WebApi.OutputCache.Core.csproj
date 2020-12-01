@@ -48,6 +48,7 @@
     <Compile Include="IModelQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Time\CacheTime.cs" />
+    <Compile Include="Time\PreciseTime.cs" />
     <Compile Include="Time\ShortTime.cs" />
     <Compile Include="Time\SpecificTime.cs" />
     <Compile Include="Time\ThisDay.cs" />
