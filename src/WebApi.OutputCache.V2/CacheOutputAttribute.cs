@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -20,6 +21,8 @@ namespace WebApi.OutputCache.V2
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class CacheOutputAttribute : ActionFilterAttribute
     {
+        private static readonly IFormatProvider TimeoutFormatProvider = new CultureInfo("en-US");
+
         private const string CurrentRequestMediaType = "CacheOutput:CurrentRequestMediaType";
         protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json") {CharSet = Encoding.UTF8.HeaderName};
 
@@ -52,7 +55,7 @@ namespace WebApi.OutputCache.V2
         /// </summary>
         public int ClientTimeSpan
         {
-            get => (int)_clientTimeout.TotalSeconds;
+            get => (int) _clientTimeout.TotalSeconds;
             set => _clientTimeout = TimeSpan.FromSeconds(value);
         }
         
@@ -73,30 +76,30 @@ namespace WebApi.OutputCache.V2
         }
 
         /// <summary>
-        /// Corresponds to CacheControl MaxAge HTTP header
+        /// Corresponds to CacheControl MaxAge HTTP header (string in TimeSpan's en-US format)
         /// </summary>
-        public TimeSpan ClientTimeout
+        public string ClientTimeout
         {
-            get => _clientTimeout;
-            set => _clientTimeout = value;
+            get => _clientTimeout.ToString();
+            set => _clientTimeout = ParseTimeSpan(value);
         }
 
         /// <summary>
-        /// How long response should be cached on the server side
+        /// How long response should be cached on the server side (string in TimeSpan's en-US format)
         /// </summary>
-        public TimeSpan ServerTimeout
+        public string ServerTimeout
         {
-            get => _serverTimeout;
-            set => _serverTimeout = value;
+            get => _serverTimeout.ToString();
+            set => _serverTimeout = ParseTimeSpan(value);
         }
 
         /// <summary>
-        /// Corresponds to CacheControl Shared MaxAge HTTP header
+        /// Corresponds to CacheControl Shared MaxAge HTTP header (string in TimeSpan's en-US format)
         /// </summary>
-        public TimeSpan? SharedTimeout
+        public string SharedTimeout
         {
-            get => _sharedTimeout;
-            set => _sharedTimeout = value;
+            get => _sharedTimeout.ToString();
+            set => _sharedTimeout = string.IsNullOrEmpty(value) ?  null : (TimeSpan?) ParseTimeSpan(value);
         }
 
         /// <summary>
@@ -406,6 +409,11 @@ namespace WebApi.OutputCache.V2
                 var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
                 message.Headers.ETag = eTag;
             }
+        }
+
+        private static TimeSpan ParseTimeSpan(string input)
+        {
+            return TimeSpan.Parse(input, TimeoutFormatProvider);
         }
     }
 } 

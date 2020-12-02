@@ -53,6 +53,18 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
         }
 
+
+        [Test]
+        public void set_cache_to_predefined_value_using_string_timeout()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "GetStringTimeout_c500ms_s500ms").Result;
+
+            _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-getstringtimeout_c500ms_s500ms:application/json; charset=utf-8")), Times.Exactly(2));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-getstringtimeout_c500ms_s500ms"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(1)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-getstringtimeout_c500ms_s500ms:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x < DateTime.Now.AddSeconds(1)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-getstringtimeout_c500ms_s500ms")), Times.Once());
+        }
+
         [Test]
         public void set_cache_to_predefined_value_c100_s0()
         {
