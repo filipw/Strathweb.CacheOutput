@@ -72,19 +72,27 @@ namespace WebApi.OutputCache.V2
             set => _sharedTimeout = TimeSpan.FromSeconds(value);
         }
 
-
+        /// <summary>
+        /// Corresponds to CacheControl MaxAge HTTP header
+        /// </summary>
         public TimeSpan ClientTimeout
         {
             get => _clientTimeout;
             set => _clientTimeout = value;
         }
 
+        /// <summary>
+        /// How long response should be cached on the server side
+        /// </summary>
         public TimeSpan ServerTimeout
         {
             get => _serverTimeout;
             set => _serverTimeout = value;
         }
 
+        /// <summary>
+        /// Corresponds to CacheControl Shared MaxAge HTTP header
+        /// </summary>
         public TimeSpan? SharedTimeout
         {
             get => _sharedTimeout;
