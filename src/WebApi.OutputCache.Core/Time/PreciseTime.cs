@@ -17,7 +17,7 @@ namespace WebApi.OutputCache.Core.Time
 
         public CacheTime Execute(DateTime model)
         {
-            return  new CacheTime
+            return new CacheTime
             {
                 AbsoluteExpiration = model.Add(_server),
                 ClientTimeSpan = _client,
