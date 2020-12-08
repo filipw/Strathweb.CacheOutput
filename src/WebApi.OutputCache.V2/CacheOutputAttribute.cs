@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Runtime.ExceptionServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,30 +40,79 @@ namespace WebApi.OutputCache.V2
         public bool ExcludeQueryStringFromCacheKey { get; set; }
 
         /// <summary>
-        /// How long response should be cached on the server side (in seconds)
+        /// How long response should be cached on the server side in seconds. <c cref="ServerTimeSpanMillis">ServerTimeSpanMillis</c> has precedence over this property.
         /// </summary>
         public int ServerTimeSpan { get; set; }
 
         /// <summary>
-        /// Corresponds to CacheControl MaxAge HTTP header (in seconds)
+        /// Corresponds to CacheControl MaxAge HTTP header in seconds. <c cref="ClientTimeSpanMillis">ClientTimeSpanMillis</c> has precedence over this property.
         /// </summary>
         public int ClientTimeSpan { get; set; }
 
-        
         private int? _sharedTimeSpan = null;
 
         /// <summary>
-        /// Corresponds to CacheControl Shared MaxAge HTTP header (in seconds)
+        /// Corresponds to CacheControl Shared MaxAge HTTP header in seconds. <c cref="SharedTimeSpanMillis">SharedTimeSpanMillis</c> has precedence over this property.
         /// </summary>
         public int SharedTimeSpan
         {
             get // required for property visibility
             {
                 if (!_sharedTimeSpan.HasValue)
-                    throw new Exception("should not be called without value set"); 
+                {
+                    throw new Exception("should not be called without value set");
+                } 
                 return _sharedTimeSpan.Value;
             }
-            set { _sharedTimeSpan = value; }
+            set => _sharedTimeSpan = value;
+        }
+
+        /// <summary>
+        /// Corresponds to CacheControl MaxAge HTTP header in milliseconds. This property has precedence over <c cref="ClientTimeSpan">ClientTimeSpan</c>. If not set <c cref="ClientTimeSpan">ClientTimeSpan</c> is used. 
+        /// </summary>
+        public ulong ClientTimeSpanMillis
+        {
+            get // required for property visibility
+            {
+                if (!_clientTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _clientTimeSpanMillis.Value;
+            }
+            set => _clientTimeSpanMillis = value;
+        }
+
+        /// <summary>
+        /// How long response should be cached on the server side in milliseconds. This property has precedence over <c cref="ServerTimeSpan">ServerTimeSpan</c>. If not set <c cref="ServerTimeSpan">ServerTimeSpan</c> is used. 
+        /// </summary>
+        public ulong ServerTimeSpanMillis
+        {
+            get // required for property visibility
+            {
+                if (!_serverTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _serverTimeSpanMillis.Value;
+            }
+            set => _serverTimeSpanMillis = value;
+        }
+
+        /// <summary>
+        /// Corresponds to CacheControl Shared MaxAge HTTP header (string in TimeSpan's en-US format) in milliseconds. This property has precedence over <c cref="SharedTimeSpan">SharedTimeSpan</c>. If not set <c cref="SharedTimeSpan">SharedTimeSpan</c> is used. 
+        /// </summary>
+        public ulong SharedTimeSpanMillis
+        {
+            get // required for property visibility
+            {
+                if (!_sharedTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _sharedTimeSpanMillis.Value;
+            }
+            set => _sharedTimeSpanMillis = value;
         }
 
         /// <summary>
@@ -102,6 +150,10 @@ namespace WebApi.OutputCache.V2
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
 
+        private ulong? _clientTimeSpanMillis;
+        private ulong? _serverTimeSpanMillis;
+        private ulong? _sharedTimeSpanMillis;
+
         protected virtual bool IsCachingAllowed(HttpActionContext actionContext, bool anonymousOnly)
         {
             if (anonymousOnly)
@@ -127,7 +179,21 @@ namespace WebApi.OutputCache.V2
 
         protected void ResetCacheTimeQuery()
         {
-            CacheTimeQuery = new ShortTime( ServerTimeSpan, ClientTimeSpan, _sharedTimeSpan);
+            var serverTimeout = CreateTimeSpan(_serverTimeSpanMillis, ServerTimeSpan);
+            var clientTimeout = CreateTimeSpan(_clientTimeSpanMillis, ClientTimeSpan);
+
+            TimeSpan? sharedTimeout = null;
+
+            if (_sharedTimeSpanMillis.HasValue)
+            {
+                sharedTimeout = TimeSpan.FromMilliseconds(_sharedTimeSpanMillis.Value);
+            }
+            else if(_sharedTimeSpan.HasValue)
+            {
+                sharedTimeout = TimeSpan.FromSeconds(_sharedTimeSpan.Value);
+            }
+
+            CacheTimeQuery = new PreciseTime(serverTimeout, clientTimeout, sharedTimeout);
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
@@ -371,6 +437,11 @@ namespace WebApi.OutputCache.V2
                 var eTag = new EntityTagHeaderValue(@"""" + etag.Replace("\"", string.Empty) + @"""");
                 message.Headers.ETag = eTag;
             }
+        }
+
+        private static TimeSpan CreateTimeSpan(ulong? millis, int seconds)
+        {
+            return millis.HasValue ? TimeSpan.FromMilliseconds(millis.Value) : TimeSpan.FromSeconds(seconds);
         }
     }
 } 

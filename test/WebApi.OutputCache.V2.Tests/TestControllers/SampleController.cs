@@ -15,6 +15,12 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
             return "test";
         }
 
+        [CacheOutput(ClientTimeSpanMillis = 500, ServerTimeSpanMillis = 500)]
+        public string GetStringTimeout_c500ms_s500ms()
+        {
+            return "test";
+        }
+
         [CacheOutput(ClientTimeSpan = 100, ServerTimeSpan = 0)]
         public string Get_c100_s0()
         {
