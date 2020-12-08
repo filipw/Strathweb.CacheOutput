@@ -21,8 +21,6 @@ namespace WebApi.OutputCache.V2
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
     public class CacheOutputAttribute : ActionFilterAttribute
     {
-        private static readonly IFormatProvider TimeoutFormatProvider = new CultureInfo("en-US");
-
         private const string CurrentRequestMediaType = "CacheOutput:CurrentRequestMediaType";
         protected static MediaTypeHeaderValue DefaultMediaType = new MediaTypeHeaderValue("application/json") {CharSet = Encoding.UTF8.HeaderName};
 
@@ -42,64 +40,79 @@ namespace WebApi.OutputCache.V2
         public bool ExcludeQueryStringFromCacheKey { get; set; }
 
         /// <summary>
-        /// How long response should be cached on the server side (in seconds)
+        /// How long response should be cached on the server side in seconds. <c cref="ServerTimeSpanMillis">ServerTimeSpanMillis</c> has precedence over this property.
         /// </summary>
-        public int ServerTimeSpan
-        {
-            get => (int) _serverTimeout.TotalSeconds;
-            set => _serverTimeout = TimeSpan.FromSeconds(value);
-        }
+        public int ServerTimeSpan { get; set; }
 
         /// <summary>
-        /// Corresponds to CacheControl MaxAge HTTP header (in seconds)
+        /// Corresponds to CacheControl MaxAge HTTP header in seconds. <c cref="ClientTimeSpanMillis">ClientTimeSpanMillis</c> has precedence over this property.
         /// </summary>
-        public int ClientTimeSpan
-        {
-            get => (int) _clientTimeout.TotalSeconds;
-            set => _clientTimeout = TimeSpan.FromSeconds(value);
-        }
-        
+        public int ClientTimeSpan { get; set; }
+
+        private int? _sharedTimeSpan = null;
+
         /// <summary>
-        /// Corresponds to CacheControl Shared MaxAge HTTP header (in seconds)
+        /// Corresponds to CacheControl Shared MaxAge HTTP header in seconds. <c cref="SharedTimeSpanMillis">SharedTimeSpanMillis</c> has precedence over this property.
         /// </summary>
         public int SharedTimeSpan
         {
             get // required for property visibility
             {
-                if (!_sharedTimeout.HasValue)
+                if (!_sharedTimeSpan.HasValue)
                 {
                     throw new Exception("should not be called without value set");
                 } 
-                return (int) _sharedTimeout.Value.TotalSeconds;
+                return _sharedTimeSpan.Value;
             }
-            set => _sharedTimeout = TimeSpan.FromSeconds(value);
+            set => _sharedTimeSpan = value;
         }
 
         /// <summary>
-        /// Corresponds to CacheControl MaxAge HTTP header (string in TimeSpan's en-US format)
+        /// Corresponds to CacheControl MaxAge HTTP header in milliseconds. This property has precedence over <c cref="ClientTimeSpan">ClientTimeSpan</c>. If not set <c cref="ClientTimeSpan">ClientTimeSpan</c> is used. 
         /// </summary>
-        public string ClientTimeout
+        public ulong ClientTimeSpanMillis
         {
-            get => _clientTimeout.ToString();
-            set => _clientTimeout = ParseTimeSpan(value);
+            get // required for property visibility
+            {
+                if (!_clientTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _clientTimeSpanMillis.Value;
+            }
+            set => _clientTimeSpanMillis = value;
         }
 
         /// <summary>
-        /// How long response should be cached on the server side (string in TimeSpan's en-US format)
+        /// How long response should be cached on the server side in milliseconds. This property has precedence over <c cref="ServerTimeSpan">ServerTimeSpan</c>. If not set <c cref="ServerTimeSpan">ServerTimeSpan</c> is used. 
         /// </summary>
-        public string ServerTimeout
+        public ulong ServerTimeSpanMillis
         {
-            get => _serverTimeout.ToString();
-            set => _serverTimeout = ParseTimeSpan(value);
+            get // required for property visibility
+            {
+                if (!_serverTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _serverTimeSpanMillis.Value;
+            }
+            set => _serverTimeSpanMillis = value;
         }
 
         /// <summary>
-        /// Corresponds to CacheControl Shared MaxAge HTTP header (string in TimeSpan's en-US format)
+        /// Corresponds to CacheControl Shared MaxAge HTTP header (string in TimeSpan's en-US format) in milliseconds. This property has precedence over <c cref="SharedTimeSpan">SharedTimeSpan</c>. If not set <c cref="SharedTimeSpan">SharedTimeSpan</c> is used. 
         /// </summary>
-        public string SharedTimeout
+        public ulong SharedTimeSpanMillis
         {
-            get => _sharedTimeout.ToString();
-            set => _sharedTimeout = string.IsNullOrEmpty(value) ?  null : (TimeSpan?) ParseTimeSpan(value);
+            get // required for property visibility
+            {
+                if (!_sharedTimeSpanMillis.HasValue)
+                {
+                    throw new Exception("should not be called without value set");
+                }
+                return _sharedTimeSpanMillis.Value;
+            }
+            set => _sharedTimeSpanMillis = value;
         }
 
         /// <summary>
@@ -136,9 +149,10 @@ namespace WebApi.OutputCache.V2
         }
 
         internal IModelQuery<DateTime, CacheTime> CacheTimeQuery;
-        private TimeSpan _clientTimeout;
-        private TimeSpan _serverTimeout;
-        private TimeSpan? _sharedTimeout;
+
+        private ulong? _clientTimeSpanMillis;
+        private ulong? _serverTimeSpanMillis;
+        private ulong? _sharedTimeSpanMillis;
 
         protected virtual bool IsCachingAllowed(HttpActionContext actionContext, bool anonymousOnly)
         {
@@ -165,7 +179,21 @@ namespace WebApi.OutputCache.V2
 
         protected void ResetCacheTimeQuery()
         {
-            CacheTimeQuery = new PreciseTime(_serverTimeout, _clientTimeout, _sharedTimeout);
+            var serverTimeout = CreateTimeSpan(_serverTimeSpanMillis, ServerTimeSpan);
+            var clientTimeout = CreateTimeSpan(_clientTimeSpanMillis, ClientTimeSpan);
+
+            TimeSpan? sharedTimeout = null;
+
+            if (_sharedTimeSpanMillis.HasValue)
+            {
+                sharedTimeout = TimeSpan.FromMilliseconds(_sharedTimeSpanMillis.Value);
+            }
+            else if(_sharedTimeSpan.HasValue)
+            {
+                sharedTimeout = TimeSpan.FromSeconds(_sharedTimeSpan.Value);
+            }
+
+            CacheTimeQuery = new PreciseTime(serverTimeout, clientTimeout, sharedTimeout);
         }
 
         protected virtual MediaTypeHeaderValue GetExpectedMediaType(HttpConfiguration config, HttpActionContext actionContext)
@@ -411,9 +439,9 @@ namespace WebApi.OutputCache.V2
             }
         }
 
-        private static TimeSpan ParseTimeSpan(string input)
+        private static TimeSpan CreateTimeSpan(ulong? millis, int seconds)
         {
-            return TimeSpan.Parse(input, TimeoutFormatProvider);
+            return millis.HasValue ? TimeSpan.FromMilliseconds(millis.Value) : TimeSpan.FromSeconds(seconds);
         }
     }
 } 
