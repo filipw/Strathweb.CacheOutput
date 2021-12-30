@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Net.Http.Headers;
 using System.Web.Http.Controllers;
 
@@ -14,6 +15,7 @@ namespace WebApi.OutputCache.V2.Tests
         private const string ArgumentValue = "val";
         protected HttpActionContext context;
         protected MediaTypeHeaderValue mediaType;
+        protected Dictionary<string, List<string>> headers;
         protected Uri requestUri;
         protected TCacheKeyGenerator cacheKeyGenerator;
         protected string BaseCacheKey;

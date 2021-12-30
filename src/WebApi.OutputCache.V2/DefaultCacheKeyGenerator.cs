@@ -9,12 +9,16 @@ namespace WebApi.OutputCache.V2
 {
     public class DefaultCacheKeyGenerator : ICacheKeyGenerator
     {
-        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
+        public virtual string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString, Dictionary<string, List<string>> headers)
         {
             var key = MakeBaseKey(context);
             var parameters = FormatParameters(context, excludeQueryString);
+            string custHeaders = GetCustomHeaders(headers);
 
-            return string.Format("{0}{1}:{2}", key, parameters, mediaType);
+            if (!(string.IsNullOrEmpty(custHeaders)))
+                return string.Format("{0}{1}:{2}:{3}", key, parameters, custHeaders, mediaType);
+            else
+                return string.Format("{0}{1}:{2}", key, parameters, mediaType);
         }
 
         protected virtual string MakeBaseKey(HttpActionContext context)
@@ -57,7 +61,34 @@ namespace WebApi.OutputCache.V2
             if (parameters == "-") parameters = string.Empty;
             return parameters;
         }
+        protected virtual string GetCustomHeaders(Dictionary<string, List<string>> headers)
+        {
+            //string returnValue = string.Empty;
 
+            if (!(headers == null))
+            {
+                //foreach(var item in headers)
+                //{
+                //    if (!(returnValue.Length > 0))
+                //    {
+                //        //first group and needs to not include the ;
+                //        returnValue = item.ToString();
+
+                //    }
+                //    else
+                //    {
+                //        returnValue = string.Format("{0}|{1}={2}", returnValue, item.Key, item.Value);
+                //    }
+                //}
+                return string.Join("&", headers.Select(x => x.Key.ToLower() + "=" + GetValue(x.Value)));
+            }
+            else
+            {
+                return string.Empty;
+            }
+
+            //return returnValue;
+        }
         private string GetJsonpCallback(HttpRequestMessage request)
         {
             var callback = string.Empty;

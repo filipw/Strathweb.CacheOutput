@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Collections.Generic;
+using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
@@ -8,6 +9,11 @@ namespace WebApi.OutputCache.V2.Tests.TestControllers
     {
         private class UnregisteredCacheKeyGenerator : ICacheKeyGenerator
         {
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString, Dictionary<string, List<string>> headers)
+            {
+                return "unregistered";
+            }
+
             public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 return "unregistered";

@@ -29,7 +29,7 @@ namespace WebApi.OutputCache.V2.Tests
         [Test]
         public void NoParametersIncludeQueryString_ShouldReturnBaseKeyAndQueryStringAndUserIdentityAndMediaTypeConcatenated()
         {
-            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false);
+            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false, headers);
 
             AssertCacheKeysBasicFormat(cacheKey);
             Assert.AreEqual(String.Format("{0}-{1}:{2}:{3}", BaseCacheKey, requestUri.Query.Substring(1), FormatUserIdentityForAssertion(), mediaType), cacheKey, 
@@ -39,7 +39,7 @@ namespace WebApi.OutputCache.V2.Tests
         [Test]
         public void NoParametersExcludeQueryString_ShouldReturnBaseKeyAndUserIdentityAndMediaTypeConcatenated()
         {
-            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true);
+            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true, headers);
 
             AssertCacheKeysBasicFormat(cacheKey);
             Assert.AreEqual(String.Format("{0}:{1}:{2}", BaseCacheKey, FormatUserIdentityForAssertion(), mediaType), cacheKey,
@@ -50,7 +50,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void WithParametersIncludeQueryString_ShouldReturnBaseKeyAndArgumentsAndQueryStringAndUserIdentityAndMediaTypeConcatenated()
         {
             AddActionArgumentsToContext();
-            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false);
+            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, false, headers);
 
             AssertCacheKeysBasicFormat(cacheKey);
             Assert.AreEqual(String.Format("{0}-{1}&{2}:{3}:{4}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), requestUri.Query.Substring(1), FormatUserIdentityForAssertion(), mediaType), cacheKey,
@@ -61,7 +61,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void WithParametersExcludeQueryString_ShouldReturnBaseKeyAndArgumentsAndUserIdentityAndMediaTypeConcatenated()
         {
             AddActionArgumentsToContext();
-            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true);
+            var cacheKey = cacheKeyGenerator.MakeCacheKey(context, mediaType, true, headers);
 
             AssertCacheKeysBasicFormat(cacheKey);
             Assert.AreEqual(String.Format("{0}-{1}:{2}:{3}", BaseCacheKey, FormatActionArgumentsForKeyAssertion(), FormatUserIdentityForAssertion(), mediaType), cacheKey,

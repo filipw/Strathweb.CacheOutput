@@ -187,7 +187,9 @@ namespace WebApi.OutputCache.V2
 
             var responseMediaType = GetExpectedMediaType(config, actionContext);
             actionContext.Request.Properties[CurrentRequestMediaType] = responseMediaType;
-            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
+            var customRequestHeaders = AddCustomRequestHeaders(actionContext);
+
+            var cachekey = cacheKeyGenerator.MakeCacheKey(actionContext, responseMediaType, ExcludeQueryStringFromCacheKey, customRequestHeaders);
 
             if (!_webApiCache.Contains(cachekey)) return;
 
@@ -254,9 +256,11 @@ namespace WebApi.OutputCache.V2
                 var httpConfig = actionExecutedContext.Request.GetConfiguration();
                 var config = httpConfig.CacheOutputConfiguration();
                 var cacheKeyGenerator = config.GetCacheKeyGenerator(actionExecutedContext.Request, CacheKeyGenerator);
+                var requestHeaders = AddCustomRequestHeaders(actionExecutedContext.Request.Headers);
 
                 var responseMediaType = actionExecutedContext.Request.Properties[CurrentRequestMediaType] as MediaTypeHeaderValue ?? GetExpectedMediaType(httpConfig, actionExecutedContext.ActionContext);
-                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey);
+                var reqestHeaders = AddCustomRequestHeaders(actionExecutedContext.Request.Headers);
+                var cachekey = cacheKeyGenerator.MakeCacheKey(actionExecutedContext.ActionContext, responseMediaType, ExcludeQueryStringFromCacheKey, requestHeaders);
 
                 if (!string.IsNullOrWhiteSpace(cachekey) && !(_webApiCache.Contains(cachekey)))
                 {
@@ -357,6 +361,23 @@ namespace WebApi.OutputCache.V2
                     response.Content.Headers.Add(headerKey, headerValue);
                 }
             }
+        }
+
+        protected virtual Dictionary<string, List<string>> AddCustomRequestHeaders(HttpActionContext actionContext)
+        {
+            return AddCustomRequestHeaders(actionContext.Request.Headers);
+        }
+        protected virtual Dictionary<string, List<string>> AddCustomRequestHeaders(HttpRequestHeaders requestHeaders)
+        {
+            Dictionary<string, List<string>> headers = new Dictionary<string, List<string>>();
+
+            if (!(string.IsNullOrEmpty(IncludeCustomHeaders)))
+            {
+                // convert to dictionary of lists to ensure thread safety if implementation of IEnumerable is changed
+                headers = requestHeaders.Where(h => IncludeCustomHeaders.ToLower().Contains(h.Key.ToLower()))
+                    .ToDictionary(x => x.Key.ToLower(), x => x.Value.ToList());
+            }
+            return headers;
         }
 
         protected virtual string CreateEtag(HttpActionExecutedContext actionExecutedContext, string cachekey, CacheTime cacheTime)

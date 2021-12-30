@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -17,6 +18,11 @@ namespace WebApi.OutputCache.V2.Tests
     {
         public class CustomCacheKeyGenerator : ICacheKeyGenerator
         {
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString, Dictionary<string, List<string>> headers)
+            {
+                return "custom_key";
+            }
+
             public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 return "custom_key";
@@ -59,7 +65,7 @@ namespace WebApi.OutputCache.V2.Tests
         public void custom_default_cache_key_generator_called_and_key_used()
         {
             var client = new HttpClient(_server);
-            _keyGeneratorA.Setup(k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<bool>()))
+            _keyGeneratorA.Setup(k => k.MakeCacheKey(It.IsAny<HttpActionContext>(), It.IsAny<MediaTypeHeaderValue>(), It.IsAny<bool>(), It.IsAny<Dictionary<string, List<string>>>()))
                 .Returns("keykeykey")
                 .Verifiable("Key generator was never called");
             // use the samplecontroller to show that no changes are required to existing code
