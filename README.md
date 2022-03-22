@@ -1,3 +1,13 @@
+# 📢 This repo is no longer maintained 📢
+
+First of all, I apologize it took so long to make an announcement, but I think it has been clear to everyone from the update frequency that this repo is no longer maintained.
+
+I would therefore like to officially (re)state that, indeed, this repo and the corresponding library is no longer maintained. I will archive it soon.
+
+It served its purpose back in the ASP.NET Web API days, and I hope it helped some people build their products. The ASP.NET landscape is obviously much different now, and, given many other involvements, I do not have the capacity or energy to keep this legacy thing alive. I am sorry if anyone feels let down by this. If you are using it you and still need it, you are of course free to fork and make any changes you wish.
+
+I would like to thank almost 1k people who starred this repo and everyone who contributed to over 3 million downloads on Nuget. Thank you all.
+
 ASP.NET Web API CacheOutput
 ========================
 
