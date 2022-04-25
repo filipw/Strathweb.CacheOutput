@@ -37,6 +37,16 @@ namespace WebApi.OutputCache.V2.Tests
         }
 
         [Test]
+        public void maxageinmillis_mustrevalidate_false_headers_correct()
+        {
+            var client = new HttpClient(_server);
+            var result = client.GetAsync(_url + "GetStringTimeout_c500ms_s500ms").Result;
+
+            Assert.AreEqual(TimeSpan.FromMilliseconds(500), result.Headers.CacheControl.MaxAge);
+            Assert.IsFalse(result.Headers.CacheControl.MustRevalidate);
+        }
+
+        [Test]
         public void no_cachecontrol_when_clienttimeout_is_zero()
         {
             var client = new HttpClient(_server);
