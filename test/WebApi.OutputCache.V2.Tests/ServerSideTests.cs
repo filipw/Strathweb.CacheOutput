@@ -49,8 +49,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_c100_s100").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -62,8 +62,8 @@ namespace WebApi.OutputCache.V2.Tests
             // NOTE: Should we expect the _cache to not be called at all if the ServerTimeSpan is 0?
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0:application/json; charset=utf-8")), Times.Once());
             // NOTE: Server timespan is 0, so there should not have been any Add at all.
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Never());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(1)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0")), Times.Never());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(1)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s0"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_request_httpResponseException_noCache").Result;
 
             _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -83,7 +83,7 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_request_exception_noCache").Result;
 
             _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Once());
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_request_noContent").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_request_nocontent:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -105,8 +105,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -119,8 +119,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100")), Times.Exactly(1));
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c100_s100"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Exactly(1));
         }
 
         [Test]
@@ -130,8 +130,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_false/1?xxx=2").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1&xxx=2:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1&xxx=2:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1&xxx=2:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -141,8 +141,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_false/1?id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_false"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -155,10 +155,10 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8")), Times.Exactly(2));
 
             //base
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
 
             //actual
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -171,10 +171,10 @@ namespace WebApi.OutputCache.V2.Tests
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8")), Times.Exactly(2));
 
             //base
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
 
             //actual
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_true"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -184,8 +184,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?id=1&callback=abc").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -195,8 +195,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc&id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -206,8 +206,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?de=xxx&callback=abc&id=1").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1&de=xxx:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1&de=xxx:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback-id=1&de=xxx:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -217,8 +217,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_s50_exclude_fakecallback?callback=abc").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_s50_exclude_fakecallback"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -230,7 +230,7 @@ namespace WebApi.OutputCache.V2.Tests
 
             Assert.True(result.IsSuccessStatusCode);
             Assert.IsNull(result.Headers.CacheControl);
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         [Test]
@@ -275,8 +275,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync(_url + "Get_ihttpactionresult").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -288,8 +288,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:text/xml; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult:text/xml; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_ihttpactionresult"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
 
@@ -312,8 +312,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync("http://www.strathweb.com/api/ignore/cached").Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached:application/json; charset=utf-8")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached:application/json; charset=utf-8"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(100)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.ignorecontroller-cached"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
         }
 
         [Test]
@@ -323,8 +323,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.GetAsync("http://www.strathweb.com/api/ignore/uncached").Result;
 
             _cache.Verify(s => s.Contains(It.IsAny<string>()), Times.Never());
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
-            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
+            _cache.Verify(s => s.Add(It.IsAny<string>(), It.IsAny<object>(), It.IsAny<DateTimeOffset>(), It.IsAny<string>(), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Never());
         }
 
         //[Test]
@@ -346,8 +346,8 @@ namespace WebApi.OutputCache.V2.Tests
             var result = client.SendAsync(req).Result;
 
             _cache.Verify(s => s.Contains(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image:image/jpeg")), Times.Exactly(2));
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null), Times.Once());
-            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image:image/jpeg"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image")), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), null, It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
+            _cache.Verify(s => s.Add(It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image:image/jpeg"), It.IsAny<object>(), It.Is<DateTimeOffset>(x => x <= DateTime.Now.AddSeconds(50)), It.Is<string>(x => x == "webapi.outputcache.v2.tests.testcontrollers.samplecontroller-get_c50_s50_image"), It.IsAny<TimeSpan>(), It.IsAny<bool>()), Times.Once());
             Assert.That(result.Content.Headers.ContentType, Is.EqualTo(new MediaTypeHeaderValue("image/jpeg")));
         }
 
