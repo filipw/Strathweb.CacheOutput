@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -104,6 +105,12 @@ namespace WebApi.OutputCache.V2.Tests
         #region Helper classes
         private class FailCacheKeyGenerator : ICacheKeyGenerator
         {
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString, Dictionary<string, List<string>> headers)
+            {
+                Assert.Fail("This cache key generator should never be invoked");
+                return "fail";
+            }
+
             public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
             {
                 Assert.Fail("This cache key generator should never be invoked");
@@ -118,6 +125,11 @@ namespace WebApi.OutputCache.V2.Tests
             public InternalRegisteredCacheKeyGenerator(string key)
             {
                 _key = key;
+            }
+
+            public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString, Dictionary<string, List<string>> headers)
+            {
+                return _key;
             }
 
             public string MakeCacheKey(HttpActionContext context, MediaTypeHeaderValue mediaType, bool excludeQueryString = false)
